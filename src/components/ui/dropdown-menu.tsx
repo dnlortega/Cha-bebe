@@ -20,13 +20,22 @@ function DropdownMenuTrigger({
   ...props
 }: MenuPrimitive.Trigger.Props & { asChild?: boolean }) {
   if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<any>
     return (
       <MenuPrimitive.Trigger
         data-slot="dropdown-menu-trigger"
-        render={(triggerProps) =>
-          React.cloneElement(children as React.ReactElement<any>, triggerProps)
-        }
         {...props}
+        render={(triggerProps) =>
+          React.cloneElement(child, {
+            ...triggerProps,
+            ...child.props,
+            className: cn(triggerProps.className, child.props.className),
+            onClick: (e: React.MouseEvent) => {
+              triggerProps.onClick?.(e)
+              child.props.onClick?.(e)
+            },
+          })
+        }
       />
     )
   }
