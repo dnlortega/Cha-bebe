@@ -10,6 +10,8 @@ import {
   getSettings,
   updateSettings
 } from "@/app/actions";
+import { useTheme } from "@/components/ThemeProvider";
+import { THEMES } from "@/lib/themes";
 import { 
   Table, 
   TableBody, 
@@ -84,7 +86,7 @@ export default function AdminPage() {
   
   // Settings state
   const [invitationUrl, setInvitationUrl] = useState("");
-  const [theme, setTheme] = useState("GOLD");
+  const { theme, setTheme } = useTheme();
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Edit state
@@ -248,7 +250,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 p-4 sm:p-12 font-inter selection:bg-accent selection:text-accent-foreground uppercase tracking-widest">
+    <div className="min-h-screen bg-background p-4 sm:p-12 font-inter selection:bg-accent selection:text-accent-foreground uppercase tracking-widest transition-colors duration-500">
       <div className="max-w-7xl mx-auto space-y-8 sm:y-12">
         <header className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-left">
           <div className="space-y-2">
@@ -290,6 +292,20 @@ export default function AdminPage() {
             <p className="text-[8px] sm:text-[10px] text-blue-600/60 font-bold tracking-[0.2em]">PESSOAS CONFIRMADAS</p>
             <p className="text-xl sm:text-4xl font-serif text-primary">{stats.totalPeople}</p>
           </Card>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-end">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-primary">PROGRESSO DE CONFIRMAÇÕES</p>
+            <p className="text-[10px] font-bold tracking-[0.2em] opacity-40">{Math.round((stats.confirmedGroups / (stats.total || 1)) * 100)}%</p>
+          </div>
+          <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary transition-all duration-1000 ease-out" 
+              style={{ width: `${(stats.confirmedGroups / (stats.total || 1)) * 100}%` }}
+            />
+          </div>
         </div>
 
         <Tabs defaultValue="list" className="space-y-8">
@@ -520,13 +536,11 @@ export default function AdminPage() {
                         <SelectValue placeholder="SELECIONE O TEMA" />
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
-                        <SelectItem value="GOLD" className="py-3">🔱 DOURADO CLASSIC</SelectItem>
-                        <SelectItem value="BLUE" className="py-3">❄️ AZUL CELESTE</SelectItem>
-                        <SelectItem value="PINK" className="py-3">🌸 ROSA PASTEL</SelectItem>
-                        <SelectItem value="BT21" className="py-3">🧸 BT21 POP</SelectItem>
-                        <SelectItem value="DARK" className="py-3">🌑 ELEGANT NAVY</SelectItem>
-                        <SelectItem value="SAGE" className="py-3">🌿 BOHO SAGE</SelectItem>
-                        <SelectItem value="WHITE" className="py-3">⚪ CLASSIC WHITE</SelectItem>
+                        {THEMES.map((t) => (
+                          <SelectItem key={t.id} value={t.id} className="py-3">
+                            {t.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

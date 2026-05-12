@@ -51,11 +51,15 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
 
     if (result.success) {
       if (finalStatus === "CONFIRMED") {
+        // Get theme primary color for confetti
+        const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary').trim();
+        
         confetti({
           particleCount: 150,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#B8860B", "#D4AF37", "#FFFFFF"],
+          // Mix primary with white and a lighter version
+          colors: [primaryColor, "#FFFFFF", "#FACC15"],
         });
       }
       toast.success("RESPOSTA ENVIADA COM SUCESSO!");
