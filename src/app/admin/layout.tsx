@@ -106,43 +106,52 @@ export default function AdminLayout({
 
   if (!authorized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <Card className="w-full max-w-sm border border-primary/5 shadow-2xl bg-white rounded-none animate-in fade-in zoom-in duration-700">
-          <CardHeader className="space-y-4 text-center pt-10">
-            <div className="w-12 h-12 bg-primary/5 mx-auto flex items-center justify-center mb-2">
-               <SettingsIcon className="h-6 w-6 text-primary/40" />
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6 font-sans">
+        <Card className="w-full max-w-sm border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-white rounded-none animate-in fade-in zoom-in duration-1000 overflow-hidden">
+          <div className="h-2 w-full bg-primary" />
+          <CardHeader className="space-y-6 text-center pt-16 pb-10">
+            <div className="w-16 h-16 bg-stone-900 text-white mx-auto flex items-center justify-center rotate-45 group hover:rotate-0 transition-all duration-700 shadow-2xl">
+               <div className="-rotate-45 group-hover:rotate-0 transition-all duration-700">
+                  <UserCircle className="h-8 w-8" />
+               </div>
             </div>
-            <CardTitle className="text-xl font-serif tracking-[0.3em] text-primary">ADMINISTRAÇÃO</CardTitle>
-            <p className="text-[9px] opacity-40 tracking-[0.2em] uppercase">ACESSO RESTRITO</p>
-            <Separator className="w-8 mx-auto bg-primary/20" />
+            <div className="space-y-2">
+              <CardTitle className="text-2xl font-serif tracking-[0.2em] text-primary uppercase">Welcome</CardTitle>
+              <p className="text-[9px] opacity-30 tracking-[0.5em] uppercase font-light">Acesso Administrativo</p>
+            </div>
           </CardHeader>
-          <CardContent className="pb-12 px-10">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold opacity-30 tracking-widest uppercase">Usuário</label>
-                <Input 
-                  type="text" 
-                  placeholder="DIGITE SEU USUÁRIO" 
-                  className="bg-stone-50 border-primary/10 rounded-none focus-visible:ring-primary/20 text-[10px] tracking-widest h-12"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
+          <CardContent className="pb-20 px-12">
+            <form onSubmit={handleLogin} className="space-y-8">
+              <div className="space-y-6">
+                <div className="relative group">
+                  <Input 
+                    type="text" 
+                    placeholder="USERNAME" 
+                    className="bg-transparent border-0 border-b border-stone-200 rounded-none focus-visible:ring-0 focus-visible:border-primary text-[11px] tracking-[0.3em] h-12 text-center transition-all placeholder:opacity-20 uppercase font-bold"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-primary group-focus-within:w-full transition-all duration-500" />
+                </div>
+
+                <div className="relative group">
+                  <Input 
+                    type="password" 
+                    placeholder="PASSWORD" 
+                    className="bg-transparent border-0 border-b border-stone-200 rounded-none focus-visible:ring-0 focus-visible:border-primary text-[11px] tracking-[0.3em] h-12 text-center transition-all placeholder:opacity-20 uppercase font-bold"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-primary group-focus-within:w-full transition-all duration-500" />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold opacity-30 tracking-widest uppercase">Senha</label>
-                <Input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  className="bg-stone-50 border-primary/10 rounded-none focus-visible:ring-primary/20 text-[10px] tracking-widest h-12"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="pt-4">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-[10px] tracking-[0.3em] rounded-none transition-all shadow-lg shadow-primary/10">
-                  ENTRAR NO SISTEMA
-                </Button>
-              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-stone-900 hover:bg-stone-800 text-white h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-2xl hover:translate-y-[-2px]"
+              >
+                LOGIN
+              </Button>
             </form>
           </CardContent>
         </Card>
