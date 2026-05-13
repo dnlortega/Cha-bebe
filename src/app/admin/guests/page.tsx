@@ -72,6 +72,7 @@ export default function GuestsPage() {
   const [editMembers, setEditMembers] = useState("");
   const [editAdults, setEditAdults] = useState(1);
   const [editChildren, setEditChildren] = useState(0);
+  const [editDiaper, setEditDiaper] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function GuestsPage() {
   const handleUpdate = async () => {
     if (!editName.trim() || !editingGuest) return;
     setIsEditing(true);
-    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren);
+    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren, editDiaper || undefined);
     if (result.success) {
       toast.success("DADOS ATUALIZADOS");
       setEditingGuest(null);
@@ -372,6 +373,7 @@ export default function GuestsPage() {
                               setEditMembers(guest.membros || "");
                               setEditAdults(guest.qtd_adultos || 1);
                               setEditChildren(guest.qtd_criancas || 0);
+                              setEditDiaper(guest.fralda_tamanho || null);
                             }}
                           >
                             <Edit2 className="h-4 w-4" />
@@ -446,6 +448,23 @@ export default function GuestsPage() {
                      <SelectItem value="FAMILIA">FAMÍLIA</SelectItem>
                    </SelectContent>
                  </Select>
+               </div>
+               
+               <div className="space-y-4">
+                  <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">Tamanho da Fralda</label>
+                  <Select value={editDiaper || "NONE"} onValueChange={(val) => setEditDiaper(val === "NONE" ? null : val)}>
+                    <SelectTrigger className="rounded-none border-primary/10 h-14 tracking-[0.2em] bg-stone-50 text-[11px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
+                      <SelectItem value="NONE">NENHUMA</SelectItem>
+                      <SelectItem value="RN">RN</SelectItem>
+                      <SelectItem value="P">P</SelectItem>
+                      <SelectItem value="M">M</SelectItem>
+                      <SelectItem value="G">G</SelectItem>
+                      <SelectItem value="GG">GG</SelectItem>
+                    </SelectContent>
+                  </Select>
                </div>
 
                <div className="grid grid-cols-2 gap-4">

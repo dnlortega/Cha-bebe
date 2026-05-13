@@ -87,6 +87,27 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
               ? `FICAMOS MUITO FELIZES EM SABER QUE VOCÊ VIRÁ! NOS VEMOS EM BREVE.` 
               : `SENTIREMOS SUA FALTA, MAS AGRADECEMOS POR NOS AVISAR.`}
           </CardDescription>
+
+          {status === "CONFIRMED" && guest.fralda_tamanho && (
+            <div className="pt-10 animate-in fade-in zoom-in duration-1000 delay-300">
+               <div className="relative group max-w-[280px] mx-auto">
+                  <div className="absolute -top-2 -left-2 w-4 h-4 border-t border-l border-primary/40" />
+                  <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b border-r border-primary/40" />
+                  
+                  <div className="bg-stone-900 text-white p-8 space-y-4 shadow-2xl transition-transform duration-500">
+                     <div className="flex flex-col items-center justify-center gap-3">
+                        <div className="flex items-center gap-2 opacity-50">
+                           <PackageCheck className="h-3 w-3" />
+                           <p className="text-[9px] font-bold tracking-[0.4em] uppercase">Lembrete do Presente</p>
+                        </div>
+                        <div className="text-center">
+                           <h2 className="text-6xl font-serif text-primary tracking-tighter leading-none">{guest.fralda_tamanho}</h2>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="flex justify-center pb-12">
           <Button 

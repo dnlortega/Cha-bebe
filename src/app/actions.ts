@@ -147,14 +147,15 @@ export async function addMultipleGuests(namesText: string) {
         const parts = line.split("|").map(s => s.trim());
         const nome = parts[0];
         const tipo = (parts[1]?.toUpperCase() === "FAMILIA") ? "FAMILIA" : "INDIVIDUAL";
-        const membros = parts[2] || null; // Nomes separados por vírgula
+        const membros = parts[2] || null;
+        const fralda = parts[3]?.toUpperCase() || null;
         
         const slug = await generateSlug(nome);
         
         return prisma.guest.upsert({
           where: { slug },
-          update: { tipo, membros },
-          create: { nome, slug, tipo, membros },
+          update: { tipo, membros, fralda_tamanho: fralda },
+          create: { nome, slug, tipo, membros, fralda_tamanho: fralda },
         });
       })
     );

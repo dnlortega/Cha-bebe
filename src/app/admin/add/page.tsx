@@ -65,7 +65,7 @@ export default function AddGuestsPage() {
               </div>
               <CardContent className="p-0">
                 <Textarea 
-                  placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA, PEDRO" 
+                  placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL | | RN&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA | P" 
                   className="min-h-[450px] bg-stone-50/50 border-none rounded-none focus-visible:ring-0 text-[12px] tracking-widest p-10 leading-relaxed resize-none placeholder:opacity-20"
                   value={newGuestsText}
                   onChange={(e) => setNewGuestsText(e.target.value)}
@@ -104,18 +104,24 @@ export default function AddGuestsPage() {
                  <div className="flex gap-4">
                     <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">3</div>
                     <div className="space-y-2">
-                       <p className="text-[10px] font-bold tracking-widest uppercase">IMPORTANTE</p>
-                       <p className="text-[9px] opacity-50 leading-relaxed uppercase tracking-widest">Use a barra vertical ( | ) para separar os campos. Cada convidado deve estar em uma nova linha.</p>
+                       <p className="text-[10px] font-bold tracking-widest uppercase">COM FRALDA DEFINIDA</p>
+                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
+                          NOME | INDIVIDUAL | | P <br/>
+                          NOME | FAMILIA | MEMBROS | M
+                       </code>
                     </div>
                  </div>
               </div>
            </div>
 
-           <div className="p-8 bg-stone-50 border border-primary/5 flex gap-4 items-start">
-              <Info className="h-4 w-4 text-primary opacity-40 mt-1" />
-              <p className="text-[9px] opacity-40 leading-relaxed uppercase tracking-widest">
-                Os links de convite serão gerados automaticamente baseados nos nomes inseridos.
-              </p>
+           <div className="bg-primary/5 p-8 border border-primary/10">
+              <div className="flex items-center gap-3 mb-4">
+                  <HelpCircle className="h-4 w-4 text-primary opacity-40" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase">DICA</p>
+               </div>
+               <p className="text-[9px] tracking-widest leading-relaxed opacity-60 uppercase">
+                  VOCÊ PODE DEIXAR O CAMPO DE FRALDA VAZIO PARA QUE O SISTEMA DISTRIBUA AUTOMATICAMENTE DEPOIS.
+               </p>
            </div>
         </div>
       </div>
