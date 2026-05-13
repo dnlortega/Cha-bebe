@@ -86,7 +86,10 @@ export function AdminSidebar() {
 
       <div className="p-4">
         <button 
-          onClick={() => window.location.href = "/"}
+          onClick={() => {
+            sessionStorage.removeItem("admin_auth");
+            window.location.href = "/";
+          }}
           className="w-full flex items-center gap-3 px-4 py-3 text-[10px] tracking-[0.2em] text-red-500/60 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300"
         >
           <LogOut className="h-4 w-4" />
