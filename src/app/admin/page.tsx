@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { getGuests } from "@/app/actions";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Loader2,
@@ -18,7 +20,6 @@ import {
   ClipboardList,
   ChevronRight
 } from "lucide-react";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
 export default function AdminDashboard() {
@@ -155,9 +156,15 @@ export default function AdminDashboard() {
                   
                   <Separator className="bg-primary/5" />
                   
-                  <Button asChild variant="ghost" className="w-full text-[9px] tracking-[0.4em] text-primary hover:bg-primary/5 uppercase font-bold py-6">
-                     <Link href="/admin/guests">Ver Todos os Convites</Link>
-                  </Button>
+                  <Link 
+                    href="/admin/guests" 
+                    className={cn(
+                      buttonVariants({ variant: "ghost" }), 
+                      "w-full text-[9px] tracking-[0.4em] text-primary hover:bg-primary/5 uppercase font-bold py-10 rounded-none border-t border-primary/5"
+                    )}
+                  >
+                    Ver Todos os Convites
+                  </Link>
                </div>
             </Card>
          </div>
