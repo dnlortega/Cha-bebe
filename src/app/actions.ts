@@ -137,6 +137,6 @@ export async function getGuests() {
   }
 }
 
-export async function verifyAdmin(password: string) {
-  return password === process.env.ADMIN_PASSWORD;
+export async function verifyAdmin(username: string, password: string) {
+  return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
