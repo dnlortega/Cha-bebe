@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { getGuests } from "@/app/actions";
-import { Card } from "@/components/ui/card";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
 import { 
+  Loader2,
+  RefreshCw,
   Users, 
   CheckCircle2, 
   Clock, 
   UserPlus, 
-  RefreshCw, 
   TrendingUp, 
   Baby, 
   UserCheck,
