@@ -153,13 +153,28 @@ export async function ensureAdminExists() {
 }
 
 export async function verifyAdmin(username: string, password: string) {
-  await ensureAdminExists(); // Make sure there's at least one admin
-  const admin = await prisma.admin.findUnique({
-    where: { username },
-  });
-  
-  if (!admin) return false;
-  return admin.password === password;
+  try {
+    await ensureAdminExists(); // Make sure there's at least one admin
+    
+    const admin = await prisma.admin.findUnique({
+      where: { username },
+    });
+    
+    if (!admin) {
+      console.log(`Login attempt failed: User ${username} not found in database.`);
+      return false;
+    }
+
+    const isCorrect = admin.password === password;
+    if (!isCorrect) {
+      console.log(`Login attempt failed: Incorrect password for user ${username}.`);
+    }
+    
+    return isCorrect;
+  } catch (error) {
+    console.error("Critical error during admin verification:", error);
+    return false;
+  }
 }
 
 export async function updateAdminCredentials(currentUsername: string, newUsername: string, newPass: string) {
