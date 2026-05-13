@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { Separator } from "@/components/ui/separator";
 
-import { Check, X, Users as UsersIcon, User as UserIcon, Heart } from "lucide-react";
+import { Check, X, Users as UsersIcon, User as UserIcon, Heart, PackageCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RSVPFormProps {
@@ -21,6 +21,7 @@ interface RSVPFormProps {
     tipo: string;
     membros: string | null;
     membros_confirmados: string | null;
+    fralda_tamanho?: string | null;
   };
 }
 
@@ -115,6 +116,21 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
           OLÁ, <span className="font-bold text-primary">{guest.nome}</span>! <br/>
           {guest.tipo === "FAMILIA" ? "CONVITE PARA TODA A FAMÍLIA" : "ESTE É UM CONVITE INDIVIDUAL"}
         </CardDescription>
+
+        {guest.fralda_tamanho && (
+          <div className="pt-8 animate-in fade-in slide-in-from-bottom duration-1000 delay-500">
+             <div className="bg-primary/5 p-6 space-y-3 border border-primary/10">
+                <div className="flex items-center justify-center gap-2 opacity-40">
+                   <PackageCheck className="h-3 w-3" />
+                   <p className="text-[9px] font-bold tracking-[0.3em] uppercase">Sugestão de Presente</p>
+                </div>
+                <div className="text-center">
+                   <p className="text-[10px] tracking-[0.2em] opacity-60 uppercase mb-1">Fralda Tamanho</p>
+                   <p className="text-2xl font-serif text-primary tracking-widest">{guest.fralda_tamanho}</p>
+                </div>
+             </div>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="pt-8 pb-12 px-6 sm:px-10">

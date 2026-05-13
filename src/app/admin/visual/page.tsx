@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSettings, updateSettings, updateAdminCredentials } from "@/app/actions";
+import { getSettings, updateSettings, updateAdminCredentials, distributeDiapers } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,8 @@ import {
   Image as ImageIcon,
   UserCircle,
   Key,
-  Info
+  Info,
+  PackageCheck
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -35,6 +36,15 @@ export default function VisualPage() {
   const [sessionTimeout, setSessionTimeout] = useState(30);
   const [loading, setLoading] = useState(false);
   
+  // Diaper states
+  const [rnQty, setRnQty] = useState(0);
+  const [pQty, setPQty] = useState(0);
+  const [mQty, setMQty] = useState(0);
+  const [gQty, setGQty] = useState(0);
+  const [ggQty, setGgQty] = useState(0);
+  const [distributing, setDistributing] = useState(false);
+
+  // Admin credentials state
   const [currentUsername, setCurrentUsername] = useState("admin");
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -50,18 +60,43 @@ export default function VisualPage() {
       setInvitationUrl(data.invitationUrl || "");
       setTheme(data.theme || "GOLD");
       setSessionTimeout(data.sessionTimeout || 30);
+      setRnQty(data.rnQty || 0);
+      setPQty(data.pQty || 0);
+      setMQty(data.mQty || 0);
+      setGQty(data.gQty || 0);
+      setGgQty(data.ggQty || 0);
     }
   };
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings(invitationUrl, theme, sessionTimeout);
+    const result = await updateSettings(
+      invitationUrl, 
+      theme, 
+      sessionTimeout,
+      rnQty,
+      pQty,
+      mQty,
+      gQty,
+      ggQty
+    );
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
       toast.error(result.error);
     }
     setLoading(false);
+  };
+
+  const handleDistribute = async () => {
+    setDistributing(true);
+    const result = await distributeDiapers();
+    if (result.success) {
+      toast.success("FRALDAS DISTRIBUÍDAS COM SUCESSO!");
+    } else {
+      toast.error(result.error);
+    }
+    setDistributing(false);
   };
 
   const handleUpdateAdmin = async (e: React.FormEvent) => {
@@ -149,6 +184,52 @@ export default function VisualPage() {
                       className="rounded-none border-primary/10 bg-stone-50 h-14 text-[11px] tracking-widest"
                     />
                  </div>
+              </div>
+           </Card>
+        </section>
+
+        {/* Diapers Management */}
+        <section className="space-y-8">
+           <div className="flex items-center gap-4">
+              <PackageCheck className="h-5 w-5 text-primary opacity-30" />
+              <h3 className="text-xs font-serif tracking-[0.3em] uppercase">Gestão de Fraldas</h3>
+           </div>
+
+           <Card className="border-none shadow-2xl bg-white rounded-none p-10 space-y-10">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                 {[
+                   { id: 'rn', label: 'RN', val: rnQty, set: setRnQty },
+                   { id: 'p', label: 'P', val: pQty, set: setPQty },
+                   { id: 'm', label: 'M', val: mQty, set: setMQty },
+                   { id: 'g', label: 'G', val: gQty, set: setGQty },
+                   { id: 'gg', label: 'GG', val: ggQty, set: setGgQty },
+                 ].map((size) => (
+                   <div key={size.id} className="space-y-2">
+                      <label className="text-[9px] font-bold opacity-30 tracking-widest uppercase text-center block">{size.label}</label>
+                      <Input 
+                        type="number"
+                        value={size.val}
+                        onChange={(e) => size.set(parseInt(e.target.value) || 0)}
+                        className="rounded-none border-primary/10 bg-stone-50 h-12 text-center text-[11px] tracking-widest"
+                      />
+                   </div>
+                 ))}
+              </div>
+
+              <div className="space-y-6">
+                 <Button 
+                   onClick={handleDistribute} 
+                   disabled={distributing}
+                   variant="outline"
+                   className="w-full border-primary/50 text-primary hover:bg-primary hover:text-white rounded-none h-14 text-[10px] tracking-[0.4em] transition-all"
+                 >
+                   {distributing ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : <PackageCheck className="h-4 w-4 mr-3" />}
+                   DISTRIBUIR FRALDAS AUTOMATICAMENTE
+                 </Button>
+                 
+                 <p className="text-[8px] opacity-30 text-center uppercase tracking-widest">
+                    O sistema prioriza os tamanhos na ordem: RN → P → M → G → GG
+                 </p>
               </div>
            </Card>
         </section>

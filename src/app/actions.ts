@@ -21,19 +21,38 @@ export async function getSettings() {
 
   if (!settings) {
     settings = await prisma.settings.create({
-      data: { id: "default", invitationUrl: "/convite.png", theme: "GOLD", sessionTimeout: 30 },
+      data: { 
+        id: "default", 
+        invitationUrl: "/convite.png", 
+        theme: "GOLD", 
+        sessionTimeout: 30,
+        rnQty: 0,
+        pQty: 0,
+        mQty: 0,
+        gQty: 0,
+        ggQty: 0
+      },
     });
   }
 
   return settings;
 }
 
-export async function updateSettings(invitationUrl: string, theme: string, sessionTimeout: number) {
+export async function updateSettings(
+  invitationUrl: string, 
+  theme: string, 
+  sessionTimeout: number,
+  rnQty: number = 0,
+  pQty: number = 0,
+  mQty: number = 0,
+  gQty: number = 0,
+  ggQty: number = 0
+) {
   try {
     await prisma.settings.upsert({
       where: { id: "default" },
-      update: { invitationUrl, theme, sessionTimeout },
-      create: { id: "default", invitationUrl, theme, sessionTimeout }
+      update: { invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty },
+      create: { id: "default", invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty }
     });
     revalidatePath("/", "layout");
     return { success: true };
@@ -54,7 +73,15 @@ export async function deleteGuest(id: string) {
   }
 }
 
-export async function updateGuest(id: string, nome: string, tipo: string, membros?: string, qtdAdultos: number = 1, qtdCriancas: number = 0) {
+export async function updateGuest(
+  id: string, 
+  nome: string, 
+  tipo: string, 
+  membros?: string, 
+  qtdAdultos: number = 1, 
+  qtdCriancas: number = 0,
+  fralda?: string
+) {
   try {
     const slug = await generateSlug(nome);
     await prisma.guest.update({
@@ -65,7 +92,8 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
         tipo, 
         membros,
         qtd_adultos: qtdAdultos,
-        qtd_criancas: qtdCriancas
+        qtd_criancas: qtdCriancas,
+        fralda_tamanho: fralda
       },
     });
     revalidatePath("/admin");
@@ -73,6 +101,40 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
   } catch (error) {
     console.error("Error updating guest:", error);
     return { success: false, error: "FALHA AO ATUALIZAR CONVIDADO." };
+  }
+}
+
+export async function distributeDiapers() {
+  try {
+    const settings = await getSettings();
+    const guests = await prisma.guest.findMany({ orderBy: { createdAt: "asc" } });
+    
+    let rnLeft = settings.rnQty;
+    let pLeft = settings.pQty;
+    let mLeft = settings.mQty;
+    let gLeft = settings.gQty;
+    let ggLeft = settings.ggQty;
+
+    const updates = guests.map(async (guest) => {
+      let size = null;
+      if (rnLeft > 0) { size = "RN"; rnLeft--; }
+      else if (pLeft > 0) { size = "P"; pLeft--; }
+      else if (mLeft > 0) { size = "M"; mLeft--; }
+      else if (gLeft > 0) { size = "G"; gLeft--; }
+      else if (ggLeft > 0) { size = "GG"; ggLeft--; }
+
+      return prisma.guest.update({
+        where: { id: guest.id },
+        data: { fralda_tamanho: size }
+      });
+    });
+
+    await Promise.all(updates);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error distributing diapers:", error);
+    return { success: false, error: "Erro ao distribuir fraldas" };
   }
 }
 

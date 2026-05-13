@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, Settings as SettingsIcon, UserCircle } from "lucide-react";
+import Image from "next/image";
 
 const AdminAuthContext = createContext<{
   authorized: boolean;
@@ -110,9 +111,14 @@ export default function AdminLayout({
         <Card className="w-full max-w-sm border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-white rounded-none animate-in fade-in zoom-in duration-1000 overflow-hidden">
           <div className="h-2 w-full bg-primary" />
           <CardHeader className="space-y-6 text-center pt-16 pb-10">
-            <div className="w-16 h-16 bg-stone-900 text-white mx-auto flex items-center justify-center rotate-45 group hover:rotate-0 transition-all duration-700 shadow-2xl">
-               <div className="-rotate-45 group-hover:rotate-0 transition-all duration-700">
-                  <UserCircle className="h-8 w-8" />
+            <div className="w-20 h-20 bg-stone-900 mx-auto flex items-center justify-center rotate-45 group hover:rotate-0 transition-all duration-700 shadow-2xl relative overflow-hidden">
+               <div className="-rotate-45 group-hover:rotate-0 transition-all duration-700 w-full h-full p-2">
+                  <Image 
+                    src="/icon.png" 
+                    alt="Logo" 
+                    fill 
+                    className="object-cover"
+                  />
                </div>
             </div>
             <div className="space-y-2">

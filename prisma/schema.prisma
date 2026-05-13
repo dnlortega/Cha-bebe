@@ -18,6 +18,7 @@ model Guest {
   qtd_adultos       Int      @default(0)
   qtd_criancas      Int      @default(0)
   data_resposta     DateTime?
+  fralda_tamanho    String?   // "RN", "P", "M", "G", "GG"
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -27,6 +28,11 @@ model Settings {
   invitationUrl String @default("/convite.png")
   theme         String @default("GOLD")
   sessionTimeout Int    @default(30) // In seconds
+  rnQty         Int    @default(0)
+  pQty          Int    @default(0)
+  mQty          Int    @default(0)
+  gQty          Int    @default(0)
+  ggQty         Int    @default(0)
 }
 
 model Admin {

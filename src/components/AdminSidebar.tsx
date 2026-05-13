@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { 
   Users, 
   UserPlus, 
@@ -52,9 +53,16 @@ export function AdminSidebar() {
 
   const SidebarContent = () => (
     <>
-      <div className="p-8">
-        <h1 className="text-xl font-serif tracking-[0.2em] text-primary">ADMIN</h1>
-        <p className="text-[8px] opacity-40 tracking-[0.3em] font-light mt-1">CHA-BEBE LUXO</p>
+      <div className="p-10 flex flex-col items-center space-y-4">
+        <div className="w-16 h-16 relative bg-stone-900 shadow-2xl p-3 border border-white/10">
+           <Image 
+              src="/icon.png" 
+              alt="Logo" 
+              fill 
+              className="object-cover" 
+           />
+        </div>
+        <p className="text-[8px] opacity-40 tracking-[0.5em] font-light uppercase">Chá de Bebê</p>
       </div>
 
       <Separator className="bg-primary/5 mx-6 w-auto" />

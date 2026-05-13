@@ -176,30 +176,36 @@ export default function GuestsPage() {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-stone-50/50 p-4 border border-primary/5">
+              <div className="grid grid-cols-3 gap-4 bg-stone-50/50 p-4 border border-primary/5">
                  <div className="space-y-1">
                     <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">STATUS</p>
                     {guest.status_confirmacao === "CONFIRMED" ? (
                       <div className="flex items-center gap-1.5 text-emerald-600">
                          <CheckCircle className="h-3 w-3" />
-                         <span className="text-[9px] font-bold tracking-widest">CONFIRMADO</span>
+                         <span className="text-[9px] font-bold tracking-widest">OK</span>
                       </div>
                     ) : guest.status_confirmacao === "DECLINED" ? (
                       <div className="flex items-center gap-1.5 text-red-400">
                          <XCircle className="h-3 w-3" />
-                         <span className="text-[9px] font-bold tracking-widest uppercase">NÃO VIRÁ</span>
+                         <span className="text-[9px] font-bold tracking-widest uppercase">OFF</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1.5 opacity-30 italic">
                          <Clock className="h-3 w-3" />
-                         <span className="text-[9px] tracking-widest">PENDENTE</span>
+                         <span className="text-[9px] tracking-widest">...</span>
                       </div>
                     )}
                  </div>
                  <div className="space-y-1">
                     <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">PRESENÇA</p>
-                    <p className="text-[10px] font-bold text-primary/70">
-                       {guest.status_confirmacao === "CONFIRMED" ? `${(guest.qtd_adultos || 0) + (guest.qtd_criancas || 0)} PESSOAS` : "-"}
+                    <p className="text-[10px] font-bold text-primary/70 uppercase">
+                       {guest.status_confirmacao === "CONFIRMED" ? `${(guest.qtd_adultos || 0) + (guest.qtd_criancas || 0)} P` : "-"}
+                    </p>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">FRALDA</p>
+                    <p className="text-[10px] font-bold text-primary/70 uppercase">
+                       {guest.fralda_tamanho || "-"}
                     </p>
                  </div>
               </div>
@@ -255,6 +261,7 @@ export default function GuestsPage() {
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary pl-8 uppercase">CONVIDADO</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">TIPO</TableHead>
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">FRALDA</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">STATUS</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">QUEM VAI / DETALHES</TableHead>
                 <TableHead className="text-right text-[10px] tracking-[0.3em] h-20 font-bold text-primary pr-8 uppercase">OPÇÕES</TableHead>
@@ -290,6 +297,16 @@ export default function GuestsPage() {
                     <Badge variant="outline" className={`rounded-none text-[9px] py-1 px-4 border-primary/10 font-bold tracking-widest ${guest.tipo === 'FAMILIA' ? 'bg-primary/5 text-primary' : 'bg-stone-50 text-stone-500'}`}>
                       {guest.tipo}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {guest.fralda_tamanho ? (
+                      <div className="flex items-center gap-2 opacity-60">
+                        <PackageCheck className="h-4 w-4" />
+                        <span className="text-[11px] font-bold tracking-widest">{guest.fralda_tamanho}</span>
+                      </div>
+                    ) : (
+                      <span className="opacity-20">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {guest.status_confirmacao === "CONFIRMED" ? (
