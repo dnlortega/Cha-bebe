@@ -69,6 +69,8 @@ export default function GuestsPage() {
   const [editName, setEditName] = useState("");
   const [editType, setEditType] = useState("INDIVIDUAL");
   const [editMembers, setEditMembers] = useState("");
+  const [editAdults, setEditAdults] = useState(1);
+  const [editChildren, setEditChildren] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function GuestsPage() {
   const handleUpdate = async () => {
     if (!editName.trim() || !editingGuest) return;
     setIsEditing(true);
-    const result = await updateGuest(editingGuest.id, editName, editType, editMembers);
+    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren);
     if (result.success) {
       toast.success("DADOS ATUALIZADOS");
       setEditingGuest(null);
@@ -121,18 +123,18 @@ export default function GuestsPage() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       <header className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-serif text-primary tracking-[0.2em]">CONVITES</h1>
-          <p className="text-[10px] opacity-50 tracking-[0.3em] font-light">LISTA COMPLETA DE CONVIDADOS</p>
+        <div className="space-y-2 text-center md:text-left">
+          <h1 className="text-4xl font-serif text-primary tracking-[0.2em]">CONVITES</h1>
+          <p className="text-[10px] opacity-50 tracking-[0.4em] font-light uppercase">GERENCIE SUA LISTA DE CONVIDADOS</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-           <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 opacity-30" />
+           <div className="relative w-full sm:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
               <Input 
-                placeholder="BUSCAR CONVIDADO..." 
-                className="pl-9 bg-white border-primary/10 rounded-none h-10 text-[9px] tracking-widest focus-visible:ring-primary/20"
+                placeholder="BUSCAR POR NOME OU LINK..." 
+                className="pl-12 bg-white border-primary/10 rounded-none h-12 text-[10px] tracking-widest focus-visible:ring-primary/20 shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -140,8 +142,8 @@ export default function GuestsPage() {
            
            <Tooltip>
              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={() => fetchGuests()} disabled={loading} className="w-12 h-10 border-primary/20 rounded-none bg-white">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                <Button variant="outline" size="icon" onClick={() => fetchGuests()} disabled={loading} className="w-14 h-12 border-primary/20 rounded-none bg-white shadow-sm hover:bg-stone-50">
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
                 </Button>
              </TooltipTrigger>
              <TooltipContent className="text-[10px] tracking-widest uppercase">ATUALIZAR</TooltipContent>
@@ -149,81 +151,102 @@ export default function GuestsPage() {
         </div>
       </header>
 
-      <div className="bg-white border border-primary/5 shadow-sm overflow-hidden">
+      <div className="bg-white border border-primary/5 shadow-xl overflow-hidden rounded-none">
         {/* Mobile View: Cards */}
-        <div className="block sm:hidden divide-y divide-primary/5">
-          {filteredGuests.map((guest) => (
-            <div key={guest.id} className="p-4 space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="text-[11px] font-bold tracking-widest">{guest.nome}</div>
-                  <div className="text-[9px] opacity-40 font-mono lowercase tracking-tight">/{guest.slug}</div>
+        <div className="block lg:hidden divide-y divide-primary/5">
+          {filteredGuests.length === 0 ? (
+            <div className="p-20 text-center space-y-4">
+              <Search className="h-12 w-12 opacity-10 mx-auto" />
+              <p className="text-[10px] opacity-40 tracking-widest uppercase">Nenhum convidado encontrado</p>
+            </div>
+          ) : filteredGuests.map((guest) => (
+            <div key={guest.id} className="p-6 space-y-6 hover:bg-stone-50/50 transition-all">
+              <div className="flex justify-between items-start gap-4">
+                <div className="space-y-1 flex-1">
+                  <div className="text-[12px] font-bold tracking-widest text-primary uppercase">{guest.nome}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] opacity-40 font-mono lowercase tracking-tight">/{guest.slug}</span>
+                    <button onClick={() => copyToClipboard(guest.slug)} className="p-1 hover:bg-primary/5 transition-colors">
+                        <Copy className="h-3 w-3 opacity-30" />
+                    </button>
+                  </div>
                 </div>
-                <Badge variant="outline" className={`rounded-none text-[8px] py-0.5 px-3 border-primary/20 font-light ${guest.tipo === 'FAMILIA' ? 'bg-primary/5' : ''}`}>
+                <Badge variant="outline" className={`rounded-none text-[8px] py-1 px-3 border-primary/10 font-bold tracking-widest ${guest.tipo === 'FAMILIA' ? 'bg-primary/5 text-primary' : 'bg-stone-50 text-stone-500'}`}>
                   {guest.tipo}
                 </Badge>
               </div>
 
-              <div className="flex justify-between items-center">
-                <div>
-                  {guest.status_confirmacao === "CONFIRMED" ? (
-                    <div className="flex items-center gap-1.5 text-primary">
-                       <CheckCircle className="h-3 w-3" />
-                       <span className="text-[9px] font-bold">CONFIRMADO</span>
-                    </div>
-                  ) : guest.status_confirmacao === "DECLINED" ? (
-                    <div className="flex items-center gap-1.5 opacity-30">
-                       <XCircle className="h-3 w-3" />
-                       <span className="text-[9px]">NÃO VIRÁ</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 opacity-20 italic">
-                       <Clock className="h-3 w-3" />
-                       <span className="text-[9px]">AGUARDANDO...</span>
-                    </div>
-                  )}
-                </div>
+              <div className="grid grid-cols-2 gap-4 bg-stone-50/50 p-4 border border-primary/5">
+                 <div className="space-y-1">
+                    <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">STATUS</p>
+                    {guest.status_confirmacao === "CONFIRMED" ? (
+                      <div className="flex items-center gap-1.5 text-emerald-600">
+                         <CheckCircle className="h-3 w-3" />
+                         <span className="text-[9px] font-bold tracking-widest">CONFIRMADO</span>
+                      </div>
+                    ) : guest.status_confirmacao === "DECLINED" ? (
+                      <div className="flex items-center gap-1.5 text-red-400">
+                         <XCircle className="h-3 w-3" />
+                         <span className="text-[9px] font-bold tracking-widest uppercase">NÃO VIRÁ</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 opacity-30 italic">
+                         <Clock className="h-3 w-3" />
+                         <span className="text-[9px] tracking-widest">PENDENTE</span>
+                      </div>
+                    )}
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">PRESENÇA</p>
+                    <p className="text-[10px] font-bold text-primary/70">
+                       {guest.status_confirmacao === "CONFIRMED" ? `${(guest.qtd_adultos || 0) + (guest.qtd_criancas || 0)} PESSOAS` : "-"}
+                    </p>
+                 </div>
+              </div>
 
-                <div className="flex gap-2">
-                   <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40" onClick={() => copyToClipboard(guest.slug)}>
-                      <Copy className="h-3 w-3" />
-                   </Button>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40" onClick={() => window.open(`/${guest.slug}`, '_blank')}>
-                      <ExternalLink className="h-3 w-3" />
-                   </Button>
-                   <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40">
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[140px]">
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setEditingGuest(guest);
-                            setEditName(guest.nome);
-                            setEditType(guest.tipo);
-                            setEditMembers(guest.membros || "");
-                          }}
-                          className="cursor-pointer py-3"
-                        >
-                          <Edit2 className="mr-3 h-3 w-3" /> EDITAR
-                        </DropdownMenuItem>
-                        <Separator className="bg-primary/5" />
-                        <DropdownMenuItem 
-                          onClick={() => handleDelete(guest.id)}
-                          className="cursor-pointer text-red-500 py-3"
-                        >
-                          <Trash2 className="mr-3 h-3 w-3" /> EXCLUIR
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+              <div className="flex justify-between items-center gap-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 rounded-none border-primary/10 text-[9px] tracking-[0.2em] uppercase h-10 hover:bg-primary hover:text-white transition-all"
+                  onClick={() => window.open(`/${guest.slug}`, '_blank')}
+                >
+                  <ExternalLink className="h-3 w-3 mr-2" /> VER PÁGINA
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-12 h-10 rounded-none border-primary/10">
+                      <MoreVertical className="h-4 w-4 opacity-40" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[160px] p-0 shadow-2xl">
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        setEditingGuest(guest);
+                        setEditName(guest.nome);
+                        setEditType(guest.tipo);
+                        setEditMembers(guest.membros || "");
+                        setEditAdults(guest.qtd_adultos || 1);
+                        setEditChildren(guest.qtd_criancas || 0);
+                      }}
+                      className="cursor-pointer py-4 px-6 focus:bg-primary focus:text-white"
+                    >
+                      <Edit2 className="mr-3 h-3 w-3" /> EDITAR DADOS
+                    </DropdownMenuItem>
+                    <Separator className="bg-primary/5" />
+                    <DropdownMenuItem 
+                      onClick={() => handleDelete(guest.id)}
+                      className="cursor-pointer text-red-500 py-4 px-6 focus:bg-red-500 focus:text-white"
+                    >
+                      <Trash2 className="mr-3 h-3 w-3" /> EXCLUIR REGISTRO
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {guest.membros_confirmados && (
-                <div className="text-[8px] opacity-50 normal-case leading-relaxed bg-stone-50 p-2 border-l-2 border-primary/20">
-                  {guest.membros_confirmados}
+                <div className="text-[9px] opacity-60 normal-case leading-relaxed bg-stone-50 p-4 border-l-4 border-primary/20 italic">
+                  &quot;{guest.membros_confirmados}&quot;
                 </div>
               )}
             </div>
@@ -231,66 +254,93 @@ export default function GuestsPage() {
         </div>
 
         {/* Desktop View: Table */}
-        <div className="hidden sm:block overflow-x-auto">
-          <Table className="min-w-[800px] sm:w-full">
-            <TableHeader className="bg-stone-50">
-              <TableRow className="hover:bg-transparent border-primary/5">
-                <TableHead className="text-[10px] tracking-[0.2em] h-16 font-bold text-primary">CONVIDADO / LINK</TableHead>
-                <TableHead className="text-[10px] tracking-[0.2em] h-16 font-bold text-primary">CATEGORIA</TableHead>
-                <TableHead className="text-[10px] tracking-[0.2em] h-16 font-bold text-primary">STATUS / QUEM VAI</TableHead>
-                <TableHead className="text-right text-[10px] tracking-[0.2em] h-16 font-bold text-primary">OPÇÕES</TableHead>
+        <div className="hidden lg:block overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-stone-50 border-b border-primary/5">
+              <TableRow className="hover:bg-transparent border-none">
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary pl-8 uppercase">CONVIDADO</TableHead>
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">TIPO</TableHead>
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">STATUS</TableHead>
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">QUEM VAI / DETALHES</TableHead>
+                <TableHead className="text-right text-[10px] tracking-[0.3em] h-20 font-bold text-primary pr-8 uppercase">OPÇÕES</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredGuests.map((guest) => (
-                <TableRow key={guest.id} className="hover:bg-stone-50/50 border-primary/5 group">
-                  <TableCell className="py-6">
-                    <div className="space-y-1">
-                      <div className="text-[11px] font-bold tracking-widest">{guest.nome}</div>
-                      <div className="flex items-center gap-2">
-                         <span className="text-[9px] opacity-40 font-mono lowercase tracking-tight">/{guest.slug}</span>
-                         <button onClick={() => copyToClipboard(guest.slug)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+              {filteredGuests.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                      <Search className="h-12 w-12 opacity-5" />
+                      <p className="text-[10px] opacity-30 tracking-[0.4em] uppercase">Nenhum convidado encontrado</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredGuests.map((guest) => (
+                <TableRow key={guest.id} className="hover:bg-stone-50/50 border-primary/5 transition-colors group">
+                  <TableCell className="py-8 pl-8">
+                    <div className="space-y-1.5">
+                      <div className="text-[12px] font-bold tracking-widest text-primary uppercase">{guest.nome}</div>
+                      <div className="flex items-center gap-3">
+                         <span className="text-[10px] opacity-40 font-mono lowercase tracking-tight">/{guest.slug}</span>
+                         <button 
+                            onClick={() => copyToClipboard(guest.slug)} 
+                            className="opacity-0 group-hover:opacity-100 transition-all p-1 hover:bg-primary/5"
+                          >
                             <Copy className="h-3 w-3 opacity-30 hover:opacity-100" />
                          </button>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`rounded-none text-[8px] py-0.5 px-3 border-primary/20 font-light ${guest.tipo === 'FAMILIA' ? 'bg-primary/5' : ''}`}>
+                    <Badge variant="outline" className={`rounded-none text-[9px] py-1 px-4 border-primary/10 font-bold tracking-widest ${guest.tipo === 'FAMILIA' ? 'bg-primary/5 text-primary' : 'bg-stone-50 text-stone-500'}`}>
                       {guest.tipo}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     {guest.status_confirmacao === "CONFIRMED" ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-1.5 text-primary">
-                           <CheckCircle className="h-3 w-3" />
-                           <span className="text-[9px] font-bold">CONFIRMADO</span>
-                        </div>
-                        {guest.membros_confirmados && (
-                          <div className="text-[8px] opacity-50 normal-case leading-relaxed max-w-[200px] bg-stone-100 p-2 border-l-2 border-primary/20">
-                            {guest.membros_confirmados}
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2 text-emerald-600">
+                         <CheckCircle className="h-4 w-4" />
+                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase">CONFIRMADO</span>
                       </div>
                     ) : guest.status_confirmacao === "DECLINED" ? (
-                      <div className="flex items-center gap-1.5 opacity-30">
-                         <XCircle className="h-3 w-3" />
-                         <span className="text-[9px]">NÃO VIRÁ</span>
+                      <div className="flex items-center gap-2 text-red-400">
+                         <XCircle className="h-4 w-4" />
+                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase">NÃO VIRÁ</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 opacity-20 italic">
-                         <Clock className="h-3 w-3" />
-                         <span className="text-[9px]">AGUARDANDO...</span>
+                      <div className="flex items-center gap-2 opacity-20 italic">
+                         <Clock className="h-4 w-4" />
+                         <span className="text-[10px] tracking-[0.2em] uppercase">PENDENTE</span>
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
+                  <TableCell>
+                    {guest.status_confirmacao === "CONFIRMED" ? (
+                      <div className="space-y-3 py-2">
+                        <div className="flex gap-4">
+                           <div className="text-[10px] tracking-widest uppercase">
+                              <span className="opacity-40 mr-2">ADULTOS:</span>
+                              <span className="font-bold">{guest.qtd_adultos || 0}</span>
+                           </div>
+                           <div className="text-[10px] tracking-widest uppercase">
+                              <span className="opacity-40 mr-2">CRIANÇAS:</span>
+                              <span className="font-bold">{guest.qtd_criancas || 0}</span>
+                           </div>
+                        </div>
+                        {guest.membros_confirmados && (
+                          <div className="text-[9px] opacity-50 normal-case leading-relaxed max-w-[300px] bg-stone-100 p-3 border-l-4 border-primary/20 italic">
+                            &quot;{guest.membros_confirmados}&quot;
+                          </div>
+                        )}
+                      </div>
+                    ) : "-"}
+                  </TableCell>
+                  <TableCell className="text-right pr-8">
+                    <div className="flex justify-end gap-2">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40 hover:opacity-100" onClick={() => window.open(`/${guest.slug}`, '_blank')}>
-                            <ExternalLink className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" className="h-10 w-10 opacity-30 hover:opacity-100 hover:bg-primary/5" onClick={() => window.open(`/${guest.slug}`, '_blank')}>
+                            <ExternalLink className="h-4 w-4 text-primary" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent className="text-[9px] tracking-widest uppercase">VER PÁGINA</TooltipContent>
@@ -298,28 +348,30 @@ export default function GuestsPage() {
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 opacity-40 hover:opacity-100">
-                            <MoreVertical className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" className="h-10 w-10 opacity-30 hover:opacity-100 hover:bg-primary/5">
+                            <MoreVertical className="h-4 w-4 text-primary" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[140px]">
+                        <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[180px] p-0 shadow-2xl">
                           <DropdownMenuItem 
                             onClick={() => {
                               setEditingGuest(guest);
                               setEditName(guest.nome);
                               setEditType(guest.tipo);
                               setEditMembers(guest.membros || "");
+                              setEditAdults(guest.qtd_adultos || 1);
+                              setEditChildren(guest.qtd_criancas || 0);
                             }}
-                            className="cursor-pointer py-3"
+                            className="cursor-pointer py-4 px-6 focus:bg-primary focus:text-white"
                           >
-                            <Edit2 className="mr-3 h-3 w-3" /> EDITAR DADOS
+                            <Edit2 className="mr-4 h-4 w-4" /> EDITAR DADOS
                           </DropdownMenuItem>
                           <Separator className="bg-primary/5" />
                           <DropdownMenuItem 
                             onClick={() => handleDelete(guest.id)}
-                            className="cursor-pointer text-red-500 focus:text-red-500 py-3"
+                            className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50 py-4 px-6"
                           >
-                            <Trash2 className="mr-3 h-3 w-3" /> EXCLUIR REGISTRO
+                            <Trash2 className="mr-4 h-4 w-4" /> EXCLUIR REGISTRO
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -334,11 +386,11 @@ export default function GuestsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingGuest} onOpenChange={(open) => !open && setEditingGuest(null)}>
-        <DialogContent className="rounded-none border-none sm:max-w-[500px] uppercase tracking-widest p-0 overflow-hidden shadow-2xl">
-          <div className="bg-primary p-8 text-primary-foreground flex justify-between items-center">
+        <DialogContent className="rounded-none border-none sm:max-w-[600px] uppercase tracking-widest p-0 overflow-hidden shadow-2xl">
+          <div className="bg-primary p-10 text-primary-foreground flex justify-between items-center">
              <div className="space-y-1">
-                <DialogTitle className="text-xl font-serif tracking-[0.2em]">EDITAR</DialogTitle>
-                <p className="text-[9px] opacity-60 tracking-widest uppercase">ATUALIZAR CONVIDADO</p>
+                <DialogTitle className="text-2xl font-serif tracking-[0.2em]">EDITAR</DialogTitle>
+                <p className="text-[10px] opacity-60 tracking-[0.4em] uppercase font-light">ATUALIZAR INFORMAÇÕES DO CONVITE</p>
              </div>
              <Tooltip>
                <TooltipTrigger asChild>
@@ -346,44 +398,70 @@ export default function GuestsPage() {
                     onClick={handleUpdate} 
                     disabled={isEditing || !editName.trim()}
                     size="icon"
-                    className="bg-white text-primary hover:bg-stone-100 h-12 w-12 rounded-none"
+                    className="bg-white text-primary hover:bg-stone-100 h-16 w-16 rounded-none shadow-2xl transition-all"
                   >
-                    {isEditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {isEditing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
                   </Button>
                </TooltipTrigger>
-               <TooltipContent className="text-[10px] tracking-widest uppercase">SALVAR</TooltipContent>
+               <TooltipContent className="text-[10px] tracking-widest uppercase">SALVAR ALTERAÇÕES</TooltipContent>
              </Tooltip>
           </div>
-          <div className="p-8 space-y-6 bg-white">
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold opacity-40">NOME DO CONVITE</label>
+          <div className="p-10 space-y-10 bg-white">
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold opacity-40 tracking-widest">NOME DO CONVITE</label>
               <Input 
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="rounded-none border-primary/10 focus-visible:ring-primary/20 tracking-widest h-12"
+                className="rounded-none border-primary/10 focus-visible:ring-primary/20 tracking-widest h-14 bg-stone-50 text-[11px]"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[9px] font-bold opacity-40">CATEGORIA</label>
-              <Select value={editType} onValueChange={(val) => val && setEditType(val)}>
-                <SelectTrigger className="rounded-none border-primary/10 h-12 tracking-[0.2em]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
-                  <SelectItem value="INDIVIDUAL">INDIVIDUAL</SelectItem>
-                  <SelectItem value="FAMILIA">FAMÍLIA</SelectItem>
-                </SelectContent>
-              </Select>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+               <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-40 tracking-widest">CATEGORIA</label>
+                 <Select value={editType} onValueChange={(val) => val && setEditType(val)}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 tracking-[0.2em] bg-stone-50 text-[11px]">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
+                     <SelectItem value="INDIVIDUAL">INDIVIDUAL</SelectItem>
+                     <SelectItem value="FAMILIA">FAMÍLIA</SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-bold opacity-40 tracking-widest">ADULTOS</label>
+                    <Input 
+                      type="number"
+                      value={editAdults}
+                      onChange={(e) => setEditAdults(parseInt(e.target.value) || 0)}
+                      className="rounded-none border-primary/10 focus-visible:ring-primary/20 h-14 bg-stone-50 text-[11px]"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-bold opacity-40 tracking-widest">CRIANÇAS</label>
+                    <Input 
+                      type="number"
+                      value={editChildren}
+                      onChange={(e) => setEditChildren(parseInt(e.target.value) || 0)}
+                      className="rounded-none border-primary/10 focus-visible:ring-primary/20 h-14 bg-stone-50 text-[11px]"
+                    />
+                  </div>
+               </div>
             </div>
+
             {editType === "FAMILIA" && (
-              <div className="space-y-2 animate-in fade-in duration-500">
-                <label className="text-[9px] font-bold opacity-40">INTEGRANTES</label>
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <label className="text-[10px] font-bold opacity-40 tracking-widest">NOMES DOS INTEGRANTES</label>
                 <Textarea 
                   value={editMembers}
                   onChange={(e) => setEditMembers(e.target.value)}
                   placeholder="EX: JOÃO, MARIA, PEDRO"
-                  className="rounded-none border-primary/10 focus-visible:ring-primary/20 tracking-widest min-h-[120px] bg-stone-50"
+                  className="rounded-none border-primary/10 focus-visible:ring-primary/20 tracking-widest min-h-[140px] bg-stone-50 p-6 text-[11px] leading-relaxed"
                 />
+                <p className="text-[9px] opacity-30 italic">NOMES SEPARADOS POR VÍRGULA.</p>
               </div>
             )}
           </div>

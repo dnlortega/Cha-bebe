@@ -9,6 +9,17 @@ import { toast } from "sonner";
 import { Loader2, UserPlus } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { 
+  Users, 
+  UserPlus, 
+  Loader2, 
+  ClipboardList, 
+  Info,
+  CheckCircle,
+  HelpCircle
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
 export default function AddGuestsPage() {
   const [newGuestsText, setNewGuestsText] = useState("");
   const [registering, setRegistering] = useState(false);
@@ -27,49 +38,89 @@ export default function AddGuestsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-serif text-primary tracking-[0.2em]">CADASTRAR</h1>
-        <p className="text-[10px] opacity-50 tracking-[0.3em] font-light">ADICIONE MÚLTIPLOS CONVITES DE UMA VEZ</p>
-      </div>
+    <div className="max-w-6xl space-y-12 animate-in fade-in duration-1000 pb-20">
+      <header className="space-y-2">
+        <h1 className="text-4xl font-serif text-primary tracking-[0.2em]">CADASTRAR</h1>
+        <p className="text-[10px] opacity-50 tracking-[0.4em] font-light uppercase">ADICIONE MÚLTIPLOS CONVITES DE UMA VEZ</p>
+      </header>
 
-      <Card className="border-none shadow-sm bg-white rounded-none max-w-2xl overflow-hidden">
-        <div className="bg-primary p-6 sm:p-12 text-primary-foreground flex flex-col sm:flex-row justify-between items-center gap-6">
-           <div className="space-y-2 text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-serif tracking-widest uppercase">LISTA DE CADASTRO</h2>
-              <p className="text-[9px] opacity-70 tracking-widest font-light">UM POR LINHA | NOME | TIPO | INTEGRANTES</p>
-           </div>
-           <Tooltip>
-             <TooltipTrigger asChild>
-                <button 
-                  onClick={handleAddGuests} 
-                  disabled={registering || !newGuestsText.trim()}
-                  className="bg-white text-primary hover:bg-stone-100 h-14 w-14 flex items-center justify-center rounded-none shadow-xl transition-all disabled:opacity-50"
-                >
-                  {registering ? <Loader2 className="h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5" />}
-                </button>
-             </TooltipTrigger>
-             <TooltipContent className="text-[10px] tracking-widest uppercase">SALVAR LISTA</TooltipContent>
-           </Tooltip>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+        <div className="lg:col-span-3">
+           <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
+              <div className="bg-stone-900 p-10 text-white flex justify-between items-center border-b-4 border-primary">
+                 <div className="space-y-1">
+                    <h2 className="text-xl font-serif tracking-[0.2em] uppercase">LISTA DE CADASTRO</h2>
+                    <p className="text-[9px] opacity-50 tracking-[0.4em] uppercase font-light">INSIRA OS DADOS ABAIXO</p>
+                 </div>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                      <button 
+                        onClick={handleAddGuests} 
+                        disabled={registering || !newGuestsText.trim()}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 h-16 w-16 flex items-center justify-center rounded-none shadow-2xl transition-all disabled:opacity-50"
+                      >
+                        {registering ? <Loader2 className="h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5" />}
+                      </button>
+                   </TooltipTrigger>
+                   <TooltipContent className="text-[10px] tracking-widest uppercase">SALVAR TODOS</TooltipContent>
+                 </Tooltip>
+              </div>
+              <CardContent className="p-0">
+                <Textarea 
+                  placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA, PEDRO" 
+                  className="min-h-[450px] bg-stone-50/50 border-none rounded-none focus-visible:ring-0 text-[12px] tracking-widest p-10 leading-relaxed resize-none placeholder:opacity-20"
+                  value={newGuestsText}
+                  onChange={(e) => setNewGuestsText(e.target.value)}
+                />
+              </CardContent>
+           </Card>
         </div>
-        <CardContent className="p-6 sm:p-12 space-y-8">
-          <div className="space-y-4">
-            <Textarea 
-              placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA, PEDRO" 
-              className="min-h-[300px] sm:min-h-[350px] bg-stone-50 border-primary/10 rounded-none focus-visible:ring-primary/20 text-[11px] tracking-widest p-4 sm:p-6 leading-relaxed"
-              value={newGuestsText}
-              onChange={(e) => setNewGuestsText(e.target.value)}
-            />
-          </div>
-          <div className="p-4 sm:p-6 bg-stone-50 border border-primary/5">
-             <h4 className="text-[10px] font-bold tracking-widest mb-4">FORMATO ACEITO:</h4>
-             <ul className="text-[9px] space-y-2 opacity-60 tracking-widest uppercase list-disc pl-4">
-                <li>NOME | INDIVIDUAL</li>
-                <li>NOME | FAMILIA | MEMBRO 1, MEMBRO 2, MEMBRO 3</li>
-             </ul>
-          </div>
-        </CardContent>
-      </Card>
+
+        <div className="lg:col-span-2 space-y-8">
+           <div className="space-y-6 bg-white p-10 border border-primary/5 shadow-lg">
+              <h3 className="text-xs font-serif tracking-[0.3em] text-primary flex items-center gap-3 uppercase">
+                <ClipboardList className="h-4 w-4" />
+                COMO CADASTRAR
+              </h3>
+              <Separator className="bg-primary/10" />
+              
+              <div className="space-y-8">
+                 <div className="flex gap-4">
+                    <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">1</div>
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-bold tracking-widest uppercase">INDIVIDUAL</p>
+                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70">NOME | INDIVIDUAL</code>
+                    </div>
+                 </div>
+
+                 <div className="flex gap-4">
+                    <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">2</div>
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-bold tracking-widest uppercase">FAMÍLIA</p>
+                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
+                          NOME | FAMILIA | MEMBRO 1, MEMBRO 2, MEMBRO 3
+                       </code>
+                    </div>
+                 </div>
+
+                 <div className="flex gap-4">
+                    <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">3</div>
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-bold tracking-widest uppercase">IMPORTANTE</p>
+                       <p className="text-[9px] opacity-50 leading-relaxed uppercase tracking-widest">Use a barra vertical ( | ) para separar os campos. Cada convidado deve estar em uma nova linha.</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           <div className="p-8 bg-stone-50 border border-primary/5 flex gap-4 items-start">
+              <Info className="h-4 w-4 text-primary opacity-40 mt-1" />
+              <p className="text-[9px] opacity-40 leading-relaxed uppercase tracking-widest">
+                Os links de convite serão gerados automaticamente baseados nos nomes inseridos.
+              </p>
+           </div>
+        </div>
+      </div>
     </div>
   );
 }
