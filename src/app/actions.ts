@@ -32,8 +32,8 @@ export async function updateSettings(invitationUrl: string, theme: string, sessi
   try {
     await prisma.settings.upsert({
       where: { id: "default" },
-      update: { invitationUrl, theme },
-      create: { id: "default", invitationUrl, theme }
+      update: { invitationUrl, theme, sessionTimeout },
+      create: { id: "default", invitationUrl, theme, sessionTimeout }
     });
     revalidatePath("/", "layout");
     return { success: true };
@@ -54,12 +54,19 @@ export async function deleteGuest(id: string) {
   }
 }
 
-export async function updateGuest(id: string, nome: string, tipo: string, membros?: string) {
+export async function updateGuest(id: string, nome: string, tipo: string, membros?: string, qtdAdultos: number = 1, qtdCriancas: number = 0) {
   try {
     const slug = await generateSlug(nome);
     await prisma.guest.update({
       where: { id },
-      data: { nome, slug, tipo, membros },
+      data: { 
+        nome, 
+        slug, 
+        tipo, 
+        membros,
+        qtd_adultos: qtdAdultos,
+        qtd_criancas: qtdCriancas
+      },
     });
     revalidatePath("/admin");
     return { success: true };
