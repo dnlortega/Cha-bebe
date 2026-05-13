@@ -13,6 +13,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { THEMES } from "@/lib/themes";
 import { 
   Save, 
   Loader2, 
@@ -130,9 +131,9 @@ export default function VisualPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-[10px]">
-                        <SelectItem value="GOLD">LUXURY GOLD</SelectItem>
-                        <SelectItem value="ROSE">SOFT ROSE</SelectItem>
-                        <SelectItem value="BLUE">BABY BLUE</SelectItem>
+                        {THEMES.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                  </div>
