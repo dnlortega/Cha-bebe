@@ -13,6 +13,9 @@ export const THEMES: ThemeConfig[] = [
   { id: "DARK", name: "🌑 NAVY ELEGANT", icon: "🌑", className: "theme-dark" },
   { id: "SAGE", name: "🌿 BOHO SAGE", icon: "🌿", className: "theme-sage" },
   { id: "WHITE", name: "⚪ CLASSIC WHITE", icon: "⚪", className: "theme-white" },
+  { id: "BTS", name: "💜 BTS / ARMY", icon: "💜", className: "theme-bts" },
+  { id: "TOYSTORY", name: "🤠 TOY STORY", icon: "🤠", className: "theme-toystory" },
+  { id: "PRINCE", name: "👑 PEQUENO PRÍNCIPE", icon: "👑", className: "theme-prince" },
 ];
 
 export const getThemeById = (id: string) => THEMES.find(t => t.id === id) || THEMES[0];
