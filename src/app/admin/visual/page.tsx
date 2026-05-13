@@ -161,7 +161,7 @@ export default function VisualPage() {
                     <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase flex items-center gap-3">
                        <Palette className="h-3 w-3" /> Tema
                     </label>
-                    <Select value={theme} onValueChange={setTheme}>
+                    <Select value={theme} onValueChange={(val) => setTheme(val || "GOLD")}>
                       <SelectTrigger className="rounded-none border-primary/10 h-14 bg-stone-50 text-[11px] tracking-widest">
                         <SelectValue />
                       </SelectTrigger>
