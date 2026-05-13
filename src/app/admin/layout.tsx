@@ -29,14 +29,61 @@ export default function AdminLayout({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [checking, setChecking] = useState(true);
+  const [timeoutMinutes, setTimeoutMinutes] = useState(30);
 
   useEffect(() => {
     const isAuth = sessionStorage.getItem("admin_auth") === "true";
     if (isAuth) {
       setAuthorized(true);
     }
+    
+    // Fetch timeout setting
+    getSettings().then(settings => {
+      if (settings && settings.sessionTimeout) {
+        setTimeoutMinutes(settings.sessionTimeout);
+      }
+    });
+
     setChecking(false);
   }, []);
+
+  // Idle Timer Logic
+  useEffect(() => {
+    if (!authorized) return;
+
+    let timer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        handleLogout();
+      }, timeoutMinutes * 60 * 1000);
+    };
+
+    const handleLogout = () => {
+      sessionStorage.removeItem("admin_auth");
+      setAuthorized(false);
+      toast.info("SESSÃO ENCERRADA POR INATIVIDADE");
+    };
+
+    // Events to track activity
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("keydown", resetTimer);
+    window.addEventListener("mousedown", resetTimer);
+    window.addEventListener("scroll", resetTimer);
+    window.addEventListener("touchstart", resetTimer);
+
+    resetTimer(); // Initialize timer
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("keydown", resetTimer);
+      window.removeEventListener("mousedown", resetTimer);
+      window.removeEventListener("scroll", resetTimer);
+      window.removeEventListener("touchstart", resetTimer);
+    };
+  }, [authorized, timeoutMinutes]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

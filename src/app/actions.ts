@@ -15,24 +15,20 @@ export async function generateSlug(name: string) {
 }
 
 export async function getSettings() {
-  try {
-    let settings = await prisma.settings.findUnique({ where: { id: "default" } });
-    if (!settings) {
-      settings = await prisma.settings.create({
-        data: { id: "default", invitationUrl: "/convite.png", theme: "GOLD" }
-      });
-    }
-    return settings;
-  } catch (error) {
-    console.error("Error fetching settings:", error);
-    return { 
-      invitationUrl: "/convite.png", 
-      theme: "GOLD" // GOLD, BLUE, PINK, DARK, SAGE, WHITE
-    };
+  let settings = await prisma.settings.findUnique({
+    where: { id: "default" },
+  });
+
+  if (!settings) {
+    settings = await prisma.settings.create({
+      data: { id: "default", invitationUrl: "/convite.png", theme: "GOLD", sessionTimeout: 30 },
+    });
   }
+
+  return settings;
 }
 
-export async function updateSettings(invitationUrl: string, theme: string) {
+export async function updateSettings(invitationUrl: string, theme: string, sessionTimeout: number) {
   try {
     await prisma.settings.upsert({
       where: { id: "default" },

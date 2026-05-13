@@ -21,6 +21,7 @@ import {
 
 export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
+  const [sessionTimeout, setSessionTimeout] = useState(30);
   const { theme, setTheme } = useTheme();
   const [savingSettings, setSavingSettings] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -33,12 +34,13 @@ export default function VisualPage() {
     const data = await getSettings();
     setInvitationUrl(data.invitationUrl);
     setTheme(data.theme);
+    setSessionTimeout(data.sessionTimeout || 30);
     setLoading(false);
   };
 
   const handleSaveSettings = async () => {
     setSavingSettings(true);
-    const result = await updateSettings(invitationUrl, theme);
+    const result = await updateSettings(invitationUrl, theme, sessionTimeout);
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -88,7 +90,7 @@ export default function VisualPage() {
           </CardHeader>
           <CardContent className="p-0 pt-10 space-y-8">
             <div className="space-y-4">
-              <label className="text-[10px] font-bold opacity-40 tracking-widest">IMAGEM DO CONVITE (URL)</label>
+              <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">IMAGEM DO CONVITE (URL)</label>
               <Input 
                 value={invitationUrl}
                 onChange={(e) => setInvitationUrl(e.target.value)}
@@ -97,20 +99,33 @@ export default function VisualPage() {
               />
             </div>
 
-            <div className="space-y-4">
-              <label className="text-[10px] font-bold opacity-40 tracking-widest">PALETA DE CORES / TEMA</label>
-              <Select value={theme} onValueChange={(val) => val && setTheme(val)}>
-                <SelectTrigger className="rounded-none border-primary/10 h-14 tracking-[0.2em] bg-stone-50 text-[11px]">
-                  <SelectValue placeholder="SELECIONE O TEMA" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
-                  {THEMES.map((t) => (
-                    <SelectItem key={t.id} value={t.id} className="py-3">
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">PALETA DE CORES / TEMA</label>
+                 <Select value={theme} onValueChange={(val) => val && setTheme(val)}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 tracking-[0.2em] bg-stone-50 text-[11px]">
+                     <SelectValue placeholder="SELECIONE O TEMA" />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
+                     {THEMES.map((t) => (
+                       <SelectItem key={t.id} value={t.id} className="py-3">
+                         {t.name}
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               </div>
+
+               <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">TEMPO DE SESSÃO (MINUTOS)</label>
+                 <Input 
+                   type="number"
+                   value={sessionTimeout}
+                   onChange={(e) => setSessionTimeout(parseInt(e.target.value) || 1)}
+                   className="rounded-none border-primary/10 focus-visible:ring-primary/20 tracking-widest h-14 bg-stone-50 text-[11px]"
+                 />
+                 <p className="text-[8px] opacity-30 tracking-widest uppercase">O PAINEL PEDIRÁ SENHA APÓS ESSE TEMPO DE INATIVIDADE.</p>
+               </div>
             </div>
           </CardContent>
         </Card>

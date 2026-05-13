@@ -25,5 +25,6 @@ model Guest {
 model Settings {
   id            String @id @default("default")
   invitationUrl String @default("/convite.png")
-  theme         String @default("GOLD") // "GOLD", "BLUE", "PINK"
+  theme         String @default("GOLD")
+  sessionTimeout Int    @default(30) // In minutes
 }
