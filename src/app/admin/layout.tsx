@@ -2,7 +2,7 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { verifyAdmin } from "@/app/actions";
+import { verifyAdmin, getSettings } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,18 +29,15 @@ export default function AdminLayout({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [checking, setChecking] = useState(true);
-  const [timeoutMinutes, setTimeoutMinutes] = useState(30);
+  const [timeoutSeconds, setTimeoutSeconds] = useState(30);
 
   useEffect(() => {
-    const isAuth = sessionStorage.getItem("admin_auth") === "true";
-    if (isAuth) {
-      setAuthorized(true);
-    }
+    // Removed session persistence to force login on refresh
     
     // Fetch timeout setting
     getSettings().then(settings => {
       if (settings && settings.sessionTimeout) {
-        setTimeoutMinutes(settings.sessionTimeout);
+        setTimeoutSeconds(settings.sessionTimeout);
       }
     });
 
@@ -57,11 +54,10 @@ export default function AdminLayout({
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         handleLogout();
-      }, timeoutMinutes * 60 * 1000);
+      }, timeoutSeconds * 1000);
     };
 
     const handleLogout = () => {
-      sessionStorage.removeItem("admin_auth");
       setAuthorized(false);
       toast.info("SESSÃO ENCERRADA POR INATIVIDADE");
     };
@@ -83,14 +79,13 @@ export default function AdminLayout({
       window.removeEventListener("scroll", resetTimer);
       window.removeEventListener("touchstart", resetTimer);
     };
-  }, [authorized, timeoutMinutes]);
+  }, [authorized, timeoutSeconds]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const isCorrect = await verifyAdmin(username, password);
     if (isCorrect) {
       setAuthorized(true);
-      sessionStorage.setItem("admin_auth", "true");
     } else {
       toast.error("USUÁRIO OU SENHA INCORRETOS");
     }

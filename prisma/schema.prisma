@@ -26,5 +26,5 @@ model Settings {
   id            String @id @default("default")
   invitationUrl String @default("/convite.png")
   theme         String @default("GOLD")
-  sessionTimeout Int    @default(30) // In minutes
+  sessionTimeout Int    @default(30) // In seconds
 }

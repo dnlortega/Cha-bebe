@@ -117,7 +117,7 @@ export default function VisualPage() {
                </div>
 
                <div className="space-y-4">
-                 <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">TEMPO DE SESSÃO (MINUTOS)</label>
+                 <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">TEMPO DE SESSÃO (SEGUNDOS)</label>
                  <Input 
                    type="number"
                    value={sessionTimeout}
