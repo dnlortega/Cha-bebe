@@ -8,14 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Settings as SettingsIcon } from "lucide-react";
 
 const AdminAuthContext = createContext<{
   authorized: boolean;
   setAuthorized: (val: boolean) => void;
+  currentUser: string | null;
 }>({
   authorized: false,
   setAuthorized: () => {},
+  currentUser: null,
 });
 
 export const useAdminAuth = () => useContext(AdminAuthContext);
@@ -26,6 +28,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [authorized, setAuthorized] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [checking, setChecking] = useState(true);
@@ -59,6 +62,7 @@ export default function AdminLayout({
 
     const handleLogout = () => {
       setAuthorized(false);
+      setCurrentUser(null);
       toast.info("SESSÃO ENCERRADA POR INATIVIDADE");
     };
 
@@ -86,6 +90,7 @@ export default function AdminLayout({
     const isCorrect = await verifyAdmin(username, password);
     if (isCorrect) {
       setAuthorized(true);
+      setCurrentUser(username);
     } else {
       toast.error("USUÁRIO OU SENHA INCORRETOS");
     }
@@ -105,7 +110,7 @@ export default function AdminLayout({
         <Card className="w-full max-w-sm border border-primary/5 shadow-2xl bg-white rounded-none animate-in fade-in zoom-in duration-700">
           <CardHeader className="space-y-4 text-center pt-10">
             <div className="w-12 h-12 bg-primary/5 mx-auto flex items-center justify-center mb-2">
-               <Settings className="h-6 w-6 text-primary/40" />
+               <SettingsIcon className="h-6 w-6 text-primary/40" />
             </div>
             <CardTitle className="text-xl font-serif tracking-[0.3em] text-primary">ADMINISTRAÇÃO</CardTitle>
             <p className="text-[9px] opacity-40 tracking-[0.2em] uppercase">ACESSO RESTRITO</p>
@@ -146,7 +151,7 @@ export default function AdminLayout({
   }
 
   return (
-    <AdminAuthContext.Provider value={{ authorized, setAuthorized }}>
+    <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser }}>
       <div className="min-h-screen bg-background">
         <AdminSidebar />
         <main className="lg:pl-64 min-h-screen transition-all duration-300">

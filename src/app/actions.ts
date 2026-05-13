@@ -133,11 +133,39 @@ export async function getGuests() {
   }
 }
 
+export async function ensureAdminExists() {
+  const count = await prisma.admin.count();
+  if (count === 0) {
+    await prisma.admin.create({
+      data: {
+        username: "admin",
+        password: "admin123",
+      },
+    });
+  }
+}
+
 export async function verifyAdmin(username: string, password: string) {
-  const envUser = process.env.ADMIN_USERNAME;
-  const envPass = process.env.ADMIN_PASSWORD;
+  await ensureAdminExists(); // Make sure there's at least one admin
+  const admin = await prisma.admin.findUnique({
+    where: { username },
+  });
   
-  if (!envUser || !envPass) return false;
-  
-  return username === envUser && password === envPass;
+  if (!admin) return false;
+  return admin.password === password;
+}
+
+export async function updateAdminCredentials(currentUsername: string, newUsername: string, newPass: string) {
+  try {
+    const admin = await prisma.admin.findUnique({ where: { username: currentUsername } });
+    if (!admin) return { success: false, error: "Admin não encontrado" };
+
+    await prisma.admin.update({
+      where: { username: currentUsername },
+      data: { username: newUsername, password: newPass }
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Erro ao atualizar credenciais" };
+  }
 }

@@ -28,3 +28,9 @@ model Settings {
   theme         String @default("GOLD")
   sessionTimeout Int    @default(30) // In seconds
 }
+
+model Admin {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
+}
