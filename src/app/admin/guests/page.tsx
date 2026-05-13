@@ -213,35 +213,30 @@ export default function GuestsPage() {
                   <ExternalLink className="h-3 w-3 mr-2" /> VER PÁGINA
                 </Button>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-12 h-10 rounded-none border-primary/10">
-                      <MoreVertical className="h-4 w-4 opacity-40" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[160px] p-0 shadow-2xl">
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        setEditingGuest(guest);
-                        setEditName(guest.nome);
-                        setEditType(guest.tipo);
-                        setEditMembers(guest.membros || "");
-                        setEditAdults(guest.qtd_adultos || 1);
-                        setEditChildren(guest.qtd_criancas || 0);
-                      }}
-                      className="cursor-pointer py-4 px-6 focus:bg-primary focus:text-white"
-                    >
-                      <Edit2 className="mr-3 h-3 w-3" /> EDITAR DADOS
-                    </DropdownMenuItem>
-                    <Separator className="bg-primary/5" />
-                    <DropdownMenuItem 
-                      onClick={() => handleDelete(guest.id)}
-                      className="cursor-pointer text-red-500 py-4 px-6 focus:bg-red-500 focus:text-white"
-                    >
-                      <Trash2 className="mr-3 h-3 w-3" /> EXCLUIR REGISTRO
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="w-10 h-10 rounded-none border-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
+                  onClick={() => {
+                    setEditingGuest(guest);
+                    setEditName(guest.nome);
+                    setEditType(guest.tipo);
+                    setEditMembers(guest.membros || "");
+                    setEditAdults(guest.qtd_adultos || 1);
+                    setEditChildren(guest.qtd_criancas || 0);
+                  }}
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="w-10 h-10 rounded-none border-primary/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                  onClick={() => handleDelete(guest.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
 
               {guest.membros_confirmados && (
@@ -346,14 +341,12 @@ export default function GuestsPage() {
                         <TooltipContent className="text-[9px] tracking-widest uppercase">VER PÁGINA</TooltipContent>
                       </Tooltip>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-10 w-10 opacity-30 hover:opacity-100 hover:bg-primary/5">
-                            <MoreVertical className="h-4 w-4 text-primary" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-none border-primary/10 uppercase tracking-widest text-[9px] min-w-[180px] p-0 shadow-2xl">
-                          <DropdownMenuItem 
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-10 w-10 opacity-30 hover:opacity-100 hover:bg-primary/5 text-primary"
                             onClick={() => {
                               setEditingGuest(guest);
                               setEditName(guest.nome);
@@ -362,19 +355,26 @@ export default function GuestsPage() {
                               setEditAdults(guest.qtd_adultos || 1);
                               setEditChildren(guest.qtd_criancas || 0);
                             }}
-                            className="cursor-pointer py-4 px-6 focus:bg-primary focus:text-white"
                           >
-                            <Edit2 className="mr-4 h-4 w-4" /> EDITAR DADOS
-                          </DropdownMenuItem>
-                          <Separator className="bg-primary/5" />
-                          <DropdownMenuItem 
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-[9px] tracking-widest uppercase">EDITAR</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-10 w-10 opacity-30 hover:opacity-100 hover:bg-red-50 text-red-500"
                             onClick={() => handleDelete(guest.id)}
-                            className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50 py-4 px-6"
                           >
-                            <Trash2 className="mr-4 h-4 w-4" /> EXCLUIR REGISTRO
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-[9px] tracking-widest uppercase">EXCLUIR</TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>
