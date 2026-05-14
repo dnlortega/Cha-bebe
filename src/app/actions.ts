@@ -112,7 +112,11 @@ export async function updateGuest(
 export async function distributeDiapers() {
   try {
     const settings = await getSettings();
-    const guests = await prisma.guest.findMany({ orderBy: { createdAt: "asc" } });
+    // Pegar apenas convidados que ainda não têm fralda definida
+    const guests = await prisma.guest.findMany({ 
+      where: { fralda_tamanho: null },
+      orderBy: { createdAt: "asc" } 
+    });
     
     let rnLeft = settings.rnQty;
     let pLeft = settings.pQty;
@@ -120,7 +124,12 @@ export async function distributeDiapers() {
     let gLeft = settings.gQty;
     let ggLeft = settings.ggQty;
 
-    const updates = guests.map(async (guest) => {
+    // Se não houver estoque definido, avisar
+    if (rnLeft + pLeft + mLeft + gLeft + ggLeft === 0) {
+      return { success: false, error: "ESTOQUE ZERADO. DEFINA AS QUANTIDADES E SALVE ANTES." };
+    }
+
+    for (const guest of guests) {
       let size = null;
       if (rnLeft > 0) { size = "RN"; rnLeft--; }
       else if (pLeft > 0) { size = "P"; pLeft--; }
@@ -128,13 +137,18 @@ export async function distributeDiapers() {
       else if (gLeft > 0) { size = "G"; gLeft--; }
       else if (ggLeft > 0) { size = "GG"; ggLeft--; }
 
-      return prisma.guest.update({
-        where: { id: guest.id },
-        data: { fralda_tamanho: size }
-      });
-    });
+      // Só atualiza se encontrou um tamanho disponível
+      if (size) {
+        await prisma.guest.update({
+          where: { id: guest.id },
+          data: { fralda_tamanho: size }
+        });
+      } else {
+        // Se acabaram as fraldas no estoque, podemos parar o loop
+        break;
+      }
+    }
 
-    await Promise.all(updates);
     revalidatePath("/admin");
     return { success: true };
   } catch (error) {
@@ -151,7 +165,8 @@ export async function addMultipleGuests(namesText: string) {
       lines.map(async (line) => {
         const parts = line.split("|").map(s => s.trim());
         const nome = parts[0];
-        const tipo = (parts[1]?.toUpperCase() === "FAMILIA") ? "FAMILIA" : "INDIVIDUAL";
+        const tipoRaw = (parts[1] || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const tipo = tipoRaw === "FAMILIA" ? "FAMILIA" : "INDIVIDUAL";
         const membros = parts[2] || null;
         const fralda = parts[3]?.toUpperCase() || null;
         const kitChurrasco = parts[4]?.toUpperCase() === "SIM" || parts[4]?.toUpperCase() === "KIT";
