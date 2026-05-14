@@ -24,9 +24,11 @@ interface RSVPFormProps {
     fralda_tamanho?: string | null;
     kit_churrasco?: boolean;
   };
+  fontFamily?: string;
+  fontSize?: number;
 }
 
-export default function RSVPForm({ guest }: RSVPFormProps) {
+export default function RSVPForm({ guest, fontFamily, fontSize }: RSVPFormProps) {
   const [status, setStatus] = useState<string>(guest.status_confirmacao || "CONFIRMED");
   const [selectedMembers, setSelectedMembers] = useState<string[]>(
     guest.membros_confirmados ? guest.membros_confirmados.split(",").map(s => s.trim()) : []
@@ -141,11 +143,17 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
           {guest.tipo === "FAMILIA" ? <UsersIcon className="h-6 w-6 text-primary/40" /> : <UserIcon className="h-6 w-6 text-primary/40" />}
         </div>
         <div className="space-y-2">
-          <CardTitle className="text-3xl font-serif tracking-[0.2em] text-primary uppercase">CONFIRMAÇÃO</CardTitle>
+          <CardTitle 
+            className="text-3xl font-serif tracking-[0.2em] text-primary uppercase"
+            style={fontFamily ? { fontFamily, fontSize: fontSize ? `${fontSize}px` : undefined } : undefined}
+          >CONFIRMAÇÃO</CardTitle>
           <p className="text-[9px] opacity-40 tracking-[0.3em] uppercase">PRESENÇA NO EVENTO</p>
         </div>
         <Separator className="w-12 mx-auto bg-primary/20" />
-        <CardDescription className="text-xs tracking-[0.2em] opacity-80 uppercase leading-relaxed pt-2">
+        <CardDescription 
+          className="text-xs tracking-[0.2em] opacity-80 uppercase leading-relaxed pt-2"
+          style={fontFamily ? { fontFamily, fontSize: fontSize ? `${fontSize}px` : undefined } : undefined}
+        >
           OLÁ, <span className="font-bold text-primary">{guest.nome}</span>! <br/>
           {guest.tipo === "FAMILIA" ? "CONVITE PARA TODA A FAMÍLIA" : "ESTE É UM CONVITE INDIVIDUAL"}
         </CardDescription>

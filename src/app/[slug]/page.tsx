@@ -79,7 +79,10 @@ export default async function GuestPage({ params }: PageProps) {
               membros_confirmados: guest.membros_confirmados,
               fralda_tamanho: guest.fralda_tamanho,
               kit_churrasco: guest.kit_churrasco
-            }} />
+            }}
+            fontFamily={inviteFontFamily}
+            fontSize={inviteFontSize}
+          />
           </div>
         </div>
       </div>
