@@ -103,7 +103,7 @@ export default function GuestsPage() {
   const handleUpdate = async () => {
     if (!editName.trim() || !editingGuest) return;
     setIsEditing(true);
-    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren, editDiaper || undefined, editKitChurrasco);
+    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren, editDiaper, editKitChurrasco);
     if (result.success) {
       toast.success("DADOS ATUALIZADOS");
       setEditingGuest(null);
@@ -241,6 +241,7 @@ export default function GuestsPage() {
                     setEditMembers(guest.membros || "");
                     setEditAdults(guest.qtd_adultos || 1);
                     setEditChildren(guest.qtd_criancas || 0);
+                    setEditDiaper(guest.fralda_tamanho || null);
                     setEditKitChurrasco(guest.kit_churrasco || false);
                   }}
                 >
