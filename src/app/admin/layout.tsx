@@ -169,7 +169,7 @@ export default function AdminLayout({
     <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser }}>
       <div className="min-h-screen bg-background">
         <AdminSidebar />
-        <main className="lg:pl-64 min-h-screen transition-all duration-300">
+        <main className="lg:pl-24 min-h-screen transition-all duration-300">
           <div className="p-4 sm:p-8 lg:p-12 max-w-7xl mx-auto pt-20 lg:pt-12">
             {children}
           </div>

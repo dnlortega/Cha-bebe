@@ -219,13 +219,15 @@ export default function GuestsPage() {
                  </div>
               </div>
 
-              <div className="flex justify-between items-center gap-4">
+              <div className="flex justify-end items-center gap-4">
                 <Button 
                   variant="outline" 
-                  className="flex-1 rounded-none border-primary/10 text-[9px] tracking-[0.2em] uppercase h-10 hover:bg-primary hover:text-white transition-all"
+                  size="icon"
+                  className="w-10 h-10 rounded-none border-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
                   onClick={() => window.open(`/${guest.slug}`, '_blank')}
+                  title="VER PÁGINA"
                 >
-                  <ExternalLink className="h-3 w-3 mr-2" /> VER PÁGINA
+                  <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
 
                 <Button 

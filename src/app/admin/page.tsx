@@ -18,7 +18,9 @@ import {
   Baby, 
   UserCheck,
   ClipboardList,
-  ChevronRight
+  ChevronRight,
+  PackageCheck,
+  Flame
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -53,6 +55,20 @@ export default function AdminDashboard() {
     { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary" },
     { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-400" },
   ];
+
+  const diaperSizes = ["RN", "P", "M", "G", "GG"];
+  const diaperStats = diaperSizes.map(size => {
+    const requestedBy = guests.filter(g => g.fralda_tamanho === size);
+    return {
+      size,
+      total: requestedBy.length,
+      confirmed: requestedBy.filter(g => g.status_confirmacao === "CONFIRMED").length,
+      names: requestedBy.map(g => g.nome)
+    };
+  }).filter(stat => stat.total > 0);
+
+  const kitChurrascoGuests = guests.filter(g => g.kit_churrasco);
+  const kitChurrascoConfirmed = kitChurrascoGuests.filter(g => g.status_confirmacao === "CONFIRMED").length;
 
   return (
     <div className="space-y-12 animate-in fade-in duration-1000 pb-20">
@@ -166,6 +182,101 @@ export default function AdminDashboard() {
                     Ver Todos os Convites
                   </Link>
                </div>
+            </Card>
+         </div>
+      </div>
+
+      {/* Terminal de Presentes (Fraldas e Kit Churrasco) */}
+      <div className="space-y-8 pt-8">
+         <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-4">
+            <PackageCheck className="h-4 w-4" />
+            Terminal de Presentes Solicitados
+         </h3>
+         
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Fraldas */}
+            <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
+               <div className="bg-stone-900 p-8 border-b-4 border-primary text-white flex justify-between items-center">
+                  <div className="space-y-1">
+                     <h2 className="text-sm font-serif tracking-[0.2em] uppercase">Distribuição de Fraldas</h2>
+                     <p className="text-[8px] opacity-50 tracking-[0.4em] uppercase font-light">Status por Tamanho</p>
+                  </div>
+                  <PackageCheck className="h-6 w-6 opacity-30" />
+               </div>
+               <CardContent className="p-0">
+                 {diaperStats.length === 0 ? (
+                   <div className="p-12 text-center text-[9px] opacity-30 uppercase tracking-[0.2em]">Nenhuma fralda solicitada</div>
+                 ) : (
+                   <div className="divide-y divide-primary/5">
+                     {diaperStats.map((stat, idx) => (
+                       <div key={idx} className="p-8 hover:bg-stone-50 transition-colors">
+                         <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 bg-primary/5 flex items-center justify-center text-primary font-serif text-xl border border-primary/10">
+                                 {stat.size}
+                               </div>
+                               <div>
+                                  <p className="text-[12px] font-bold text-stone-700 tracking-widest">{stat.total} SOLICITADAS</p>
+                                  <p className="text-[9px] opacity-40 tracking-widest uppercase">{stat.confirmed} CONFIRMADAS</p>
+                               </div>
+                            </div>
+                         </div>
+                         <div className="space-y-2">
+                           <p className="text-[8px] opacity-30 tracking-[0.2em] uppercase font-bold">Solicitado para:</p>
+                           <div className="flex flex-wrap gap-2">
+                             {stat.names.map((name, nIdx) => (
+                               <span key={nIdx} className="text-[9px] bg-white border border-primary/10 px-3 py-1.5 uppercase tracking-widest text-primary/70 shadow-sm">
+                                 {name}
+                               </span>
+                             ))}
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </CardContent>
+            </Card>
+
+            {/* Kit Churrasco */}
+            <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
+               <div className="bg-stone-900 p-8 border-b-4 border-red-500 text-white flex justify-between items-center">
+                  <div className="space-y-1">
+                     <h2 className="text-sm font-serif tracking-[0.2em] uppercase">Kits Churrasco</h2>
+                     <p className="text-[8px] opacity-50 tracking-[0.4em] uppercase font-light">Convidados com a solicitação</p>
+                  </div>
+                  <Flame className="h-6 w-6 opacity-30 text-red-500" />
+               </div>
+               <CardContent className="p-0">
+                 {kitChurrascoGuests.length === 0 ? (
+                   <div className="p-12 text-center text-[9px] opacity-30 uppercase tracking-[0.2em]">Nenhum kit churrasco solicitado</div>
+                 ) : (
+                   <div className="p-8">
+                     <div className="flex items-center gap-6 mb-8 p-6 bg-red-50/50 border border-red-100">
+                        <div className="w-16 h-16 bg-red-100 flex items-center justify-center text-red-600 font-serif text-2xl">
+                          {kitChurrascoGuests.length}
+                        </div>
+                        <div>
+                           <p className="text-[12px] font-bold text-stone-700 tracking-widest">KITS SOLICITADOS NO TOTAL</p>
+                           <p className="text-[9px] opacity-60 text-red-500 tracking-widest uppercase">{kitChurrascoConfirmed} CONFIRMADOS ATÉ AGORA</p>
+                        </div>
+                     </div>
+                     <div className="space-y-4">
+                       <p className="text-[9px] opacity-40 tracking-[0.3em] uppercase font-bold pb-2 border-b border-primary/5">Convidados:</p>
+                       <ul className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                         {kitChurrascoGuests.map((g, idx) => (
+                           <li key={idx} className="flex justify-between items-center text-[10px] tracking-widest uppercase p-3 bg-stone-50 border border-primary/5 hover:border-primary/20 transition-colors">
+                             <span className="font-bold text-stone-700">{g.nome}</span>
+                             <span className={`px-2 py-1 ${g.status_confirmacao === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                               {g.status_confirmacao === 'CONFIRMED' ? 'CONFIRMADO' : 'PENDENTE'}
+                             </span>
+                           </li>
+                         ))}
+                       </ul>
+                     </div>
+                   </div>
+                 )}
+               </CardContent>
             </Card>
          </div>
       </div>

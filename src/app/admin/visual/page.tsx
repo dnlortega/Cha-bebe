@@ -13,6 +13,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { THEMES } from "@/lib/themes";
 import { 
   Save, 
@@ -125,14 +126,19 @@ export default function VisualPage() {
           <h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Settings</h1>
           <p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Configurações do Sistema</p>
         </div>
-        <Button 
-          onClick={handleSaveSettings} 
-          disabled={loading}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground h-14 px-10 text-[10px] tracking-[0.4em] rounded-none shadow-xl transition-all"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : <Save className="h-4 w-4 mr-3" />}
-          SALVAR TUDO
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={loading}
+              size="icon"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground h-14 w-14 rounded-none shadow-xl transition-all"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="text-[10px] tracking-widest uppercase">SALVAR TUDO</TooltipContent>
+        </Tooltip>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -217,15 +223,20 @@ export default function VisualPage() {
               </div>
 
               <div className="space-y-6">
-                 <Button 
-                   onClick={handleDistribute} 
-                   disabled={distributing}
-                   variant="outline"
-                   className="w-full border-primary/50 text-primary hover:bg-primary hover:text-white rounded-none h-14 text-[10px] tracking-[0.4em] transition-all"
-                 >
-                   {distributing ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : <PackageCheck className="h-4 w-4 mr-3" />}
-                   DISTRIBUIR FRALDAS AUTOMATICAMENTE
-                 </Button>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <Button 
+                       onClick={handleDistribute} 
+                       disabled={distributing}
+                       variant="outline"
+                       size="icon"
+                       className="w-full border-primary/50 text-primary hover:bg-primary hover:text-white rounded-none h-14 transition-all"
+                     >
+                       {distributing ? <Loader2 className="h-4 w-4 animate-spin" /> : <PackageCheck className="h-4 w-4" />}
+                     </Button>
+                   </TooltipTrigger>
+                   <TooltipContent className="text-[10px] tracking-widest uppercase">DISTRIBUIR FRALDAS AUTOMATICAMENTE</TooltipContent>
+                 </Tooltip>
                  
                  <p className="text-[8px] opacity-30 text-center uppercase tracking-widest">
                     O sistema prioriza os tamanhos na ordem: RN → P → M → G → GG
@@ -266,15 +277,20 @@ export default function VisualPage() {
                     />
                  </div>
 
-                 <Button 
-                   type="submit" 
-                   disabled={updatingAdmin}
-                   variant="outline"
-                   className="w-full border-primary/50 text-primary hover:bg-primary hover:text-white rounded-none h-14 text-[10px] tracking-[0.4em] transition-all"
-                 >
-                   {updatingAdmin ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : <Lock className="h-4 w-4 mr-3" />}
-                   ATUALIZAR
-                 </Button>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <Button 
+                       type="submit" 
+                       disabled={updatingAdmin}
+                       variant="outline"
+                       size="icon"
+                       className="w-full border-primary/50 text-primary hover:bg-primary hover:text-white rounded-none h-14 transition-all"
+                     >
+                       {updatingAdmin ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                     </Button>
+                   </TooltipTrigger>
+                   <TooltipContent className="text-[10px] tracking-widest uppercase">ATUALIZAR CREDENCIAIS</TooltipContent>
+                 </Tooltip>
               </form>
            </Card>
         </section>

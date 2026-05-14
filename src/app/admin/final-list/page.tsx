@@ -83,12 +83,18 @@ export default function FinalListPage() {
         </div>
         
         <div className="flex items-center gap-4">
-           <Button 
-            onClick={copyFullGuestList}
-            className="rounded-none bg-stone-900 hover:bg-stone-800 text-white h-12 px-8 text-[10px] tracking-[0.2em] shadow-xl transition-all"
-           >
-              <Copy className="h-4 w-4 mr-3" /> COPIAR LISTA
-           </Button>
+           <Tooltip>
+             <TooltipTrigger asChild>
+                <Button 
+                 onClick={copyFullGuestList}
+                 size="icon"
+                 className="rounded-none bg-stone-900 hover:bg-stone-800 text-white h-12 w-12 shadow-xl transition-all"
+                >
+                   <Copy className="h-4 w-4" />
+                </Button>
+             </TooltipTrigger>
+             <TooltipContent className="text-[10px] tracking-widest uppercase">COPIAR LISTA DE NOMES</TooltipContent>
+           </Tooltip>
            <Button 
             variant="outline"
             className="rounded-none border-primary/20 bg-white h-12 w-12 p-0 shadow-sm"

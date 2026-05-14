@@ -59,8 +59,8 @@ export function AdminSidebar() {
 
   const SidebarContent = () => (
     <>
-      <div className="p-10 flex flex-col items-center space-y-4">
-        <div className="w-16 h-16 relative bg-stone-900 shadow-2xl p-3 border border-white/10">
+      <div className="py-8 flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 relative bg-stone-900 shadow-xl p-2 border border-white/10">
            <Image 
               src="/icon.png" 
               alt="Logo" 
@@ -68,7 +68,6 @@ export function AdminSidebar() {
               className="object-cover" 
            />
         </div>
-        <p className="text-[8px] opacity-40 tracking-[0.5em] font-light uppercase">Chá de Bebê</p>
       </div>
 
       <Separator className="bg-primary/5 mx-6 w-auto" />
@@ -82,17 +81,14 @@ export function AdminSidebar() {
               href={item.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "flex items-center justify-between px-4 py-3 text-[10px] tracking-[0.2em] transition-all duration-300 group",
+                "flex items-center justify-center p-4 transition-all duration-300 group rounded-none",
                 isActive 
                   ? "bg-primary text-white shadow-lg shadow-primary/20" 
                   : "text-primary/60 hover:bg-primary/5 hover:text-primary"
               )}
+              title={item.title}
             >
-              <div className="flex items-center gap-3">
-                <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "opacity-50 group-hover:opacity-100")} />
-                <span>{item.title}</span>
-              </div>
-              {isActive && <ChevronRight className="h-3 w-3" />}
+              <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "opacity-60 group-hover:opacity-100")} />
             </Link>
           );
         })}
@@ -104,10 +100,10 @@ export function AdminSidebar() {
             sessionStorage.removeItem("admin_auth");
             window.location.href = "/";
           }}
-          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] tracking-[0.2em] text-red-500/60 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300"
+          className="w-full flex items-center justify-center p-4 text-red-500/60 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300"
+          title="SAIR"
         >
-          <LogOut className="h-4 w-4" />
-          <span>SAIR</span>
+          <LogOut className="h-5 w-5" />
         </button>
       </div>
     </>
@@ -128,7 +124,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 h-screen bg-white border-r border-primary/10 flex-col fixed left-0 top-0 z-50">
+      <aside className="hidden lg:flex w-24 h-screen bg-white border-r border-primary/10 flex-col fixed left-0 top-0 z-50">
         <SidebarContent />
       </aside>
 
@@ -142,7 +138,7 @@ export function AdminSidebar() {
 
       {/* Mobile Sidebar */}
       <aside className={cn(
-        "lg:hidden fixed left-0 top-0 h-screen w-72 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10",
+        "lg:hidden fixed left-0 top-0 h-screen w-24 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <SidebarContent />
