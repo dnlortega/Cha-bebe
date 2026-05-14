@@ -22,6 +22,7 @@ interface RSVPFormProps {
     membros: string | null;
     membros_confirmados: string | null;
     fralda_tamanho?: string | null;
+    kit_churrasco?: boolean;
   };
 }
 
@@ -88,20 +89,31 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
               : `SENTIREMOS SUA FALTA, MAS AGRADECEMOS POR NOS AVISAR.`}
           </CardDescription>
 
-          {status === "CONFIRMED" && guest.fralda_tamanho && (
+          {status === "CONFIRMED" && (guest.fralda_tamanho || guest.kit_churrasco) && (
             <div className="pt-10 animate-in fade-in zoom-in duration-1000 delay-300">
                <div className="relative group max-w-[280px] mx-auto">
                   <div className="absolute -top-2 -left-2 w-4 h-4 border-t border-l border-primary/40" />
                   <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b border-r border-primary/40" />
                   
-                  <div className="bg-stone-900 text-white p-8 space-y-4 shadow-2xl transition-transform duration-500">
+                  <div className="bg-primary text-primary-foreground p-8 space-y-4 shadow-2xl transition-transform duration-500">
                      <div className="flex flex-col items-center justify-center gap-3">
                         <div className="flex items-center gap-2 opacity-50">
                            <PackageCheck className="h-3 w-3" />
                            <p className="text-[9px] font-bold tracking-[0.4em] uppercase">Lembrete do Presente</p>
                         </div>
-                        <div className="text-center">
-                           <h2 className="text-6xl font-serif text-primary tracking-tighter leading-none">{guest.fralda_tamanho}</h2>
+                        <div className="text-center space-y-4">
+                           {guest.fralda_tamanho && (
+                             <div>
+                               <p className="text-[10px] tracking-[0.3em] opacity-40 uppercase mb-1">Fralda</p>
+                               <h2 className="text-4xl font-serif text-primary-foreground tracking-tighter leading-none">{guest.fralda_tamanho}</h2>
+                             </div>
+                           )}
+                           {guest.kit_churrasco && (
+                             <div className="pt-2 border-t border-primary-foreground/10">
+                               <p className="text-[10px] tracking-[0.3em] opacity-40 uppercase mb-1">E também</p>
+                               <h2 className="text-lg font-serif text-primary-foreground tracking-widest leading-none uppercase">KIT CHURRASCO</h2>
+                             </div>
+                           )}
                         </div>
                      </div>
                   </div>
@@ -138,25 +150,36 @@ export default function RSVPForm({ guest }: RSVPFormProps) {
           {guest.tipo === "FAMILIA" ? "CONVITE PARA TODA A FAMÍLIA" : "ESTE É UM CONVITE INDIVIDUAL"}
         </CardDescription>
 
-        {guest.fralda_tamanho && (
+        {(guest.fralda_tamanho || guest.kit_churrasco) && (
           <div className="pt-10 animate-in fade-in zoom-in duration-1000 delay-500">
              <div className="relative group">
                 {/* Decorative corners */}
                 <div className="absolute -top-2 -left-2 w-4 h-4 border-t border-l border-primary/40" />
                 <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b border-r border-primary/40" />
                 
-                <div className="bg-stone-900 text-white p-10 space-y-6 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+                <div className="bg-primary text-primary-foreground p-10 space-y-6 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
                    <div className="flex flex-col items-center justify-center gap-4">
                       <div className="flex items-center gap-3 opacity-50">
-                         <div className="h-[1px] w-8 bg-white/30" />
+                         <div className="h-[1px] w-8 bg-primary-foreground/30" />
                          <PackageCheck className="h-4 w-4" />
                          <p className="text-[10px] font-bold tracking-[0.4em] uppercase">Presente</p>
-                         <div className="h-[1px] w-8 bg-white/30" />
+                         <div className="h-[1px] w-8 bg-primary-foreground/30" />
                       </div>
                       
-                      <div className="text-center space-y-1">
-                         <p className="text-[11px] tracking-[0.3em] opacity-40 uppercase">Fralda Tamanho</p>
-                         <h2 className="text-8xl font-serif text-primary tracking-tighter leading-none py-2">{guest.fralda_tamanho}</h2>
+                      <div className="text-center space-y-6">
+                         {guest.fralda_tamanho && (
+                           <div className="space-y-1">
+                              <p className="text-[11px] tracking-[0.3em] opacity-40 uppercase">Fralda Tamanho</p>
+                              <h2 className="text-8xl font-serif text-primary-foreground tracking-tighter leading-none py-2">{guest.fralda_tamanho}</h2>
+                           </div>
+                         )}
+
+                         {guest.kit_churrasco && (
+                           <div className="space-y-2 pt-4 border-t border-primary-foreground/10">
+                              <p className="text-[11px] tracking-[0.3em] opacity-40 uppercase">E traga um</p>
+                              <h2 className="text-2xl font-serif text-primary-foreground tracking-[0.2em] leading-none py-2 uppercase">KIT CHURRASCO</h2>
+                           </div>
+                         )}
                       </div>
                       
                       <p className="text-[9px] tracking-[0.2em] opacity-30 uppercase font-light">Sua presença é o nosso maior presente</p>

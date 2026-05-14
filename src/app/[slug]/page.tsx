@@ -58,7 +58,9 @@ export default async function GuestPage({ params }: PageProps) {
               status_confirmacao: guest.status_confirmacao,
               tipo: guest.tipo,
               membros: guest.membros,
-              membros_confirmados: guest.membros_confirmados
+              membros_confirmados: guest.membros_confirmados,
+              fralda_tamanho: guest.fralda_tamanho,
+              kit_churrasco: guest.kit_churrasco
             }} />
           </div>
         </div>

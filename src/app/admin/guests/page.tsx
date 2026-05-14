@@ -73,6 +73,7 @@ export default function GuestsPage() {
   const [editAdults, setEditAdults] = useState(1);
   const [editChildren, setEditChildren] = useState(0);
   const [editDiaper, setEditDiaper] = useState<string | null>(null);
+  const [editKitChurrasco, setEditKitChurrasco] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -102,7 +103,7 @@ export default function GuestsPage() {
   const handleUpdate = async () => {
     if (!editName.trim() || !editingGuest) return;
     setIsEditing(true);
-    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren, editDiaper || undefined);
+    const result = await updateGuest(editingGuest.id, editName, editType, editMembers, editAdults, editChildren, editDiaper || undefined, editKitChurrasco);
     if (result.success) {
       toast.success("DADOS ATUALIZADOS");
       setEditingGuest(null);
@@ -178,7 +179,7 @@ export default function GuestsPage() {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 bg-stone-50/50 p-4 border border-primary/5">
+              <div className="grid grid-cols-2 gap-4 bg-stone-50/50 p-4 border border-primary/5">
                  <div className="space-y-1">
                     <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">STATUS</p>
                     {guest.status_confirmacao === "CONFIRMED" ? (
@@ -210,6 +211,12 @@ export default function GuestsPage() {
                        {guest.fralda_tamanho || "-"}
                     </p>
                  </div>
+                 <div className="space-y-1">
+                    <p className="text-[8px] opacity-30 font-bold tracking-widest uppercase">KIT CHURRASCO</p>
+                    <p className="text-[10px] font-bold text-primary/70 uppercase">
+                       {guest.kit_churrasco ? "SIM" : "-"}
+                    </p>
+                 </div>
               </div>
 
               <div className="flex justify-between items-center gap-4">
@@ -232,6 +239,7 @@ export default function GuestsPage() {
                     setEditMembers(guest.membros || "");
                     setEditAdults(guest.qtd_adultos || 1);
                     setEditChildren(guest.qtd_criancas || 0);
+                    setEditKitChurrasco(guest.kit_churrasco || false);
                   }}
                 >
                   <Edit2 className="h-3.5 w-3.5" />
@@ -264,6 +272,7 @@ export default function GuestsPage() {
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary pl-8 uppercase">CONVIDADO</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">TIPO</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">FRALDA</TableHead>
+                <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">KIT</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">STATUS</TableHead>
                 <TableHead className="text-[10px] tracking-[0.3em] h-20 font-bold text-primary uppercase">QUEM VAI / DETALHES</TableHead>
                 <TableHead className="text-right text-[10px] tracking-[0.3em] h-20 font-bold text-primary pr-8 uppercase">OPÇÕES</TableHead>
@@ -306,6 +315,13 @@ export default function GuestsPage() {
                         <PackageCheck className="h-4 w-4" />
                         <span className="text-[11px] font-bold tracking-widest">{guest.fralda_tamanho}</span>
                       </div>
+                    ) : (
+                      <span className="opacity-20">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {guest.kit_churrasco ? (
+                      <Badge variant="outline" className="rounded-none text-[8px] py-1 px-2 border-primary/20 bg-stone-900 text-white font-bold tracking-widest uppercase">KIT CHURRASCO</Badge>
                     ) : (
                       <span className="opacity-20">-</span>
                     )}
@@ -374,6 +390,7 @@ export default function GuestsPage() {
                               setEditAdults(guest.qtd_adultos || 1);
                               setEditChildren(guest.qtd_criancas || 0);
                               setEditDiaper(guest.fralda_tamanho || null);
+                              setEditKitChurrasco(guest.kit_churrasco || false);
                             }}
                           >
                             <Edit2 className="h-4 w-4" />
@@ -486,6 +503,19 @@ export default function GuestsPage() {
                       className="rounded-none border-primary/10 focus-visible:ring-primary/20 h-14 bg-stone-50 text-[11px]"
                     />
                   </div>
+               </div>
+
+               <div className="space-y-4">
+                  <label className="text-[10px] font-bold opacity-40 tracking-widest uppercase">Kit Churrasco</label>
+                  <Select value={editKitChurrasco ? "SIM" : "NAO"} onValueChange={(val) => setEditKitChurrasco(val === "SIM")}>
+                    <SelectTrigger className="rounded-none border-primary/10 h-14 tracking-[0.2em] bg-stone-50 text-[11px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none border-primary/10 uppercase tracking-widest text-xs">
+                      <SelectItem value="SIM">SIM</SelectItem>
+                      <SelectItem value="NAO">NÃO</SelectItem>
+                    </SelectContent>
+                  </Select>
                </div>
             </div>
 

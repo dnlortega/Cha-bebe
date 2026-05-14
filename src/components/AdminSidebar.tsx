@@ -13,7 +13,8 @@ import {
   LogOut,
   ChevronRight,
   Menu,
-  X
+  X,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -44,6 +45,11 @@ const menuItems = [
     title: "VISUAL",
     icon: Settings,
     href: "/admin/visual",
+  },
+  {
+    title: "SOBRE",
+    icon: Info,
+    href: "/admin/about",
   },
 ];
 

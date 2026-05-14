@@ -19,6 +19,7 @@ model Guest {
   qtd_criancas      Int      @default(0)
   data_resposta     DateTime?
   fralda_tamanho    String?   // "RN", "P", "M", "G", "GG"
+  kit_churrasco     Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

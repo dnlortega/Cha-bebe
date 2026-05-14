@@ -64,8 +64,8 @@ export default function AddGuestsPage() {
                  </Tooltip>
               </div>
               <CardContent className="p-0">
-                <Textarea 
-                  placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL | | RN&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA | P" 
+                  <Textarea 
+                  placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL | | RN | SIM&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA | P | NÃO" 
                   className="min-h-[450px] bg-stone-50/50 border-none rounded-none focus-visible:ring-0 text-[12px] tracking-widest p-10 leading-relaxed resize-none placeholder:opacity-20"
                   value={newGuestsText}
                   onChange={(e) => setNewGuestsText(e.target.value)}
@@ -96,7 +96,7 @@ export default function AddGuestsPage() {
                     <div className="space-y-2">
                        <p className="text-[10px] font-bold tracking-widest uppercase">FAMÍLIA</p>
                        <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
-                          NOME | FAMILIA | MEMBRO 1, MEMBRO 2, MEMBRO 3
+                          NOME | FAMILIA | MEMBRO 1, MEMBRO 2
                        </code>
                     </div>
                  </div>
@@ -104,10 +104,10 @@ export default function AddGuestsPage() {
                  <div className="flex gap-4">
                     <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">3</div>
                     <div className="space-y-2">
-                       <p className="text-[10px] font-bold tracking-widest uppercase">COM FRALDA DEFINIDA</p>
+                       <p className="text-[10px] font-bold tracking-widest uppercase">COM FRALDA E KIT</p>
                        <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
-                          NOME | INDIVIDUAL | | P <br/>
-                          NOME | FAMILIA | MEMBROS | M
+                          NOME | INDIVIDUAL | | P | SIM <br/>
+                          NOME | FAMILIA | MEMBROS | M | NÃO
                        </code>
                     </div>
                  </div>

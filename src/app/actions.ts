@@ -80,7 +80,8 @@ export async function updateGuest(
   membros?: string, 
   qtdAdultos: number = 1, 
   qtdCriancas: number = 0,
-  fralda?: string
+  fralda?: string,
+  kitChurrasco: boolean = false
 ) {
   try {
     const slug = await generateSlug(nome);
@@ -93,14 +94,18 @@ export async function updateGuest(
         membros,
         qtd_adultos: qtdAdultos,
         qtd_criancas: qtdCriancas,
-        fralda_tamanho: fralda
+        fralda_tamanho: fralda,
+        kit_churrasco: kitChurrasco
       },
     });
     revalidatePath("/admin");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating guest:", error);
-    return { success: false, error: "FALHA AO ATUALIZAR CONVIDADO." };
+    return { 
+      success: false, 
+      error: `ERRO: ${error.message || "FALHA AO ATUALIZAR"}` 
+    };
   }
 }
 
@@ -149,13 +154,14 @@ export async function addMultipleGuests(namesText: string) {
         const tipo = (parts[1]?.toUpperCase() === "FAMILIA") ? "FAMILIA" : "INDIVIDUAL";
         const membros = parts[2] || null;
         const fralda = parts[3]?.toUpperCase() || null;
+        const kitChurrasco = parts[4]?.toUpperCase() === "SIM" || parts[4]?.toUpperCase() === "KIT";
         
         const slug = await generateSlug(nome);
         
         return prisma.guest.upsert({
           where: { slug },
-          update: { tipo, membros, fralda_tamanho: fralda },
-          create: { nome, slug, tipo, membros, fralda_tamanho: fralda },
+          update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
+          create: { nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
         });
       })
     );
