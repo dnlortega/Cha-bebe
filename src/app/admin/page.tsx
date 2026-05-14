@@ -114,26 +114,14 @@ export default function AdminDashboard() {
             </h3>
             <div className="grid grid-cols-1 gap-4">
                <Link href="/admin/add" className="group">
-                  <div className="p-10 bg-stone-900 text-white flex items-center justify-between group-hover:bg-stone-800 transition-all border-l-4 border-primary shadow-xl">
-                     <div className="space-y-2">
-                        <p className="text-[12px] tracking-[0.3em] uppercase font-bold">Cadastrar</p>
-                        <p className="text-[9px] opacity-40 uppercase tracking-widest">Adicionar convidados em massa</p>
-                     </div>
-                     <div className="w-12 h-12 bg-white/5 flex items-center justify-center group-hover:bg-primary transition-all">
-                        <UserPlus className="h-5 w-5" />
-                     </div>
+                  <div className="p-8 bg-stone-900 text-white flex items-center justify-center group-hover:bg-stone-800 transition-all border-l-4 border-primary shadow-xl h-24">
+                     <UserPlus className="h-6 w-6" />
                   </div>
                </Link>
 
                <Link href="/admin/final-list" className="group">
-                  <div className="p-10 bg-white border border-primary/10 flex items-center justify-between group-hover:bg-stone-50 transition-all shadow-lg">
-                     <div className="space-y-2">
-                        <p className="text-[12px] tracking-[0.3em] uppercase font-bold text-primary">Lista Final</p>
-                        <p className="text-[9px] opacity-40 uppercase tracking-widest">Resumo para buffet e recepção</p>
-                     </div>
-                     <div className="w-12 h-12 bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all text-primary">
-                        <ClipboardList className="h-5 w-5" />
-                     </div>
+                  <div className="p-8 bg-white border border-primary/10 flex items-center justify-center group-hover:bg-stone-50 transition-all shadow-lg h-24">
+                     <ClipboardList className="h-6 w-6 text-primary" />
                   </div>
                </Link>
             </div>
@@ -176,10 +164,11 @@ export default function AdminDashboard() {
                     href="/admin/guests" 
                     className={cn(
                       buttonVariants({ variant: "ghost" }), 
-                      "w-full text-[9px] tracking-[0.4em] text-primary hover:bg-primary/5 uppercase font-bold py-10 rounded-none border-t border-primary/5"
+                      "w-full text-primary hover:bg-primary/5 py-8 rounded-none border-t border-primary/5 flex items-center justify-center"
                     )}
+                    title="VER TODOS OS CONVITES"
                   >
-                    Ver Todos os Convites
+                    <Users className="h-5 w-5" />
                   </Link>
                </div>
             </Card>
