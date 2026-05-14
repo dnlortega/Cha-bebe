@@ -20,8 +20,23 @@ export default async function GuestPage({ params }: PageProps) {
     notFound();
   }
 
+  const FONT_VAR_MAP: Record<string, string> = {
+    "Playfair Display": "var(--font-playfair)",
+    "Cormorant Garamond": "var(--font-cormorant)",
+    "Dancing Script": "var(--font-dancing)",
+    "Great Vibes": "var(--font-great-vibes)",
+    "Lora": "var(--font-lora)",
+    "Cinzel": "var(--font-cinzel)",
+  };
+
+  const inviteFontFamily = FONT_VAR_MAP[settings.inviteFont || "Playfair Display"] || "var(--font-playfair)";
+  const inviteFontSize = settings.inviteFontSize || 18;
+
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000">
+    <main 
+      className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000"
+      style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}
+    >
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center">
         {/* Invitation Side */}
         <div className="relative group animate-in fade-in slide-in-from-left duration-1000 fill-mode-both hidden lg:block">

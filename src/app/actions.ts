@@ -30,7 +30,11 @@ export async function getSettings() {
         pQty: 0,
         mQty: 0,
         gQty: 0,
-        ggQty: 0
+        ggQty: 0,
+        systemFont: "Inter",
+        systemFontSize: 14,
+        inviteFont: "Playfair Display",
+        inviteFontSize: 18
       },
     });
   }
@@ -46,13 +50,17 @@ export async function updateSettings(
   pQty: number = 0,
   mQty: number = 0,
   gQty: number = 0,
-  ggQty: number = 0
+  ggQty: number = 0,
+  systemFont: string = "Inter",
+  systemFontSize: number = 14,
+  inviteFont: string = "Playfair Display",
+  inviteFontSize: number = 18
 ) {
   try {
     await prisma.settings.upsert({
       where: { id: "default" },
-      update: { invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty },
-      create: { id: "default", invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty }
+      update: { invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty, systemFont, systemFontSize, inviteFont, inviteFontSize },
+      create: { id: "default", invitationUrl, theme, sessionTimeout, rnQty, pQty, mQty, gQty, ggQty, systemFont, systemFontSize, inviteFont, inviteFontSize }
     });
     revalidatePath("/", "layout");
     return { success: true };

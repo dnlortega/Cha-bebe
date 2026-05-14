@@ -34,6 +34,10 @@ model Settings {
   mQty          Int    @default(0)
   gQty          Int    @default(0)
   ggQty         Int    @default(0)
+  systemFont    String @default("Inter")
+  systemFontSize Int   @default(14)
+  inviteFont    String @default("Playfair Display")
+  inviteFontSize Int   @default(18)
 }
 
 model Admin {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getSettings, updateSettings, updateAdminCredentials, distributeDiapers } from "@/app/actions";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -27,9 +27,41 @@ import {
   UserCircle,
   Key,
   Info,
-  PackageCheck
+  PackageCheck,
+  Type,
+  ExternalLink
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+
+const SYSTEM_FONTS = [
+  { id: "Inter", name: "Inter — Clean & Moderno (Padrão)" },
+  { id: "Outfit", name: "Outfit — Geométrico Premium" },
+  { id: "Plus Jakarta Sans", name: "Plus Jakarta Sans — Contemporâneo" },
+  { id: "DM Sans", name: "DM Sans — Amigável Profissional" },
+  { id: "Geist", name: "Geist — Tech Minimalista" },
+];
+
+const INVITE_FONTS = [
+  { id: "Playfair Display", name: "Playfair Display — Elegante Clássico ✨ (Recomendado)" },
+  { id: "Cormorant Garamond", name: "Cormorant Garamond — Ultra Refinado" },
+  { id: "Dancing Script", name: "Dancing Script — Caligrafia Delicada" },
+  { id: "Great Vibes", name: "Great Vibes — Fluido & Feminino" },
+  { id: "Lora", name: "Lora — Aconchegante Moderno" },
+  { id: "Cinzel", name: "Cinzel — Romano Clássico" },
+];
+
+const FONT_SIZES = [
+  { id: 12, name: "12px — Muito Pequeno" },
+  { id: 13, name: "13px — Pequeno" },
+  { id: 14, name: "14px — Padrão Admin ✨" },
+  { id: 15, name: "15px — Médio" },
+  { id: 16, name: "16px — Confortável" },
+  { id: 17, name: "17px — Levemente Grande" },
+  { id: 18, name: "18px — Padrão Convite ✨" },
+  { id: 20, name: "20px — Grande" },
+  { id: 22, name: "22px — Muito Grande" },
+  { id: 24, name: "24px — Extra Grande" },
+];
 
 export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
@@ -37,6 +69,12 @@ export default function VisualPage() {
   const [sessionTimeout, setSessionTimeout] = useState(30);
   const [loading, setLoading] = useState(false);
   
+  // Font states
+  const [systemFont, setSystemFont] = useState("Inter");
+  const [systemFontSize, setSystemFontSize] = useState(14);
+  const [inviteFont, setInviteFont] = useState("Playfair Display");
+  const [inviteFontSize, setInviteFontSize] = useState(18);
+
   // Diaper states
   const [rnQty, setRnQty] = useState(0);
   const [pQty, setPQty] = useState(0);
@@ -66,6 +104,10 @@ export default function VisualPage() {
       setMQty(data.mQty || 0);
       setGQty(data.gQty || 0);
       setGgQty(data.ggQty || 0);
+      setSystemFont(data.systemFont || "Inter");
+      setSystemFontSize(data.systemFontSize || 14);
+      setInviteFont(data.inviteFont || "Playfair Display");
+      setInviteFontSize(data.inviteFontSize || 18);
     }
   };
 
@@ -75,11 +117,9 @@ export default function VisualPage() {
       invitationUrl, 
       theme, 
       sessionTimeout,
-      rnQty,
-      pQty,
-      mQty,
-      gQty,
-      ggQty
+      rnQty, pQty, mQty, gQty, ggQty,
+      systemFont, systemFontSize,
+      inviteFont, inviteFontSize
     );
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
@@ -150,16 +190,26 @@ export default function VisualPage() {
            </div>
            
            <Card className="border-none shadow-2xl bg-white rounded-none p-10 space-y-10">
-              <div className="space-y-4">
+              {/* Imagem do Convite */}
+              <div className="space-y-3">
                 <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase flex items-center gap-3">
                    <ImageIcon className="h-3 w-3" /> Imagem do Convite
                 </label>
                 <Input 
                   value={invitationUrl}
                   onChange={(e) => setInvitationUrl(e.target.value)}
-                  placeholder="URL da imagem"
+                  placeholder="URL ou Data URI da imagem"
                   className="rounded-none border-primary/10 focus-visible:ring-primary/20 bg-stone-50 h-14 text-[11px] tracking-widest"
                 />
+                <a 
+                  href="https://www.site24x7.com/pt/tools/imagem-para-dados-uri.html" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-[9px] tracking-widest uppercase opacity-40 hover:opacity-80 hover:text-primary transition-all"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Converter imagem para Data URI (cole aqui direto)
+                </a>
               </div>
 
               <div className="grid grid-cols-2 gap-10">
@@ -239,24 +289,110 @@ export default function VisualPage() {
                  </Tooltip>
                  
                  <p className="text-[8px] opacity-30 text-center uppercase tracking-widest">
-                    O sistema prioriza os tamanhos na ordem: RN → P → M → G → GG
+                    Só atribui para quem ainda não tem fralda definida. Ordem: RN → P → M → G → GG
                  </p>
               </div>
            </Card>
         </section>
 
-        {/* Security / Admin */}
+        {/* Fonts — System */}
         <section className="space-y-8">
+           <div className="flex items-center gap-4">
+              <Type className="h-5 w-5 text-primary opacity-30" />
+              <h3 className="text-xs font-serif tracking-[0.3em] uppercase">Tipografia — Admin</h3>
+           </div>
+           <Card className="border-none shadow-2xl bg-white rounded-none p-10 space-y-8">
+              <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase">Fonte do Sistema</label>
+                 <Select value={systemFont} onValueChange={(v) => setSystemFont(v || "Inter")}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 bg-stone-50 text-[11px] tracking-widest">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 text-[10px] tracking-widest">
+                     {SYSTEM_FONTS.map(f => (
+                       <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+              </div>
+              <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase">Tamanho da Fonte</label>
+                 <Select value={String(systemFontSize)} onValueChange={(v) => setSystemFontSize(parseInt(v))}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 bg-stone-50 text-[11px] tracking-widest">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 text-[10px] tracking-widest">
+                     {FONT_SIZES.map(s => (
+                       <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+              </div>
+              {/* Preview */}
+              <div className="p-6 bg-stone-50 border border-primary/5">
+                <p className="opacity-40 mb-2 text-[8px] tracking-widest uppercase">Pré-visualização</p>
+                <p style={{ fontFamily: systemFont, fontSize: `${systemFontSize}px` }}>
+                  Chá de Bebê — Painel Administrativo
+                </p>
+              </div>
+           </Card>
+        </section>
+
+        {/* Fonts — Invite */}
+        <section className="space-y-8">
+           <div className="flex items-center gap-4">
+              <Type className="h-5 w-5 text-primary opacity-30" />
+              <h3 className="text-xs font-serif tracking-[0.3em] uppercase">Tipografia — Convite</h3>
+           </div>
+           <Card className="border-none shadow-2xl bg-white rounded-none p-10 space-y-8">
+              <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase">Fonte do Convite</label>
+                 <Select value={inviteFont} onValueChange={(v) => setInviteFont(v || "Playfair Display")}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 bg-stone-50 text-[11px] tracking-widest">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 text-[10px] tracking-widest">
+                     {INVITE_FONTS.map(f => (
+                       <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+              </div>
+              <div className="space-y-4">
+                 <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase">Tamanho da Fonte</label>
+                 <Select value={String(inviteFontSize)} onValueChange={(v) => setInviteFontSize(parseInt(v))}>
+                   <SelectTrigger className="rounded-none border-primary/10 h-14 bg-stone-50 text-[11px] tracking-widest">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent className="rounded-none border-primary/10 text-[10px] tracking-widest">
+                     {FONT_SIZES.map(s => (
+                       <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+              </div>
+              {/* Preview */}
+              <div className="p-6 bg-stone-50 border border-primary/5">
+                <p className="opacity-40 mb-2 text-[8px] tracking-widest uppercase">Pré-visualização</p>
+                <p style={{ fontFamily: inviteFont, fontSize: `${inviteFontSize}px` }}>
+                  Você está Convidado — Chá de Bebê
+                </p>
+              </div>
+           </Card>
+        </section>
+
+        {/* Security / Admin */}
+        <section className="space-y-8 lg:col-span-2">
            <div className="flex items-center gap-4">
               <ShieldCheck className="h-5 w-5 text-primary opacity-30" />
               <h3 className="text-xs font-serif tracking-[0.3em] uppercase">Segurança</h3>
            </div>
 
            <Card className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
-              <form onSubmit={handleUpdateAdmin} className="space-y-8">
+              <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
                  <div className="space-y-4">
                     <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase flex items-center gap-3">
-                       <UserCircle className="h-3 w-3" /> Usuário
+                       <UserCircle className="h-3 w-3" /> Novo Usuário
                     </label>
                     <Input 
                       value={newUsername}
@@ -267,7 +403,7 @@ export default function VisualPage() {
 
                  <div className="space-y-4">
                     <label className="text-[10px] font-bold opacity-30 tracking-widest uppercase flex items-center gap-3">
-                       <Key className="h-3 w-3" /> Senha
+                       <Key className="h-3 w-3" /> Nova Senha
                     </label>
                     <Input 
                       type="password"
@@ -299,7 +435,7 @@ export default function VisualPage() {
       <div className="p-8 bg-stone-50 border border-primary/5 flex items-start gap-4">
          <Info className="h-4 w-4 text-primary opacity-40 mt-1" />
          <p className="text-[9px] opacity-40 leading-relaxed uppercase tracking-widest">
-            Defina o tempo de inatividade (em segundos) e as credenciais de acesso ao banco de dados.
+            Salve sempre antes de distribuir fraldas. As fontes serão aplicadas no próximo carregamento da página.
          </p>
       </div>
     </div>
