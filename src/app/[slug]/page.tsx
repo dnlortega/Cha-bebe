@@ -33,6 +33,7 @@ export default async function GuestPage({ params }: PageProps) {
               fill
               className="object-contain"
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         </div>
@@ -45,6 +46,8 @@ export default async function GuestPage({ params }: PageProps) {
               alt="CONVITE"
               fill
               className="object-contain"
+              priority
+              sizes="192px"
             />
           </div>
         </div>
