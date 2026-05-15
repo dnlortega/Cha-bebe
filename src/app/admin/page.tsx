@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
-  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, ClipboardList, ChevronRight, PackageCheck, Flame, XCircle, ArrowUpRight, MessageSquareQuote
+  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, ClipboardList, ChevronRight, PackageCheck, Flame, XCircle, ArrowUpRight, MessageSquareQuote, Stars
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 

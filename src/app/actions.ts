@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
 export async function generateSlug(name: string) {
   return name
@@ -15,6 +15,7 @@ export async function generateSlug(name: string) {
 }
 
 export async function getSettings() {
+  noStore();
   let settings = await prisma.settings.findUnique({
     where: { id: "default" },
   });
@@ -65,6 +66,7 @@ export async function updateSettings(data: any) {
 
 // Guestbook / Mural Actions
 export async function getRecentMessages() {
+  noStore();
   return prisma.guest.findMany({
     where: { mensagem: { not: null }, status_confirmacao: "CONFIRMED" },
     select: { nome: true, mensagem: true, data_resposta: true },
@@ -75,6 +77,7 @@ export async function getRecentMessages() {
 
 // Gift Actions
 export async function getGifts() {
+  noStore();
   return prisma.gift.findMany({
     orderBy: { name: "asc" }
   });
@@ -165,6 +168,7 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
 }
 
 export async function getGuests() {
+  noStore();
   return prisma.guest.findMany({
     include: { gift: true },
     orderBy: { nome: "asc" },

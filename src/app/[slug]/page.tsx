@@ -9,6 +9,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function GuestPage({ params }: PageProps) {
   const { slug } = await params;
   const settings = await getSettings();
@@ -33,15 +36,23 @@ export default async function GuestPage({ params }: PageProps) {
   const inviteFontSize = settings.inviteFontSize || 18;
 
   const eventDateStr = settings.eventDate ? new Date(settings.eventDate).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' }) : null;
+  const babyName = settings.babyName ? `CHÁ DO ${settings.babyName}` : "CHÁ DE BEBÊ";
+  const isBoy = settings.babyGender === "BOY";
+  const isGirl = settings.babyGender === "GIRL";
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000 relative overflow-x-hidden" style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}>
+    <main className={`min-h-screen ${isBoy ? "bg-sky-50" : isGirl ? "bg-rose-50" : "bg-background"} text-foreground flex flex-col items-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000 relative overflow-x-hidden`} style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/3 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-primary/3 blur-3xl" />
+        <div className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />
+        <div className={`absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />
       </div>
 
-      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-start relative z-10 py-10">
+      <div className="w-full text-center mt-4 mb-8 relative z-10 animate-in fade-in slide-in-from-top duration-1000">
+         <h1 className={`text-4xl sm:text-6xl font-serif tracking-[0.2em] uppercase ${isBoy ? "text-sky-800" : isGirl ? "text-rose-800" : "text-primary"}`}>{babyName}</h1>
+         <p className="text-[10px] opacity-40 tracking-[0.4em] mt-4">VOCÊ É NOSSO CONVIDADO ESPECIAL</p>
+      </div>
+
+      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-start relative z-10 py-4">
         {/* Info Side */}
         <div className="space-y-12 animate-in fade-in slide-in-from-left duration-1000">
            {/* Invitation Image */}

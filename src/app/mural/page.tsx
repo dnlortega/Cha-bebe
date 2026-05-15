@@ -108,6 +108,3 @@ export default function MuralLivePage() {
     </main>
   );
 }
-
-// Ícone necessário que esqueci de importar
-import { MessageSquareQuote } from "lucide-react";
