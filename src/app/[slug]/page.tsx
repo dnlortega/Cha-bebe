@@ -36,12 +36,17 @@ export default async function GuestPage({ params }: PageProps) {
   const inviteFontSize = settings.inviteFontSize || 18;
 
   const eventDateStr = settings.eventDate ? new Date(settings.eventDate).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' }) : null;
-  const babyName = settings.babyName ? `CHÁ DO ${settings.babyName}` : "CHÁ DE BEBÊ";
+  
   const isBoy = settings.babyGender === "BOY";
   const isGirl = settings.babyGender === "GIRL";
+  const prefix = isGirl ? "DA" : isBoy ? "DO" : "DE";
+  const babyName = settings.babyName ? `CHÁ ${prefix} ${settings.babyName}` : "CHÁ DE BEBÊ";
+
+  const themeConfig = getThemeById(settings.theme || "GOLD");
+  const isDefaultTheme = settings.theme === "GOLD" || !settings.theme;
 
   return (
-    <main className={`min-h-screen ${isBoy ? "bg-sky-50" : isGirl ? "bg-rose-50" : "bg-background"} text-foreground flex flex-col items-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000 relative overflow-x-hidden`} style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}>
+    <main className={`min-h-screen ${isBoy && isDefaultTheme ? "bg-sky-50" : isGirl && isDefaultTheme ? "bg-rose-50" : "bg-background"} text-foreground flex flex-col items-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000 relative overflow-x-hidden`} style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />
         <div className={`absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />

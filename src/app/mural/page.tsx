@@ -5,6 +5,9 @@ import { getRecentMessages, getSettings } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Stars, Baby, MessageSquareQuote } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function MuralLivePage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
@@ -25,7 +28,8 @@ export default function MuralLivePage() {
 
   const isBoy = settings?.babyGender === "BOY";
   const isGirl = settings?.babyGender === "GIRL";
-  const babyName = settings?.babyName || "O Bebê";
+  const babyName = settings?.babyName || "Bebê";
+  const prefix = isGirl ? "da" : isBoy ? "do" : "do"; // Fallback to "do" or keep consistent
 
   return (
     <main className={`min-h-screen transition-colors duration-1000 overflow-hidden relative flex flex-col items-center p-10 sm:p-20 ${
@@ -47,7 +51,7 @@ export default function MuralLivePage() {
            <Stars className="w-6 h-6 animate-pulse" />
         </div>
         <h1 className={`text-6xl sm:text-8xl font-serif tracking-[0.2em] uppercase transition-colors ${isBoy ? "text-sky-800" : isGirl ? "text-rose-800" : "text-primary"}`}>
-          Mural do {babyName}
+          Mural {prefix} {babyName}
         </h1>
       </header>
 

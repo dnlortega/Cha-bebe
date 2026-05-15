@@ -6,6 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { getSettings } from "@/app/actions";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getThemeById } from "@/lib/themes";
+import { unstable_noStore as noStore } from "next/cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // System fonts
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -46,6 +50,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  noStore();
   const settings = await getSettings();
   const initialTheme = settings.theme || "GOLD";
   const themeConfig = getThemeById(initialTheme);

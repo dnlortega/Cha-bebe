@@ -25,7 +25,7 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
   const [status, setStatus] = useState<string>(guest.status_confirmacao || "CONFIRMED");
   const [selectedMembers, setSelectedMembers] = useState<string[]>(guest.membros_confirmados ? guest.membros_confirmados.split(",").map((s: string) => s.trim()) : []);
   const [mensagem, setMensagem] = useState("");
-  const [selectedGift, setSelectedGift] = useState<string | undefined>(undefined);
+  const [selectedGift, setSelectedGift] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
   const [submitted, setSubmitted] = useState(!!guest.status_confirmacao);
 
