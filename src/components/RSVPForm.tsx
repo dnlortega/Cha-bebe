@@ -95,7 +95,7 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
                {gifts.filter(g => !g.isReserved).length > 0 && (
                   <div className="space-y-4">
                      <Label className="text-[9px] tracking-[0.3em] opacity-40 uppercase font-bold text-center block">Escolha um Presente</Label>
-                     <Select value={selectedGift} onValueChange={(v) => setSelectedGift(v)}>
+                     <Select value={selectedGift} onValueChange={(v) => v && setSelectedGift(v)}>
                         <SelectTrigger className="rounded-none h-14 border-primary/10 bg-white/50 text-[10px] tracking-widest uppercase">
                            <SelectValue placeholder="LISTA DE PRESENTES">
                               {selectedGift ? gifts.find(g => g.id === selectedGift)?.name : "LISTA DE PRESENTES"}

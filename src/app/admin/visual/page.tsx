@@ -16,6 +16,8 @@ export default function VisualPage() {
   const [showInvitationImage, setShowInvitationImage] = useState(true);
   const [inviteFont, setInviteFont] = useState("Playfair Display");
   const [inviteFontSize, setInviteFontSize] = useState(18);
+  const [systemFont, setSystemFont] = useState("Inter");
+  const [systemFontSize, setSystemFontSize] = useState(14);
   const [babyName, setBabyName] = useState("");
   const [babyGender, setBabyGender] = useState("NONE");
   const [eventDate, setEventDate] = useState("");
@@ -36,6 +38,8 @@ export default function VisualPage() {
       setTheme(data.theme || "GOLD");
       setInviteFont(data.inviteFont || "Playfair Display");
       setInviteFontSize(data.inviteFontSize || 18);
+      setSystemFont(data.systemFont || "Inter");
+      setSystemFontSize(data.systemFontSize || 14);
       setShowInvitationImage(data.showInvitationImage ?? true);
       setBabyName(data.babyName || "");
       setBabyGender(data.babyGender || "NONE");
@@ -47,8 +51,12 @@ export default function VisualPage() {
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl });
-    if (result.success) toast.success("CONFIGURAÇÕES SALVAS");
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl });
+    if (result.success) {
+      toast.success("CONFIGURAÇÕES SALVAS");
+    } else {
+      toast.error("ERRO AO SALVAR. Reinicie o terminal.");
+    }
     setLoading(false);
   };
 
@@ -80,7 +88,11 @@ export default function VisualPage() {
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Convite</label><Select value={inviteFont} onValueChange={(v) => v && setInviteFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Playfair Display">Playfair Display</SelectItem><SelectItem value="Cormorant Garamond">Cormorant Garamond</SelectItem><SelectItem value="Dancing Script">Dancing Script</SelectItem><SelectItem value="Great Vibes">Great Vibes</SelectItem><SelectItem value="Lora">Lora</SelectItem><SelectItem value="Cinzel">Cinzel</SelectItem></SelectContent></Select></div>
-               <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tamanho da Fonte</label><Input type="number" value={inviteFontSize} onChange={e => setInviteFontSize(Number(e.target.value))} className="rounded-none h-12 bg-stone-50" /></div>
+               <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tamanho da Fonte (Convite)</label><Input type="number" value={inviteFontSize} onChange={e => setInviteFontSize(Number(e.target.value))} className="rounded-none h-12 bg-stone-50" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Sistema (Painel)</label><Select value={systemFont} onValueChange={(v) => v && setSystemFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Inter">Inter</SelectItem><SelectItem value="Outfit">Outfit</SelectItem><SelectItem value="DM Sans">DM Sans</SelectItem><SelectItem value="Plus Jakarta Sans">Plus Jakarta Sans</SelectItem></SelectContent></Select></div>
+               <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tamanho da Fonte (Painel)</label><Input type="number" value={systemFontSize} onChange={e => setSystemFontSize(Number(e.target.value))} className="rounded-none h-12 bg-stone-50" /></div>
             </div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nome do Bebê</label><Input value={babyName} onChange={e => setBabyName(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Ex: Arthur ou Helena" /></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Sexo do Bebê</label><Select value={babyGender} onValueChange={(v) => v && setBabyGender(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">NÃO DEFINIDO</SelectItem><SelectItem value="BOY">MENINO (AZUL)</SelectItem><SelectItem value="GIRL">MENINA (ROSA)</SelectItem></SelectContent></Select></div>
