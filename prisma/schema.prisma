@@ -20,6 +20,9 @@ model Guest {
   data_resposta     DateTime?
   fralda_tamanho    String?   // "RN", "P", "M", "G", "GG"
   kit_churrasco     Boolean  @default(false)
+  mensagem          String?   // Recado para os pais
+  giftId            String?   // ID do presente escolhido
+  gift              Gift?     @relation(fields: [giftId], references: [id])
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -28,7 +31,7 @@ model Settings {
   id            String @id @default("default")
   invitationUrl String @default("/convite.png")
   theme         String @default("GOLD")
-  sessionTimeout Int    @default(30) // In seconds
+  sessionTimeout Int    @default(30)
   rnQty         Int    @default(0)
   pQty          Int    @default(0)
   mQty          Int    @default(0)
@@ -38,6 +41,19 @@ model Settings {
   systemFontSize Int   @default(14)
   inviteFont    String @default("Playfair Display")
   inviteFontSize Int   @default(18)
+  // Novos campos do evento
+  eventDate     DateTime?
+  eventAddress  String?
+  eventMapsUrl  String?
+}
+
+model Gift {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  isReserved  Boolean  @default(false)
+  guests      Guest[]
+  createdAt   DateTime @default(now())
 }
 
 model Admin {
@@ -45,3 +61,4 @@ model Admin {
   username String @unique
   password String
 }
+

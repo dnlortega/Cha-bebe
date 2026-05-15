@@ -11,43 +11,47 @@ import {
   Settings, 
   LayoutDashboard,
   LogOut,
-  ChevronRight,
   Menu,
   X,
-  Info
+  Info,
+  Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
-    title: "DASHBOARD",
+    title: "Dashboard",
     icon: LayoutDashboard,
     href: "/admin",
   },
   {
-    title: "CONVITES",
+    title: "Convites",
     icon: Users,
     href: "/admin/guests",
   },
   {
-    title: "CADASTRAR",
+    title: "Cadastrar",
     icon: UserPlus,
     href: "/admin/add",
   },
   {
-    title: "LISTA FINAL",
+    title: "Lista Final",
     icon: ClipboardList,
     href: "/admin/final-list",
   },
   {
-    title: "VISUAL",
+    title: "Presentes",
+    icon: Package,
+    href: "/admin/gifts",
+  },
+  {
+    title: "Visual",
     icon: Settings,
     href: "/admin/visual",
   },
   {
-    title: "SOBRE",
+    title: "Sobre",
     icon: Info,
     href: "/admin/about",
   },
@@ -57,22 +61,24 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  const SidebarContent = () => (
-    <>
-      <div className="py-8 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 relative bg-stone-900 shadow-xl p-2 border border-white/10">
-           <Image 
-              src="/icon.png" 
-              alt="Logo" 
-              fill 
-              className="object-cover" 
-           />
+  // Icon-only on desktop; labeled in mobile drawer
+  const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className={cn("flex items-center border-b border-primary/5 py-5", showLabels ? "px-5 gap-3" : "justify-center px-3")}>
+        <div className="w-9 h-9 relative bg-stone-900 shadow-lg p-1.5 border border-white/5 flex-shrink-0">
+          <Image src="/icon.png" alt="Logo" fill className="object-cover" />
         </div>
+        {showLabels && (
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary">Admin</p>
+            <p className="text-[8px] opacity-30 tracking-widest uppercase">Painel</p>
+          </div>
+        )}
       </div>
 
-      <Separator className="bg-primary/5 mx-6 w-auto" />
-
-      <nav className="flex-1 px-4 py-8 space-y-2">
+      {/* Nav */}
+      <nav className="flex-1 p-2 space-y-1 py-6">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -81,69 +87,82 @@ export function AdminSidebar() {
               href={item.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "flex items-center justify-center p-4 transition-all duration-300 group rounded-none",
-                isActive 
-                  ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                  : "text-primary/60 hover:bg-primary/5 hover:text-primary"
+                "flex items-center py-3 transition-all duration-200 group rounded-none",
+                showLabels ? "px-3 gap-3" : "justify-center px-3",
+                isActive
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "text-stone-500 hover:bg-stone-50 hover:text-primary"
               )}
               title={item.title}
             >
-              <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "opacity-60 group-hover:opacity-100")} />
+              <item.icon className={cn(
+                "h-5 w-5 flex-shrink-0 transition-all",
+                isActive ? "text-white" : "opacity-50 group-hover:opacity-100"
+              )} />
+              {showLabels && (
+                <span className={cn(
+                  "text-[10px] font-bold tracking-[0.2em] uppercase",
+                  isActive ? "text-white" : "group-hover:text-primary"
+                )}>
+                  {item.title}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4">
-        <button 
-          onClick={() => {
-            sessionStorage.removeItem("admin_auth");
-            window.location.href = "/";
-          }}
-          className="w-full flex items-center justify-center p-4 text-red-500/60 hover:text-red-500 hover:bg-red-50/50 transition-all duration-300"
-          title="SAIR"
+      {/* Logout */}
+      <div className="p-2 border-t border-primary/5 pb-5">
+        <button
+          onClick={() => { sessionStorage.removeItem("admin_auth"); window.location.href = "/"; }}
+          className={cn(
+            "w-full flex items-center py-3 px-3 text-red-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 rounded-none",
+            showLabels ? "gap-3" : "justify-center"
+          )}
+          title="Sair"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {showLabels && <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Sair</span>}
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
     <>
       {/* Mobile Trigger */}
       <div className="lg:hidden fixed top-4 left-4 z-[60]">
-        <Button 
-          variant="outline" 
-          size="icon" 
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-white border-primary/20 rounded-none shadow-xl"
+          className="bg-white border-primary/20 rounded-none shadow-xl h-10 w-10"
         >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </Button>
       </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-24 h-screen bg-white border-r border-primary/10 flex-col fixed left-0 top-0 z-50">
-        <SidebarContent />
+      {/* Desktop Sidebar — icon only */}
+      <aside className="hidden lg:flex w-20 h-screen bg-white border-r border-primary/8 flex-col fixed left-0 top-0 z-50 shadow-sm">
+        <SidebarContent showLabels={false} />
       </aside>
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-[50] animate-in fade-in duration-300"
+        <div
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[50] animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar — with labels */}
       <aside className={cn(
-        "lg:hidden fixed left-0 top-0 h-screen w-24 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10",
+        "lg:hidden fixed left-0 top-0 h-screen w-56 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10 shadow-2xl",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <SidebarContent />
+        <SidebarContent showLabels={true} />
       </aside>
     </>
   );
 }
-

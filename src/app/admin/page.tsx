@@ -1,273 +1,111 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getGuests } from "@/app/actions";
+import { getGuests, getRecentMessages } from "@/app/actions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
-  Loader2,
-  RefreshCw,
-  Users, 
-  CheckCircle2, 
-  Clock, 
-  UserPlus, 
-  TrendingUp, 
-  Baby, 
-  UserCheck,
-  ClipboardList,
-  ChevronRight,
-  PackageCheck,
-  Flame
+  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, ClipboardList, ChevronRight, PackageCheck, Flame, XCircle, ArrowUpRight, MessageSquareQuote
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "var(--primary)" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string; }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const progress = max > 0 ? Math.min(value / max, 1) : 0;
+  const offset = circumference - progress * circumference;
+  return (
+    <svg width={size} height={size} className="rotate-[-90deg]"><circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-stone-100" />
+      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease-in-out" }} />
+    </svg>
+  );
+}
+
 export default function AdminDashboard() {
   const [guests, setGuests] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
-    const data = await getGuests();
-    setGuests(data);
+    const [gData, mData] = await Promise.all([getGuests(), getRecentMessages()]);
+    setGuests(gData);
+    setMessages(mData);
     setLoading(false);
   };
 
   const total = guests.length;
   const confirmed = guests.filter(g => g.status_confirmacao === "CONFIRMED").length;
-  const pending = guests.filter(g => !g.status_confirmacao || g.status_confirmacao === "PENDING").length;
-  
+  const pending = guests.filter(g => !g.status_confirmacao).length;
+  const declined = guests.filter(g => g.status_confirmacao === "DECLINED").length;
   const adults = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_adultos || 0) : acc, 0);
   const children = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_criancas || 0) : acc, 0);
 
-  const stats = [
-    { label: "CONVITES", value: total, icon: Users, color: "text-stone-400" },
-    { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500" },
-    { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500" },
-    { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary" },
-    { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-400" },
-  ];
-
-  const diaperSizes = ["RN", "P", "M", "G", "GG"];
-  const diaperStats = diaperSizes.map(size => {
-    const requestedBy = guests.filter(g => g.fralda_tamanho === size);
-    return {
-      size,
-      total: requestedBy.length,
-      confirmed: requestedBy.filter(g => g.status_confirmacao === "CONFIRMED").length,
-      names: requestedBy.map(g => g.nome)
-    };
-  }).filter(stat => stat.total > 0);
-
-  const kitChurrascoGuests = guests.filter(g => g.kit_churrasco);
-  const kitChurrascoConfirmed = kitChurrascoGuests.filter(g => g.status_confirmacao === "CONFIRMED").length;
-
   return (
-    <div className="space-y-12 animate-in fade-in duration-1000 pb-20">
-      <header className="flex justify-between items-end border-b border-primary/5 pb-8">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Status</h1>
-          <p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Visão Geral do Evento</p>
-        </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={fetchData} disabled={loading} className="hover:bg-primary/5 rounded-none h-12 w-12 transition-all">
-              <RefreshCw className={`h-5 w-5 text-primary opacity-30 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="text-[10px] tracking-widest uppercase">Atualizar</TooltipContent>
-        </Tooltip>
+    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
+      <header className="flex justify-between items-end border-b border-primary/5 pb-6">
+        <div className="space-y-1"><h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Status</h1><p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Visão Geral do Evento</p></div>
+        <Button variant="ghost" size="icon" onClick={fetchData} disabled={loading} className="border border-primary/5 h-11 w-11"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
       </header>
 
-      {/* Grid de Ícones e Números */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {stats.map((s, i) => (
-          <Card key={i} className="border-none shadow-2xl rounded-none bg-white group hover:translate-y-[-4px] transition-all duration-500 overflow-hidden">
-            <div className="h-1 w-full bg-stone-50 group-hover:bg-primary transition-colors" />
-            <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
-              <div className="p-4 bg-stone-50 rounded-none group-hover:bg-stone-100 transition-colors">
-                <s.icon className={`h-6 w-6 ${s.color} opacity-80`} />
-              </div>
-              <div className="space-y-1">
-                <p className="text-[32px] font-serif text-primary leading-none">{s.value}</p>
-                <p className="text-[9px] font-bold tracking-[0.2em] opacity-30 uppercase">{s.label}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="bg-stone-900 text-white rounded-none p-10 flex flex-col items-center justify-center text-center gap-6 shadow-2xl">
+          <div className="relative"><CircularProgress value={confirmed} max={total} size={130} strokeWidth={10} /><div className="absolute inset-0 flex items-center justify-center"><p className="text-4xl font-serif">{total > 0 ? Math.round((confirmed/total)*100) : 0}%</p></div></div>
+          <p className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-50">Taxa de Confirmação</p>
+        </Card>
+        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {[
+            { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
+            { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
+            { label: "RECUSADOS", value: declined, icon: XCircle, color: "text-red-400", bg: "bg-red-50" },
+            { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary", bg: "bg-primary/5" },
+            { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-400", bg: "bg-sky-50" },
+            { label: "TOTAL", value: total, icon: Users, color: "text-stone-400", bg: "bg-stone-50" }
+          ].map((s, i) => (
+            <Card key={i} className="border-none shadow-lg rounded-none bg-white p-6 flex flex-col gap-3 group hover:translate-y-[-2px] transition-all"><div className={`p-3 ${s.bg} rounded-none w-fit`}><s.icon className={`h-4 w-4 ${s.color}`} /></div><div><p className="text-3xl font-serif text-primary leading-none">{s.value}</p><p className="text-[8px] font-bold tracking-[0.2em] opacity-30 uppercase mt-1">{s.label}</p></div></Card>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 pt-8">
-         {/* Ações Visuais */}
-         <div className="lg:col-span-2 space-y-8">
-            <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-4">
-               <TrendingUp className="h-4 w-4" />
-               Ações Rápidas
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-               <Link href="/admin/add" className="group">
-                  <div className="p-8 bg-stone-900 text-white flex items-center justify-center group-hover:bg-stone-800 transition-all border-l-4 border-primary shadow-xl h-24">
-                     <UserPlus className="h-6 w-6" />
-                  </div>
-               </Link>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Mural de Recados */}
+        <section className="space-y-6">
+          <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><MessageSquareQuote className="h-4 w-4" /> Mural de Recados</h3>
+          <div className="grid grid-cols-1 gap-4">
+            {messages.length === 0 ? <p className="text-[9px] opacity-20 tracking-widest uppercase py-10 text-center bg-white border border-primary/5">Nenhum recado ainda</p> : messages.map((m, i) => (
+              <Card key={i} className="border-none shadow-xl bg-white rounded-none p-6 space-y-3">
+                <p className="text-[11px] tracking-widest font-bold text-primary uppercase">{m.nome}</p>
+                <p className="text-[11px] opacity-70 leading-relaxed italic normal-case">"{m.mensagem}"</p>
+                <p className="text-[8px] opacity-30 uppercase text-right">{new Date(m.data_resposta).toLocaleDateString()}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
 
-               <Link href="/admin/final-list" className="group">
-                  <div className="p-8 bg-white border border-primary/10 flex items-center justify-center group-hover:bg-stone-50 transition-all shadow-lg h-24">
-                     <ClipboardList className="h-6 w-6 text-primary" />
-                  </div>
-               </Link>
-            </div>
-         </div>
-
-         {/* Atividade Recente (Visual) */}
-         <div className="lg:col-span-3 space-y-8">
-            <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-4">
-               <Clock className="h-4 w-4" />
-               Atividade
-            </h3>
-            <Card className="border-none shadow-2xl bg-white rounded-none p-10 h-full">
-               <div className="space-y-8">
-                  {guests.filter(g => g.status_confirmacao && g.status_confirmacao !== "PENDING").slice(0, 5).map((g, i) => (
-                     <div key={i} className="flex items-center justify-between group">
-                        <div className="flex items-center gap-6">
-                           <div className={`w-3 h-3 rounded-none ${g.status_confirmacao === 'CONFIRMED' ? 'bg-emerald-400' : 'bg-red-400'} shadow-sm`} />
-                           <div>
-                              <p className="text-[11px] tracking-widest uppercase font-bold text-stone-700">{g.nome}</p>
-                              <p className="text-[8px] opacity-30 uppercase tracking-[0.2em]">{g.tipo}</p>
-                           </div>
-                        </div>
-                        <Link href="/admin/guests" className="opacity-0 group-hover:opacity-100 transition-all">
-                           <ChevronRight className="h-4 w-4 text-primary" />
-                        </Link>
-                     </div>
-                  ))}
-                  {guests.filter(g => g.status_confirmacao && g.status_confirmacao !== "PENDING").length === 0 && (
-                     <div className="text-center py-12 space-y-4">
-                        <div className="w-16 h-16 bg-stone-50 flex items-center justify-center mx-auto opacity-20">
-                           <Clock className="h-8 w-8" />
-                        </div>
-                        <p className="text-[9px] opacity-30 tracking-[0.4em] uppercase">Nenhuma atividade recente</p>
-                     </div>
-                  )}
-                  
-                  <Separator className="bg-primary/5" />
-                  
-                  <Link 
-                    href="/admin/guests" 
-                    className={cn(
-                      buttonVariants({ variant: "ghost" }), 
-                      "w-full text-primary hover:bg-primary/5 py-8 rounded-none border-t border-primary/5 flex items-center justify-center"
-                    )}
-                    title="VER TODOS OS CONVITES"
-                  >
-                    <Users className="h-5 w-5" />
-                  </Link>
-               </div>
-            </Card>
-         </div>
-      </div>
-
-      {/* Terminal de Presentes (Fraldas e Kit Churrasco) */}
-      <div className="space-y-8 pt-8">
-         <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-4">
-            <PackageCheck className="h-4 w-4" />
-            Terminal de Presentes Solicitados
-         </h3>
-         
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Fraldas */}
-            <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
-               <div className="bg-stone-900 p-8 border-b-4 border-primary text-white flex justify-between items-center">
-                  <div className="space-y-1">
-                     <h2 className="text-sm font-serif tracking-[0.2em] uppercase">Distribuição de Fraldas</h2>
-                     <p className="text-[8px] opacity-50 tracking-[0.4em] uppercase font-light">Status por Tamanho</p>
-                  </div>
-                  <PackageCheck className="h-6 w-6 opacity-30" />
-               </div>
-               <CardContent className="p-0">
-                 {diaperStats.length === 0 ? (
-                   <div className="p-12 text-center text-[9px] opacity-30 uppercase tracking-[0.2em]">Nenhuma fralda solicitada</div>
-                 ) : (
-                   <div className="divide-y divide-primary/5">
-                     {diaperStats.map((stat, idx) => (
-                       <div key={idx} className="p-8 hover:bg-stone-50 transition-colors">
-                         <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-center gap-4">
-                               <div className="w-12 h-12 bg-primary/5 flex items-center justify-center text-primary font-serif text-xl border border-primary/10">
-                                 {stat.size}
-                               </div>
-                               <div>
-                                  <p className="text-[12px] font-bold text-stone-700 tracking-widest">{stat.total} SOLICITADAS</p>
-                                  <p className="text-[9px] opacity-40 tracking-widest uppercase">{stat.confirmed} CONFIRMADAS</p>
-                               </div>
-                            </div>
-                         </div>
-                         <div className="space-y-2">
-                           <p className="text-[8px] opacity-30 tracking-[0.2em] uppercase font-bold">Solicitado para:</p>
-                           <div className="flex flex-wrap gap-2">
-                             {stat.names.map((name, nIdx) => (
-                               <span key={nIdx} className="text-[9px] bg-white border border-primary/10 px-3 py-1.5 uppercase tracking-widest text-primary/70 shadow-sm">
-                                 {name}
-                               </span>
-                             ))}
-                           </div>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 )}
-               </CardContent>
-            </Card>
-
-            {/* Kit Churrasco */}
-            <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
-               <div className="bg-stone-900 p-8 border-b-4 border-red-500 text-white flex justify-between items-center">
-                  <div className="space-y-1">
-                     <h2 className="text-sm font-serif tracking-[0.2em] uppercase">Kits Churrasco</h2>
-                     <p className="text-[8px] opacity-50 tracking-[0.4em] uppercase font-light">Convidados com a solicitação</p>
-                  </div>
-                  <Flame className="h-6 w-6 opacity-30 text-red-500" />
-               </div>
-               <CardContent className="p-0">
-                 {kitChurrascoGuests.length === 0 ? (
-                   <div className="p-12 text-center text-[9px] opacity-30 uppercase tracking-[0.2em]">Nenhum kit churrasco solicitado</div>
-                 ) : (
-                   <div className="p-8">
-                     <div className="flex items-center gap-6 mb-8 p-6 bg-red-50/50 border border-red-100">
-                        <div className="w-16 h-16 bg-red-100 flex items-center justify-center text-red-600 font-serif text-2xl">
-                          {kitChurrascoGuests.length}
-                        </div>
-                        <div>
-                           <p className="text-[12px] font-bold text-stone-700 tracking-widest">KITS SOLICITADOS NO TOTAL</p>
-                           <p className="text-[9px] opacity-60 text-red-500 tracking-widest uppercase">{kitChurrascoConfirmed} CONFIRMADOS ATÉ AGORA</p>
-                        </div>
-                     </div>
-                     <div className="space-y-4">
-                       <p className="text-[9px] opacity-40 tracking-[0.3em] uppercase font-bold pb-2 border-b border-primary/5">Convidados:</p>
-                       <ul className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                         {kitChurrascoGuests.map((g, idx) => (
-                           <li key={idx} className="flex justify-between items-center text-[10px] tracking-widest uppercase p-3 bg-stone-50 border border-primary/5 hover:border-primary/20 transition-colors">
-                             <span className="font-bold text-stone-700">{g.nome}</span>
-                             <span className={`px-2 py-1 ${g.status_confirmacao === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                               {g.status_confirmacao === 'CONFIRMED' ? 'CONFIRMADO' : 'PENDENTE'}
-                             </span>
-                           </li>
-                         ))}
-                       </ul>
-                     </div>
-                   </div>
-                 )}
-               </CardContent>
-            </Card>
-         </div>
+        {/* Atividade Recente & Ações */}
+        <section className="space-y-10">
+          <div className="space-y-4">
+             <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><TrendingUp className="h-4 w-4" /> Ações Rápidas</h3>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/admin/add" className="p-6 bg-stone-900 text-white flex items-center justify-between shadow-lg hover:bg-stone-800 transition-all border-l-4 border-primary"><span className="text-[10px] font-bold tracking-widest uppercase">Cadastrar</span><UserPlus className="h-5 w-5" /></Link>
+                <Link href="/admin/gifts" className="p-6 bg-white border border-primary/10 flex items-center justify-between shadow-sm hover:bg-stone-50 transition-all"><span className="text-[10px] font-bold tracking-widest uppercase text-stone-700">Presentes</span><PackageCheck className="h-5 w-5 text-primary" /></Link>
+             </div>
+          </div>
+          <div className="space-y-6">
+             <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><PackageCheck className="h-4 w-4" /> Presentes / Fraldas</h3>
+             <Card className="bg-white border border-primary/5 p-8 shadow-xl">
+                <div className="space-y-4">
+                   <p className="text-[10px] opacity-40 uppercase tracking-widest leading-relaxed">Acompanhe a distribuição de fraldas e presentes reservados na lista de convidados.</p>
+                   <Link href="/admin/guests" className="text-primary text-[10px] font-bold tracking-[0.3em] uppercase flex items-center gap-2 hover:gap-4 transition-all">Ver Detalhes <ChevronRight className="h-3 w-3" /></Link>
+                </div>
+             </Card>
+          </div>
+        </section>
       </div>
     </div>
   );
