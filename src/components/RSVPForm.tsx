@@ -82,9 +82,9 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
                  <div className="space-y-4">
                    <Label className="text-[9px] tracking-[0.3em] opacity-40 uppercase font-bold text-center block">Quem virá?</Label>
                    <div className="space-y-2">
-                     {familyMembers.map(m => (
+                     {familyMembers.map((m: string) => (
                        <div key={m} className="flex gap-2">
-                         <Button type="button" onClick={() => setSelectedMembers(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])} variant={selectedMembers.includes(m) ? "default" : "outline"} className="flex-1 rounded-none text-[9px] tracking-widest uppercase h-12">{selectedMembers.includes(m) ? <Check className="mr-2 h-3 w-3" /> : null} {m}</Button>
+                         <Button type="button" onClick={() => setSelectedMembers((prev: string[]) => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m])} variant={selectedMembers.includes(m) ? "default" : "outline"} className="flex-1 rounded-none text-[9px] tracking-widest uppercase h-12">{selectedMembers.includes(m) ? <Check className="mr-2 h-3 w-3" /> : null} {m}</Button>
                        </div>
                      ))}
                    </div>
