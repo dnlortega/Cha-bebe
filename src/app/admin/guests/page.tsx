@@ -175,8 +175,8 @@ export default function GuestsPage() {
           <div className="p-8 space-y-4 bg-white">
             <Input value={editName} onChange={e => setEditName(e.target.value)} className="rounded-none h-12 bg-stone-50 text-[11px] tracking-widest uppercase" placeholder="NOME" />
             <div className="grid grid-cols-2 gap-4">
-              <Select value={editType} onValueChange={setEditType}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="INDIVIDUAL">INDIVIDUAL</SelectItem><SelectItem value="FAMILIA">FAMÍLIA</SelectItem></SelectContent></Select>
-              <Select value={editDiaper || "NONE"} onValueChange={v => setEditDiaper(v === "NONE" ? null : v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">FRALDA: NENHUMA</SelectItem>{["RN","P","M","G","GG"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
+              <Select value={editType} onValueChange={(v) => v && setEditType(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="INDIVIDUAL">INDIVIDUAL</SelectItem><SelectItem value="FAMILIA">FAMÍLIA</SelectItem></SelectContent></Select>
+              <Select value={editDiaper || "NONE"} onValueChange={(v) => setEditDiaper(v === "NONE" ? null : v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">FRALDA: NENHUMA</SelectItem>{["RN","P","M","G","GG"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
             </div>
             {editType === "FAMILIA" && <Textarea value={editMembers} onChange={e => setEditMembers(e.target.value)} placeholder="MEMBROS (VÍRGULA)" className="h-24 rounded-none bg-stone-50" />}
           </div>
