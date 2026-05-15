@@ -4,6 +4,7 @@ import Image from "next/image";
 import RSVPForm from "@/components/RSVPForm";
 import { getSettings, getGifts } from "@/app/actions";
 import { MapPin, Calendar, Clock } from "lucide-react";
+import { getThemeById } from "@/lib/themes";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
