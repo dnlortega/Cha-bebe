@@ -31,7 +31,9 @@ export async function getSettings() {
         systemFontSize: 14,
         inviteFont: "Playfair Display",
         inviteFontSize: 18,
-        showInvitationImage: true
+        showInvitationImage: true,
+        babyName: "O Bebê",
+        babyGender: "NONE"
       },
     });
   }

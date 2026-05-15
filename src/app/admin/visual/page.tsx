@@ -14,6 +14,8 @@ export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
   const [theme, setTheme] = useState("GOLD");
   const [showInvitationImage, setShowInvitationImage] = useState(true);
+  const [babyName, setBabyName] = useState("");
+  const [babyGender, setBabyGender] = useState("NONE");
   const [eventDate, setEventDate] = useState("");
   const [eventAddress, setEventAddress] = useState("");
   const [eventMapsUrl, setEventMapsUrl] = useState("");
@@ -31,6 +33,8 @@ export default function VisualPage() {
       setInvitationUrl(data.invitationUrl || "");
       setTheme(data.theme || "GOLD");
       setShowInvitationImage(data.showInvitationImage ?? true);
+      setBabyName(data.babyName || "");
+      setBabyGender(data.babyGender || "NONE");
       setEventDate(data.eventDate ? new Date(data.eventDate).toISOString().slice(0, 16) : "");
       setEventAddress(data.eventAddress || "");
       setEventMapsUrl(data.eventMapsUrl || "");
@@ -39,7 +43,7 @@ export default function VisualPage() {
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, showInvitationImage, eventDate, eventAddress, eventMapsUrl });
+    const result = await updateSettings({ invitationUrl, theme, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl });
     if (result.success) toast.success("CONFIGURAÇÕES SALVAS");
     setLoading(false);
   };
@@ -70,6 +74,8 @@ export default function VisualPage() {
           <div className="space-y-4">
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">URL do Convite</label><Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nome do Bebê</label><Input value={babyName} onChange={e => setBabyName(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Ex: Arthur ou Helena" /></div>
+            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Sexo do Bebê</label><Select value={babyGender} onValueChange={setBabyGender}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">NÃO DEFINIDO</SelectItem><SelectItem value="BOY">MENINO (AZUL)</SelectItem><SelectItem value="GIRL">MENINA (ROSA)</SelectItem></SelectContent></Select></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Exibir Imagem do Convite</label><Select value={showInvitationImage ? "SIM" : "NAO"} onValueChange={(v) => setShowInvitationImage(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">SIM</SelectItem><SelectItem value="NAO">NÃO</SelectItem></SelectContent></Select></div>
           </div>
         </Card>

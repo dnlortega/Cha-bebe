@@ -91,9 +91,10 @@ export default function AdminDashboard() {
         <section className="space-y-10">
           <div className="space-y-4">
              <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><TrendingUp className="h-4 w-4" /> Ações Rápidas</h3>
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Link href="/admin/add" className="p-6 bg-stone-900 text-white flex items-center justify-between shadow-lg hover:bg-stone-800 transition-all border-l-4 border-primary"><span className="text-[10px] font-bold tracking-widest uppercase">Cadastrar</span><UserPlus className="h-5 w-5" /></Link>
                 <Link href="/admin/gifts" className="p-6 bg-white border border-primary/10 flex items-center justify-between shadow-sm hover:bg-stone-50 transition-all"><span className="text-[10px] font-bold tracking-widest uppercase text-stone-700">Presentes</span><PackageCheck className="h-5 w-5 text-primary" /></Link>
+                 <Link href="/mural" target="_blank" className="p-6 bg-primary text-primary-foreground flex items-center justify-between shadow-lg hover:bg-primary/90 transition-all border-l-4 border-stone-900"><span className="text-[10px] font-bold tracking-widest uppercase">Mural Live</span><Stars className="h-5 w-5" /></Link>
              </div>
           </div>
           <div className="space-y-6">

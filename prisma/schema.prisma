@@ -46,6 +46,8 @@ model Settings {
   eventAddress  String?
   eventMapsUrl  String?
   showInvitationImage Boolean @default(true)
+  babyName      String?
+  babyGender    String?   // "BOY", "GIRL", or "NONE"
 }
 
 model Gift {

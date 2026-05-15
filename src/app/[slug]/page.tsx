@@ -45,19 +45,23 @@ export default async function GuestPage({ params }: PageProps) {
         {/* Info Side */}
         <div className="space-y-12 animate-in fade-in slide-in-from-left duration-1000">
            {/* Invitation Image */}
-           <div className="relative group hidden lg:block">
-              <div className="absolute -inset-4 border border-primary/10 scale-95 group-hover:scale-100 transition-transform duration-700 pointer-events-none" />
-              <div className="relative aspect-[4/5] w-full shadow-[0_60px_120px_-20px_rgba(0,0,0,0.3)] border-[16px] border-white bg-white overflow-hidden">
-                <Image src={settings.invitationUrl || "/convite.png"} alt="CONVITE" fill className="object-contain transition-all duration-1000 group-hover:scale-105" priority />
-              </div>
-           </div>
+           {settings.showInvitationImage && (
+             <div className="relative group hidden lg:block">
+                <div className="absolute -inset-4 border border-primary/10 scale-95 group-hover:scale-100 transition-transform duration-700 pointer-events-none" />
+                <div className="relative aspect-[4/5] w-full shadow-[0_60px_120px_-20px_rgba(0,0,0,0.3)] border-[16px] border-white bg-white overflow-hidden">
+                  <Image src={settings.invitationUrl || "/convite.png"} alt="CONVITE" fill className="object-contain transition-all duration-1000 group-hover:scale-105" priority />
+                </div>
+             </div>
+           )}
 
            {/* Mobile Invitation */}
-           <div className="lg:hidden flex justify-center">
-              <div className="relative aspect-[4/5] w-48 shadow-2xl border-8 border-white bg-white overflow-hidden">
-                <Image src={settings.invitationUrl || "/convite.png"} alt="CONVITE" fill className="object-contain" priority />
-              </div>
-           </div>
+           {settings.showInvitationImage && (
+             <div className="lg:hidden flex justify-center">
+                <div className="relative aspect-[4/5] w-48 shadow-2xl border-8 border-white bg-white overflow-hidden">
+                  <Image src={settings.invitationUrl || "/convite.png"} alt="CONVITE" fill className="object-contain" priority />
+                </div>
+             </div>
+           )}
 
            {/* Event Details */}
            {(settings.eventDate || settings.eventAddress) && (
