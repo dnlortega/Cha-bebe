@@ -45,6 +45,7 @@ model Settings {
   eventDate     DateTime?
   eventAddress  String?
   eventMapsUrl  String?
+  showInvitationImage Boolean @default(true)
 }
 
 model Gift {

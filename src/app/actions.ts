@@ -30,7 +30,8 @@ export async function getSettings() {
         systemFont: "Inter",
         systemFontSize: 14,
         inviteFont: "Playfair Display",
-        inviteFontSize: 18
+        inviteFontSize: 18,
+        showInvitationImage: true
       },
     });
   }
