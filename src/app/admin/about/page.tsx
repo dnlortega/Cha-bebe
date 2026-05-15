@@ -29,14 +29,15 @@ export default function AboutPage() {
   ];
 
   const features = [
+    "Mural Live Inteligente para Telão e TVs",
+    "Gestão Dinâmica de Lista de Presentes (Reserva Única)",
+    "Gerador de Convite Direto pelo WhatsApp",
+    "Tematização Dinâmica por Sexo e Nome do Bebê",
+    "Exibição de Data, Local e Link do Maps",
     "Sistema de RSVP Individual e Familiar",
-    "Distribuição Automática de Tamanhos de Fralda",
-    "Gestão de Pedidos de Kit Churrasco",
-    "Painel Administrativo com Autenticação e Logout por Inatividade",
-    "Tematização Dinâmica e Customização de Convites",
-    "Confirmação de Membros Específicos da Família",
-    "Interface Mobile-First e Responsiva",
-    "Efeitos Visuais de Alta Qualidade (Confetes, Transições)"
+    "Distribuição Automática de Tamanhos de Fralda e Kit Churrasco",
+    "Performance Real-time Otimizada (Zero Cache)",
+    "Interface Mobile-First de Alto Luxo"
   ];
 
   return (
@@ -67,11 +68,11 @@ export default function AboutPage() {
             <div className="space-y-6 text-[12px] tracking-widest leading-relaxed text-stone-600 uppercase">
               <p>
                 ESTE SISTEMA FOI CONCEBIDO PARA PROPORCIONAR UMA EXPERIÊNCIA DE LUXO TANTO PARA OS ORGANIZADORES QUANTO PARA OS CONVIDADOS. 
-                A ARQUITETURA É BASEADA EM SERVER ACTIONS DO NEXT.JS, GARANTINDO QUE TODA A LÓGICA DE NEGÓCIO SEJA PROCESSADA DE FORMA SEGURA NO SERVIDOR.
+                A ARQUITETURA AGORA É 100% REAL-TIME (ZERO CACHE), GARANTINDO QUE QUALQUER CONFIRMAÇÃO OU MENSAGEM NO MURAL APAREÇA INSTANTANEAMENTE.
               </p>
               <p>
-                A GESTÃO DE DADOS UTILIZA O PRISMA COMO ORM, CONECTADO A UM BANCO DE DADOS POSTGRESQL HOSPEDADO NA NEON TECH, 
-                O QUE OFERECE ESCALABILIDADE E PERFORMANCE EXCEPCIONAIS.
+                A GESTÃO DE DADOS UTILIZA O PRISMA COMO ORM, CONECTADO A UM BANCO DE DADOS POSTGRESQL HOSPEDADO NA NEON TECH. 
+                TUDO FOI PROJETADO PARA OFERECER ESCALABILIDADE, PERFORMANCE EXCEPCIONAL E UM VISUAL IMPECÁVEL, PERFEITO PARA UM EVENTO INESQUECÍVEL.
               </p>
             </div>
           </section>
