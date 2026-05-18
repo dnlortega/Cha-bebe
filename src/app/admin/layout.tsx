@@ -85,6 +85,25 @@ export default function AdminLayout({
     return "Dispositivo Desconhecido";
   };
 
+  const getGPSCoordinates = (): Promise<string | null> => {
+    return new Promise((resolve) => {
+      if (typeof window === "undefined" || !navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve(`${position.coords.latitude},${position.coords.longitude}`);
+        },
+        (error) => {
+          console.warn("Permissão de GPS física negada:", error);
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    });
+  };
+
   const getLocation = async () => {
     try {
       const res = await fetch("https://ipapi.co/json/");
@@ -145,7 +164,7 @@ export default function AdminLayout({
     return;
   }, [authorized, timeoutSeconds]);
 
-  // Monitoramento ativo e instantâneo da revogação de sessão (Derrubar dispositivo automaticamente)
+  // Monitoramento active e instantâneo da revogação de sessão (Derrubar dispositivo automaticamente)
   useEffect(() => {
     if (!authorized) return;
 
@@ -177,13 +196,36 @@ export default function AdminLayout({
       // 1. Gera um novo token de sessao unico
       const token = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
       
-      // 2. Obtem as informacoes de dispositivo, nome e localizacao
+      // 2. Obtem as informacoes de localizacao via IP e fallback de GPS
+      let loc = "Localização Desconhecida";
+      let fallbackGps = "";
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.city && data.region_code) {
+            loc = `${data.city}, ${data.region_code} - ${data.country_name || "Brasil"}`;
+          }
+          if (data.latitude && data.longitude) {
+            fallbackGps = `${data.latitude},${data.longitude}`;
+          }
+        }
+      } catch (err) {
+        console.error("Erro no fetch de localizacao por IP:", err);
+      }
+
+      // 3. Tenta obter o GPS real do navegador
+      let gps = await getGPSCoordinates();
+      if (!gps && fallbackGps) {
+        gps = fallbackGps; // Usa o do IP se falhar
+      }
+      
+      // 4. Obtem informacoes de dispositivo
       const devInfo = getDeviceInfo();
       const devName = getDetailedDeviceName();
-      const loc = await getLocation();
       
-      // 3. Registra a sessao no banco de dados
-      await registerAdminSession(token, devInfo, devName, loc);
+      // 5. Registra a sessao no banco de dados com GPS
+      await registerAdminSession(token, devInfo, devName, loc, gps);
       
       if (typeof window !== "undefined") {
         localStorage.setItem("admin_session_token", token);

@@ -85,6 +85,7 @@ model AdminSession {
   deviceInfo String
   deviceName String   @default("Dispositivo Desconhecido")
   location   String   @default("Localização Desconhecida")
+  gpsCoords  String?
   lastActive DateTime @default(now())
   createdAt  DateTime @default(now())
 }

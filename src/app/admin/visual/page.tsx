@@ -218,9 +218,20 @@ export default function VisualPage() {
                           )}
                         </div>
                         <div className="space-y-0.5">
-                          <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
-                            📍 {sess.location}
-                          </p>
+                          {sess.gpsCoords ? (
+                            <a 
+                              href={`https://www.google.com/maps?q=${sess.gpsCoords}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-[9px] text-stone-600 hover:text-primary uppercase tracking-widest font-semibold flex items-center gap-1 hover:underline transition-all"
+                            >
+                              📍 {sess.location} <span className="text-[7px] text-primary font-bold bg-primary/5 px-1.5 py-0.2 ml-1 rounded-none border border-primary/10 tracking-widest uppercase">MAPA</span>
+                            </a>
+                          ) : (
+                            <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
+                              📍 {sess.location}
+                            </p>
+                          )}
                           <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
                             Última atividade: {formattedDate}
                           </p>

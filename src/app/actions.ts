@@ -319,7 +319,7 @@ export async function getHistoryLogs() {
   }));
 }
 
-export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string) {
+export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string, gpsCoords: string | null) {
   try {
     // Remove qualquer sessao antiga duplicada com o mesmo deviceInfo
     await prisma.adminSession.deleteMany({
@@ -327,7 +327,7 @@ export async function registerAdminSession(token: string, deviceInfo: string, de
     });
 
     await prisma.adminSession.create({
-      data: { token, deviceInfo, deviceName, location }
+      data: { token, deviceInfo, deviceName, location, gpsCoords }
     });
     return { success: true };
   } catch (error) {
