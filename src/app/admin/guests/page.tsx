@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getGuests, deleteGuest, updateGuest } from "@/app/actions";
+import { getGuests, deleteGuest, updateGuest, deleteAllGuests } from "@/app/actions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,6 +56,21 @@ export default function GuestsPage() {
     if (!confirm("EXCLUIR CONVIDADO?")) return;
     const result = await deleteGuest(id);
     if (result.success) fetchGuests();
+  };
+
+  const handleDeleteAll = async () => {
+    const doubleCheck = confirm("ATENÇÃO: VOCÊ TEM CERTEZA QUE DESEJA EXCLUIR TODOS OS CONVIDADOS DA LISTA? ESTA AÇÃO NÃO PODE SER DESFEITA!");
+    if (!doubleCheck) return;
+    
+    setLoading(true);
+    const result = await deleteAllGuests();
+    if (result.success) {
+      toast.success("TODOS OS CONVIDADOS FORAM EXCLUÍDOS!");
+      fetchGuests();
+    } else {
+      toast.error("ERRO AO EXCLUIR TODOS OS CONVIDADOS.");
+    }
+    setLoading(false);
   };
 
   const handleUpdate = async () => {
@@ -122,6 +137,20 @@ export default function GuestsPage() {
           </Select>
           <Button variant="outline" size="icon" onClick={exportCSV} className="h-10 w-10 rounded-none border-primary/10 bg-white"><Download className="h-4 w-4 text-primary" /></Button>
           <Button variant="outline" size="icon" onClick={fetchGuests} disabled={loading} className="h-10 w-10 rounded-none border-primary/10 bg-white"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleDeleteAll} 
+                disabled={loading || guests.length === 0} 
+                className="h-10 w-10 rounded-none border-red-200 hover:bg-red-50 hover:border-red-300 bg-white text-red-500"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-[9px]">EXCLUIR TODOS</TooltipContent>
+          </Tooltip>
         </div>
       </header>
 

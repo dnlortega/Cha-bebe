@@ -139,11 +139,34 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
 // Restantes das funções mantidas e adaptadas...
 export async function deleteGuest(id: string) {
   try {
+    const guest = await prisma.guest.findUnique({ where: { id } });
+    if (guest?.giftId) {
+      await prisma.gift.update({
+        where: { id: guest.giftId },
+        data: { isReserved: false }
+      });
+    }
     await prisma.guest.delete({ where: { id } });
     revalidatePath("/admin");
     return { success: true };
   } catch (error) {
     return { success: false, error: "FALHA AO EXCLUIR CONVIDADO." };
+  }
+}
+
+export async function deleteAllGuests() {
+  try {
+    await prisma.$transaction([
+      prisma.guest.deleteMany(),
+      prisma.gift.updateMany({
+        data: { isReserved: false }
+      })
+    ]);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting all guests:", error);
+    return { success: false, error: "FALHA AO EXCLUIR TODOS OS CONVIDADOS." };
   }
 }
 
