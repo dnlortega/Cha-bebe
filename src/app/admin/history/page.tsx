@@ -112,8 +112,7 @@ export default function HistoryPage() {
               try {
                 new Notification(`🍼 Chá da Louise`, {
                   body: `${newLog.guestNome} ${isConfirmed ? "confirmou presença!" : "recusou o convite."}`,
-                  icon: "/icon.png",
-                  vibrate: [200, 100, 200]
+                  icon: "/icon.png"
                 });
               } catch (e) {
                 console.error("Erro ao enviar notificação de sistema:", e);

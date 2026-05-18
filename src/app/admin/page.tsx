@@ -99,8 +99,7 @@ export default function AdminDashboard() {
             try {
               new Notification(`🍼 Chá da Louise`, {
                 body: `${newGuest.nome} confirmou presença!`,
-                icon: "/icon.png",
-                vibrate: [200, 100, 200]
+                icon: "/icon.png"
               });
             } catch (e) {
               console.error("Erro ao enviar notificação de sistema:", e);
