@@ -154,7 +154,7 @@ export default function GuestsPage() {
         </div>
       </header>
 
-      <div className="bg-white border border-primary/5 shadow-xl overflow-hidden rounded-none">
+      <div className="bg-white border border-primary/5 shadow-xl overflow-hidden rounded-none hidden md:block">
         <Table>
           <TableHeader className="bg-stone-50/80">
             <TableRow>
@@ -193,6 +193,58 @@ export default function GuestsPage() {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Lista em Cartões para Mobile (Ações sempre visíveis e sem rolagem lateral) */}
+      <div className="md:hidden space-y-4">
+        {filteredGuests.map(guest => (
+          <div key={guest.id} className="bg-white border border-primary/5 p-5 shadow-lg space-y-4 rounded-none">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
+                <p className="text-[9px] opacity-35 font-mono lowercase">/{guest.slug}</p>
+              </div>
+              <div>
+                {guest.status_confirmacao === "CONFIRMED" ? (
+                  <Badge className="bg-emerald-500 rounded-none text-[8px] tracking-widest">CONFIRMADO</Badge>
+                ) : (
+                  <Badge variant="outline" className="opacity-30 rounded-none text-[8px] tracking-widest">PENDENTE</Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-3 border-t border-stone-100">
+              <div className="text-[9px] tracking-widest uppercase opacity-60">
+                {guest.gift?.name ? (
+                  <span className="text-emerald-600 font-bold">PRESENTE: {guest.gift.name}</span>
+                ) : (
+                  <span>FRALDA: {guest.fralda_tamanho || "—"}</span>
+                )}
+              </div>
+
+              {/* Ações Mobile - Sempre Visíveis e Grandes para clique */}
+              <div className="flex gap-0.5">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}>
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => copyToClipboard(guest.slug)}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => { setEditingGuest(guest); setEditName(guest.nome); setEditType(guest.tipo); setEditMembers(guest.membros || ""); setEditAdults(guest.qtd_adultos || 1); setEditChildren(guest.qtd_criancas || 0); setEditDiaper(guest.fralda_tamanho || null); setEditKitChurrasco(guest.kit_churrasco || false); }}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-red-400" onClick={() => handleDelete(guest.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filteredGuests.length === 0 && (
+          <div className="text-center py-10 bg-white border border-primary/5">
+            <p className="text-[10px] tracking-widest uppercase opacity-40">NENHUM CONVIDADO ENCONTRADO</p>
+          </div>
+        )}
       </div>
 
       <Dialog open={!!editingGuest} onOpenChange={o => !o && setEditingGuest(null)}>
