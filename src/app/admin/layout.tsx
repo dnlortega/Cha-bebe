@@ -68,7 +68,7 @@ export default function AdminLayout({
             setAuthorized(true);
             setCurrentUser(savedUser);
           } else {
-            // Sessao foi revogada! Desloga
+            // Sessao foi revogada! Desloga imediatamente
             localStorage.removeItem("admin_session_token");
             localStorage.removeItem("admin_authorized");
             localStorage.removeItem("admin_username");
@@ -76,17 +76,12 @@ export default function AdminLayout({
             setCurrentUser(null);
           }
         } else {
-          // Retrocompatibilidade se tiver o admin_authorized legado
-          const isAuth = localStorage.getItem("admin_authorized") === "true";
-          if (isAuth && savedUser) {
-            // Gera um novo token e registra
-            const newToken = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
-            const devInfo = getDeviceInfo();
-            await registerAdminSession(newToken, devInfo);
-            localStorage.setItem("admin_session_token", newToken);
-            setAuthorized(true);
-            setCurrentUser(savedUser);
-          }
+          // Sem token ativo no banco! Desloga imediatamente
+          localStorage.removeItem("admin_session_token");
+          localStorage.removeItem("admin_authorized");
+          localStorage.removeItem("admin_username");
+          setAuthorized(false);
+          setCurrentUser(null);
         }
       }
       
