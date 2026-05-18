@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession } from "@/app/actions";
+import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession, getSessionHistoryLogs } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,15 +30,21 @@ export default function VisualPage() {
   const [newPassword, setNewPassword] = useState("");
   const [updatingAdmin, setUpdatingAdmin] = useState(false);
 
-  // Estados de controle de sessões ativas
+  // Estados de controle de sessões ativas e histórico
   const [sessions, setSessions] = useState<any[]>([]);
   const [currentSessionToken, setCurrentSessionToken] = useState("");
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [selectedDiag, setSelectedDiag] = useState<any | null>(null);
 
+  // Histórico de auditoria de sessões
+  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [sessionTab, setSessionTab] = useState<"ACTIVE" | "HISTORY">("ACTIVE");
+
   useEffect(() => {
     fetchSettings();
     fetchSessions();
+    fetchHistory();
     if (typeof window !== "undefined") {
       setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
     }
@@ -74,10 +80,23 @@ export default function VisualPage() {
     }
   };
 
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const data = await getSessionHistoryLogs();
+      setHistoryLogs(data);
+    } catch (e) {
+      console.error("Erro ao carregar histórico de sessões:", e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const handleRevokeSession = async (id: string, token: string) => {
     const res = await revokeAdminSession(id);
     if (res.success) {
       toast.success("DISPOSITIVO DESCONECTADO");
+      fetchHistory();
       // Se desconectou a si mesmo, força deslogar
       if (token === currentSessionToken) {
         if (typeof window !== "undefined") {
@@ -167,118 +186,195 @@ export default function VisualPage() {
           </form>
         </Card>
 
-        {/* Dispositivos Logados */}
+        {/* Sessões e Auditoria de Acessos */}
         <Card className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-4">
-            <div className="flex items-center gap-3 text-primary">
-              <Lock className="h-4 w-4 animate-pulse" />
-              <h3 className="text-xs font-bold tracking-widest uppercase">Dispositivos Logados</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => setSessionTab("ACTIVE")}
+                className={`text-xs font-bold tracking-widest uppercase rounded-none h-9 px-0 border-b-2 transition-all ${
+                  sessionTab === "ACTIVE" 
+                    ? "border-primary text-primary font-black" 
+                    : "border-transparent text-stone-400 hover:text-stone-600"
+                }`}
+              >
+                Dispositivos Logados ({sessions.length})
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSessionTab("HISTORY");
+                  fetchHistory();
+                }}
+                className={`text-xs font-bold tracking-widest uppercase rounded-none h-9 px-0 border-b-2 transition-all ${
+                  sessionTab === "HISTORY" 
+                    ? "border-primary text-primary font-black" 
+                    : "border-transparent text-stone-400 hover:text-stone-600"
+                }`}
+              >
+                Histórico de Acessos ({historyLogs.length})
+              </Button>
             </div>
+            
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={fetchSessions} 
-              disabled={loadingSessions}
-              className="text-[9px] font-bold tracking-wider rounded-none uppercase h-8 bg-stone-50 border-stone-200"
+              onClick={sessionTab === "ACTIVE" ? fetchSessions : fetchHistory} 
+              disabled={loadingSessions || loadingHistory}
+              className="text-[9px] font-bold tracking-wider rounded-none uppercase h-8 bg-stone-50 border-stone-200 ml-auto"
             >
-              {loadingSessions ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : null}
+              {(loadingSessions || loadingHistory) ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : null}
               Atualizar Lista
             </Button>
           </div>
 
-          <div className="space-y-4">
-            {sessions.length === 0 ? (
-              <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
-                Nenhum dispositivo registrado.
-              </p>
-            ) : (
-              <div className="divide-y divide-stone-100">
-                {sessions.map((sess) => {
-                  const isCurrent = sess.token === currentSessionToken;
-                  const formattedDate = new Date(sess.lastActive).toLocaleString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  });
+          {sessionTab === "ACTIVE" ? (
+            <div className="space-y-4">
+              {sessions.length === 0 ? (
+                <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
+                  Nenhum dispositivo registrado.
+                </p>
+              ) : (
+                <div className="divide-y divide-stone-100">
+                  {sessions.map((sess) => {
+                    const isCurrent = sess.token === currentSessionToken;
+                    const formattedDate = new Date(sess.lastActive).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    });
 
-                  return (
-                    <div key={sess.id} className="flex items-center justify-between py-4 group">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
-                            {sess.deviceName}
-                          </span>
-                          <Badge className="bg-stone-100 text-stone-500 hover:bg-stone-100 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
-                            {sess.deviceInfo}
-                          </Badge>
-                          {isCurrent && (
-                            <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
-                              Este Dispositivo
+                    return (
+                      <div key={sess.id} className="flex items-center justify-between py-4 group">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                              {sess.deviceName}
+                            </span>
+                            <Badge className="bg-stone-100 text-stone-500 hover:bg-stone-100 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
+                              {sess.deviceInfo}
                             </Badge>
-                          )}
-                        </div>
-                        <div className="space-y-0.5">
-                          {sess.gpsCoords ? (
-                            <a 
-                              href={`https://www.google.com/maps?q=${sess.gpsCoords}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-[9px] text-stone-600 hover:text-primary uppercase tracking-widest font-semibold flex items-center gap-1 hover:underline transition-all"
-                            >
-                              📍 {sess.location} <span className="text-[7px] text-primary font-bold bg-primary/5 px-1.5 py-0.2 ml-1 rounded-none border border-primary/10 tracking-widest uppercase">MAPA</span>
-                            </a>
-                          ) : (
-                            <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
-                              📍 {sess.location}
+                            {isCurrent && (
+                              <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
+                                Este Dispositivo
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="space-y-0.5">
+                            {sess.gpsCoords ? (
+                              <a 
+                                href={`https://www.google.com/maps?q=${sess.gpsCoords}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[9px] text-stone-600 hover:text-primary uppercase tracking-widest font-semibold flex items-center gap-1 hover:underline transition-all"
+                              >
+                                📍 {sess.location} <span className="text-[7px] text-primary font-bold bg-primary/5 px-1.5 py-0.2 ml-1 rounded-none border border-primary/10 tracking-widest uppercase">MAPA</span>
+                              </a>
+                            ) : (
+                              <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
+                                📍 {sess.location}
+                              </p>
+                            )}
+                            <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
+                              Última atividade: {formattedDate}
                             </p>
-                          )}
-                          <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
-                            Última atividade: {formattedDate}
-                          </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              try {
+                                if (sess.diagnostics && sess.diagnostics !== "{}") {
+                                  setSelectedDiag(JSON.parse(sess.diagnostics));
+                                } else {
+                                  setSelectedDiag({
+                                    "Aviso": "Sessão antiga detectada",
+                                    "Instrução": "Por favor, saia e faça login novamente para gerar o relatório completo",
+                                    "Aparelho": sess.deviceName,
+                                    "Navegador": sess.deviceInfo,
+                                    "Cidade/Estado": sess.location
+                                  });
+                                }
+                              } catch (e) {
+                                setSelectedDiag({ "Status": "Não foi possível analisar os metadados" });
+                              }
+                            }}
+                            className="text-[9px] font-bold text-stone-500 hover:text-stone-850 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-205 transition-all"
+                          >
+                            Diagnóstico
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRevokeSession(sess.id, sess.token)}
+                            className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
+                          >
+                            {isCurrent ? "Sair" : "Desconectar"}
+                          </Button>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {historyLogs.length === 0 ? (
+                <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
+                  Nenhum registro de histórico encontrado.
+                </p>
+              ) : (
+                <div className="divide-y divide-stone-100">
+                  {historyLogs.map((log) => {
+                    const formattedDate = new Date(log.timestamp).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit"
+                    });
+                    const isStart = log.action === "INICIADA";
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            try {
-                              if (sess.diagnostics && sess.diagnostics !== "{}") {
-                                setSelectedDiag(JSON.parse(sess.diagnostics));
-                              } else {
-                                setSelectedDiag({
-                                  "Aviso": "Sessão antiga detectada",
-                                  "Instrução": "Por favor, saia e faça login novamente para gerar o relatório completo",
-                                  "Aparelho": sess.deviceName,
-                                  "Navegador": sess.deviceInfo,
-                                  "Cidade/Estado": sess.location
-                                });
-                              }
-                            } catch (e) {
-                              setSelectedDiag({ "Status": "Não foi possível analisar os metadados" });
-                            }
-                          }}
-                          className="text-[9px] font-bold text-stone-500 hover:text-stone-850 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-205 transition-all"
-                        >
-                          Diagnóstico
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRevokeSession(sess.id, sess.token)}
-                          className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
-                        >
-                          {isCurrent ? "Sair" : "Desconectar"}
-                        </Button>
+                    return (
+                      <div key={log.id} className="flex items-center justify-between py-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                              {log.deviceName}
+                            </span>
+                            <Badge className="bg-stone-100 text-stone-500 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
+                              {log.deviceInfo}
+                            </Badge>
+                            <Badge className={`rounded-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${
+                              isStart 
+                                ? "bg-emerald-50 text-emerald-600" 
+                                : "bg-red-50 text-red-600"
+                            }`}>
+                              {isStart ? "🟢 INICIADA" : "🔴 FINALIZADA"}
+                            </Badge>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
+                              📍 {log.location}
+                            </p>
+                            <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
+                              Data/Hora: {formattedDate}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </Card>
       </div>
 

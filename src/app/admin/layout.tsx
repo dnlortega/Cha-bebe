@@ -194,6 +194,29 @@ export default function AdminLayout({
     return JSON.stringify(diag);
   };
 
+  const isWithinBauruGPS = (gpsCoords: string): boolean => {
+    try {
+      const [lat, lon] = gpsCoords.split(",").map(Number);
+      if (isNaN(lat) || isNaN(lon)) return false;
+      const bauruLat = -22.3147;
+      const bauruLon = -49.0606;
+      
+      const R = 6371; // Raio da terra em km
+      const dLat = (lat - bauruLat) * Math.PI / 180;
+      const dLon = (lon - bauruLon) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(bauruLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+      
+      return distance <= 50; // Permite num raio de até 50km
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       if (typeof window !== "undefined") {
@@ -294,6 +317,14 @@ export default function AdminLayout({
       if (!gps && fallbackGps) {
         gps = fallbackGps; // Usa o do IP se falhar
       }
+      
+      // 3.5 Bloqueio geográfico: o admin deve estar em Bauru, SP
+      const isFromBauru = loc.toLowerCase().includes("bauru") || (gps && isWithinBauruGPS(gps));
+      if (!isFromBauru) {
+        toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
+        return;
+      }
+      
       // 4. Obtem informacoes de dispositivo enriquecidas
       const browser = getDeviceInfo();
       const net = getConnectionType();

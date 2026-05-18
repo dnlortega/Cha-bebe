@@ -322,6 +322,21 @@ export async function getHistoryLogs() {
 export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string, gpsCoords: string | null, diagnostics: string) {
   try {
     // Remove qualquer sessao antiga duplicada com o mesmo deviceInfo E deviceName juntas
+    const duplicateSessions = await prisma.adminSession.findMany({
+      where: { deviceInfo, deviceName }
+    });
+
+    for (const dup of duplicateSessions) {
+      await prisma.sessionHistoryLog.create({
+        data: {
+          deviceName: dup.deviceName,
+          deviceInfo: dup.deviceInfo,
+          location: dup.location,
+          action: "FINALIZADA"
+        }
+      });
+    }
+
     await prisma.adminSession.deleteMany({
       where: { 
         deviceInfo,
@@ -332,6 +347,17 @@ export async function registerAdminSession(token: string, deviceInfo: string, de
     await prisma.adminSession.create({
       data: { token, deviceInfo, deviceName, location, gpsCoords, diagnostics }
     });
+
+    // Registra o início da nova sessão no histórico de auditoria
+    await prisma.sessionHistoryLog.create({
+      data: {
+        deviceName,
+        deviceInfo,
+        location,
+        action: "INICIADA"
+      }
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Erro ao registrar sessao:", error);
@@ -377,6 +403,21 @@ export async function getAdminSessions() {
 
 export async function revokeAdminSession(id: string) {
   try {
+    const session = await prisma.adminSession.findUnique({
+      where: { id }
+    });
+    if (session) {
+      // Registra a finalização da sessão
+      await prisma.sessionHistoryLog.create({
+        data: {
+          deviceName: session.deviceName,
+          deviceInfo: session.deviceInfo,
+          location: session.location,
+          action: "FINALIZADA"
+        }
+      });
+    }
+
     await prisma.adminSession.delete({
       where: { id }
     });
@@ -384,5 +425,22 @@ export async function revokeAdminSession(id: string) {
   } catch (error) {
     console.error("Erro ao revogar sessao:", error);
     return { success: false };
+  }
+}
+
+export async function getSessionHistoryLogs() {
+  noStore();
+  try {
+    const logs = await prisma.sessionHistoryLog.findMany({
+      orderBy: { timestamp: "desc" },
+      take: 50
+    });
+    return logs.map(l => ({
+      ...l,
+      timestamp: l.timestamp.toISOString()
+    }));
+  } catch (error) {
+    console.error("Erro ao carregar historico de sessoes:", error);
+    return [];
   }
 }

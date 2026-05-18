@@ -91,3 +91,12 @@ model AdminSession {
   createdAt   DateTime @default(now())
 }
 
+model SessionHistoryLog {
+  id         String   @id @default(cuid())
+  deviceName String
+  deviceInfo String
+  location   String
+  action     String   // "INICIADA" ou "FINALIZADA"
+  timestamp  DateTime @default(now())
+}
+
