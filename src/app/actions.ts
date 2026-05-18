@@ -39,7 +39,11 @@ export async function getSettings() {
     });
   }
 
-  return settings;
+  // Retorna um objeto 100% serializável, convertendo o Date do banco em string ISO
+  return {
+    ...settings,
+    eventDate: settings.eventDate ? settings.eventDate.toISOString() : null
+  };
 }
 
 export async function updateSettings(data: any) {
@@ -67,12 +71,18 @@ export async function updateSettings(data: any) {
 // Guestbook / Mural Actions
 export async function getRecentMessages() {
   noStore();
-  return prisma.guest.findMany({
+  const messages = await prisma.guest.findMany({
     where: { mensagem: { not: null }, status_confirmacao: "CONFIRMED" },
     select: { nome: true, mensagem: true, data_resposta: true },
     orderBy: { data_resposta: "desc" },
     take: 10
   });
+
+  // Retorna mensagens com data_resposta serializada como string ISO para o cliente
+  return messages.map(m => ({
+    ...m,
+    data_resposta: m.data_resposta ? m.data_resposta.toISOString() : null
+  }));
 }
 
 // Gift Actions
@@ -192,10 +202,21 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
 
 export async function getGuests() {
   noStore();
-  return prisma.guest.findMany({
+  const guests = await prisma.guest.findMany({
     include: { gift: true },
     orderBy: { nome: "asc" },
   });
+
+  return guests.map(g => ({
+    ...g,
+    data_resposta: g.data_resposta ? g.data_resposta.toISOString() : null,
+    createdAt: g.createdAt.toISOString(),
+    updatedAt: g.updatedAt.toISOString(),
+    gift: g.gift ? {
+      ...g.gift,
+      createdAt: g.gift.createdAt.toISOString()
+    } : null
+  }));
 }
 
 export async function addMultipleGuests(namesText: string) {
