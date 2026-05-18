@@ -117,7 +117,18 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
   try {
     const count = membrosConfirmados ? membrosConfirmados.split(",").filter(n => n.trim().length > 0).length : (status === "CONFIRMED" ? 1 : 0);
 
-    // Se escolheu um presente, marca como reservado
+    // Se a confirmação foi recusada ou desfeita, libera o presente anterior do convidado se houver
+    if (status !== "CONFIRMED") {
+      const currentGuest = await prisma.guest.findUnique({ where: { slug } });
+      if (currentGuest?.giftId) {
+        await prisma.gift.update({
+          where: { id: currentGuest.giftId },
+          data: { isReserved: false }
+        });
+      }
+    }
+
+    // Se escolheu um presente novo, marca como reservado
     if (giftId && status === "CONFIRMED") {
       await prisma.gift.update({
         where: { id: giftId },
@@ -125,8 +136,9 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
       });
     }
 
-    await prisma.guest.update({
+    const updatedGuest = await prisma.guest.update({
       where: { slug },
+      include: { gift: true },
       data: {
         status_confirmacao: status,
         membros_confirmados: membrosConfirmados || null,
@@ -136,8 +148,25 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
         giftId: status === "CONFIRMED" ? (giftId || null) : null
       },
     });
+
+    // Registra o log histórico da resposta
+    await prisma.guestHistory.create({
+      data: {
+        guestId: updatedGuest.id,
+        guestNome: updatedGuest.nome,
+        status_confirmacao: updatedGuest.status_confirmacao,
+        data_resposta: new Date(),
+        qtd_adultos: updatedGuest.qtd_adultos,
+        qtd_criancas: updatedGuest.qtd_criancas,
+        fralda_tamanho: updatedGuest.fralda_tamanho,
+        kit_churrasco: updatedGuest.kit_churrasco,
+        mensagem: updatedGuest.mensagem,
+        giftName: updatedGuest.gift?.name || null
+      }
+    });
     
     revalidatePath("/admin");
+    revalidatePath("/admin/history");
     revalidatePath(`/${slug}`);
     return { success: true };
   } catch (error) {
@@ -277,4 +306,15 @@ export async function distributeDiapers() {
   } catch (error) {
     return { success: false, error: "Erro ao distribuir fraldas" };
   }
+}
+
+export async function getHistoryLogs() {
+  noStore();
+  const logs = await prisma.guestHistory.findMany({
+    orderBy: { data_resposta: "desc" }
+  });
+  return logs.map(l => ({
+    ...l,
+    data_resposta: l.data_resposta.toISOString()
+  }));
 }

@@ -65,3 +65,17 @@ model Admin {
   password String
 }
 
+model GuestHistory {
+  id                String   @id @default(cuid())
+  guestId           String
+  guestNome         String
+  status_confirmacao String?  // "CONFIRMED", "DECLINED", or null
+  data_resposta     DateTime @default(now())
+  qtd_adultos       Int      @default(0)
+  qtd_criancas      Int      @default(0)
+  fralda_tamanho    String?
+  kit_churrasco     Boolean  @default(false)
+  mensagem          String?
+  giftName          String?  // Nome do presente no momento da resposta
+}
+

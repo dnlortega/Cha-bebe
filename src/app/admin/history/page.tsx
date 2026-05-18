@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { getGuests } from "@/app/actions";
+import { useState, useEffect } from "react";
+import { getHistoryLogs } from "@/app/actions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   History, 
   Calendar, 
-  Clock, 
   CheckCircle2, 
   XCircle, 
   RefreshCw, 
@@ -19,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function HistoryPage() {
-  const [guests, setGuests] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -28,8 +27,8 @@ export default function HistoryPage() {
     else setIsSyncing(true);
 
     try {
-      const data = await getGuests();
-      setGuests(data);
+      const data = await getHistoryLogs();
+      setLogs(data);
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
     } finally {
@@ -45,11 +44,6 @@ export default function HistoryPage() {
     }, 15000); // Atualiza silenciosamente a cada 15 segundos
     return () => clearInterval(interval);
   }, []);
-
-  // Filtra apenas convidados com resposta registrada, ordenando por data decrescente (mais recentes primeiro)
-  const historyList = guests
-    .filter(g => g.data_resposta !== null)
-    .sort((a, b) => new Date(b.data_resposta).getTime() - new Date(a.data_resposta).getTime());
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -87,7 +81,7 @@ export default function HistoryPage() {
       </header>
 
       {/* Conteúdo Principal */}
-      {loading && historyList.length === 0 ? (
+      {loading && logs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-4">
           <RefreshCw className="h-8 w-8 animate-spin text-primary opacity-50" />
           <p className="text-[9px] font-bold tracking-[0.3em] uppercase opacity-40">Carregando linha do tempo...</p>
@@ -95,19 +89,19 @@ export default function HistoryPage() {
       ) : (
         <div className="relative max-w-3xl mx-auto py-6">
           {/* Linha vertical central da linha do tempo */}
-          {historyList.length > 0 && (
+          {logs.length > 0 && (
             <div className="absolute left-6 lg:left-1/2 top-0 bottom-0 w-0.5 bg-primary/10 -translate-x-1/2" />
           )}
 
           <div className="space-y-12 relative">
             <AnimatePresence initial={false}>
-              {historyList.map((guest, idx) => {
-                const isConfirmed = guest.status_confirmacao === "CONFIRMED";
+              {logs.map((log, idx) => {
+                const isConfirmed = log.status_confirmacao === "CONFIRMED";
                 const isLeftPosition = idx % 2 === 0;
 
                 return (
                   <motion.div
-                    key={guest.id}
+                    key={log.id}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -135,14 +129,14 @@ export default function HistoryPage() {
                         <div className="flex items-center gap-2 text-stone-400 border-b border-stone-100 pb-3">
                           <Calendar className="h-3.5 w-3.5 opacity-55" />
                           <span className="text-[9px] font-bold tracking-widest uppercase mt-0.5">
-                            {formatDate(guest.data_resposta)}
+                            {formatDate(log.data_resposta)}
                           </span>
                         </div>
 
                         {/* Nome do Convidado */}
                         <div className="space-y-1.5">
                           <h4 className="text-sm font-bold tracking-wider text-stone-800 uppercase">
-                            {guest.nome}
+                            {log.guestNome}
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             <Badge 
@@ -154,13 +148,6 @@ export default function HistoryPage() {
                             >
                               {isConfirmed ? "Confirmado" : "Recusado"}
                             </Badge>
-
-                            {isConfirmed && (
-                              <Badge className="rounded-none text-[8px] font-bold tracking-widest uppercase bg-stone-100 text-stone-600 hover:bg-stone-100 border-none px-2.5 py-0.5 flex items-center gap-1">
-                                <Users className="h-2.5 w-2.5" />
-                                {guest.tipo === "FAMILIA" ? "Família" : "Individual"}
-                              </Badge>
-                            )}
                           </div>
                         </div>
 
@@ -169,38 +156,38 @@ export default function HistoryPage() {
                           <div className="bg-stone-50 border border-primary/5 p-3 text-[10px] tracking-wide text-stone-600 space-y-1.5 rounded-none font-medium leading-relaxed">
                             <div className="flex justify-between">
                               <span className="opacity-60 uppercase text-[8px] font-bold tracking-wider">Acompanhantes:</span>
-                              <span className="font-bold text-stone-800 uppercase">{guest.qtd_adultos} {guest.qtd_adultos === 1 ? "Adulto" : "Adultos"} {guest.qtd_criancas > 0 && `e ${guest.qtd_criancas} ${guest.qtd_criancas === 1 ? "Criança" : "Crianças"}`}</span>
+                              <span className="font-bold text-stone-800 uppercase">{log.qtd_adultos} {log.qtd_adultos === 1 ? "Adulto" : "Adultos"} {log.qtd_criancas > 0 && `e ${log.qtd_criancas} ${log.qtd_criancas === 1 ? "Criança" : "Crianças"}`}</span>
                             </div>
                             
-                            {guest.fralda_tamanho && (
+                            {log.fralda_tamanho && (
                               <div className="flex justify-between border-t border-stone-200/60 pt-1.5">
-                                <span className="opacity-60 uppercase text-[8px] font-bold tracking-wider flex items-center gap-1"><Baby className="h-3 w-3" /> Fralda Assignada:</span>
-                                <span className="font-bold text-primary uppercase">Tamanho {guest.fralda_tamanho}</span>
+                                <span className="opacity-60 uppercase text-[8px] font-bold tracking-wider flex items-center gap-1"><Baby className="h-3 w-3" /> Fralda Designada:</span>
+                                <span className="font-bold text-primary uppercase">Tamanho {log.fralda_tamanho}</span>
                               </div>
                             )}
 
-                            {guest.kit_churrasco && (
+                            {log.kit_churrasco && (
                               <div className="flex justify-between border-t border-stone-200/60 pt-1.5">
                                 <span className="opacity-60 uppercase text-[8px] font-bold tracking-wider">Kit Churrasco:</span>
                                 <span className="font-bold text-amber-600 uppercase">Reservado</span>
                               </div>
                             )}
 
-                            {guest.gift && (
+                            {log.giftName && (
                               <div className="flex justify-between border-t border-stone-200/60 pt-1.5">
                                 <span className="opacity-60 uppercase text-[8px] font-bold tracking-wider">Presente Reservado:</span>
-                                <span className="font-bold text-stone-800 uppercase truncate max-w-[150px]">{guest.gift.nome}</span>
+                                <span className="font-bold text-stone-800 uppercase truncate max-w-[150px]">{log.giftName}</span>
                               </div>
                             )}
                           </div>
                         )}
 
                         {/* Recado do Mural */}
-                        {guest.mensagem && (
+                        {log.mensagem && (
                           <div className="pt-3 border-t border-stone-100 flex items-start gap-2.5">
                             <MessageSquare className="h-3.5 w-3.5 text-primary opacity-50 flex-shrink-0 mt-0.5" />
                             <p className="text-[11px] opacity-75 italic text-stone-600 leading-relaxed normal-case">
-                              "{guest.mensagem}"
+                              "{log.mensagem}"
                             </p>
                           </div>
                         )}
@@ -215,7 +202,7 @@ export default function HistoryPage() {
       )}
 
       {/* Caso não haja nenhuma resposta ainda */}
-      {!loading && historyList.length === 0 && (
+      {!loading && logs.length === 0 && (
         <Card className="max-w-md mx-auto p-12 text-center border border-primary/5 bg-white shadow-xl space-y-4 rounded-none">
           <History className="h-12 w-12 text-stone-300 mx-auto" />
           <h3 className="text-[10px] font-bold tracking-[0.3em] uppercase text-stone-500">Nenhuma Resposta Registrada</h3>
