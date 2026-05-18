@@ -12,6 +12,29 @@ export default function MuralLivePage() {
   const [refreshInterval, setRefreshInterval] = useState(30000); // Default 30s
   const [showSettings, setShowSettings] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(messages.length / itemsPerPage);
+
+  // Rotaciona automaticamente os lotes de mensagens a cada 10 segundos
+  useEffect(() => {
+    if (totalPages <= 1) {
+      setCurrentPage(0);
+      return;
+    }
+    const timer = setInterval(() => {
+      setCurrentPage(prev => (prev + 1) % totalPages);
+    }, 10000); // 10 segundos por tela de mensagens
+    return () => clearInterval(timer);
+  }, [totalPages]);
+
+  // Se o total de mensagens mudar (ex: novas respostas), volta para a primeira tela
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [messages.length]);
+
+  const displayedMessages = messages.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   const fetchData = useCallback(async () => {
     const [msgData, settsData] = await Promise.all([getRecentMessages(), getSettings()]);
@@ -97,7 +120,7 @@ export default function MuralLivePage() {
         <div className="relative z-10 w-full max-w-7xl flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence mode="popLayout">
-              {messages.map((m, i) => (
+              {displayedMessages.map((m, i) => (
                 <motion.div
                   key={m.id || m.nome + i}
                   layout
@@ -130,6 +153,23 @@ export default function MuralLivePage() {
               ))}
             </AnimatePresence>
           </div>
+
+          {/* Indicadores de Página (Estilo pílula ativa premium) */}
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-12 animate-in fade-in duration-500">
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPage(idx)}
+                  className={`h-1.5 transition-all duration-500 rounded-full ${
+                    currentPage === idx 
+                      ? `w-8 ${isBoy ? "bg-sky-500" : isGirl ? "bg-rose-500" : "bg-primary"}` 
+                      : `w-1.5 ${isBoy ? "bg-sky-200" : isGirl ? "bg-rose-200" : "bg-primary/20"}`
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
           {messages.length === 0 && (
             <div className={`flex flex-col items-center justify-center h-64 opacity-20 space-y-4 ${isBoy ? "text-sky-500" : isGirl ? "text-rose-500" : "text-primary"}`}>

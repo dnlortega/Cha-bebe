@@ -75,7 +75,7 @@ export async function getRecentMessages() {
     where: { mensagem: { not: null }, status_confirmacao: "CONFIRMED" },
     select: { nome: true, mensagem: true, data_resposta: true },
     orderBy: { data_resposta: "desc" },
-    take: 6
+    take: 60
   });
 
   // Retorna mensagens com data_resposta serializada como string ISO para o cliente
