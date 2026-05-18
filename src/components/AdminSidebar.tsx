@@ -14,7 +14,8 @@ import {
   Menu,
   X,
   Info,
-  Package
+  Package,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,11 @@ const menuItems = [
     title: "Convites",
     icon: Users,
     href: "/admin/guests",
+  },
+  {
+    title: "Histórico",
+    icon: History,
+    href: "/admin/history",
   },
   {
     title: "Cadastrar",
