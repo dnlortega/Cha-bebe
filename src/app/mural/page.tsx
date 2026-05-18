@@ -5,9 +5,6 @@ import { getRecentMessages, getSettings } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Stars, Baby, MessageSquareQuote, Settings2, Clock } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default function MuralLivePage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
