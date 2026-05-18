@@ -14,7 +14,7 @@ export default function MuralLivePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 3;
   const totalPages = Math.ceil(messages.length / itemsPerPage);
 
   // Rotaciona automaticamente os lotes de mensagens a cada 10 segundos
