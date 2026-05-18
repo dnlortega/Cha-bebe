@@ -47,8 +47,54 @@ export default function AdminLayout({
     return browser;
   };
 
-  const getDetailedDeviceName = () => {
+  const getGPUInfo = () => {
+    if (typeof window === "undefined") return "";
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as any;
+      if (!gl) return "";
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        let gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "";
+        if (gpu.includes("Direct3D")) {
+          const parts = gpu.split("Direct3D");
+          if (parts[0]) {
+            gpu = parts[0].replace("ANGLE (", "").replace(", ", "").trim();
+          }
+        }
+        return gpu;
+      }
+    } catch (e) {}
+    return "";
+  };
+
+  const getConnectionType = () => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return "";
+    try {
+      const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      if (conn) {
+        const type = conn.effectiveType || conn.type || "wifi";
+        const rtt = conn.rtt ? `${conn.rtt}ms` : "";
+        return `Conexão: ${type.toUpperCase()}${rtt ? ` (Ping: ${rtt})` : ""}`;
+      }
+    } catch (e) {}
+    return "";
+  };
+
+  const getDetailedDeviceName = async () => {
     if (typeof window === "undefined" || !navigator) return "Dispositivo Desconhecido";
+    
+    // Tenta obter o modelo ultra exato via Client Hints se suportado (Chrome/Edge)
+    if ((navigator as any).userAgentData) {
+      try {
+        const hints = await (navigator as any).userAgentData.getHighEntropyValues(["model", "platform"]);
+        if (hints.model) {
+          const plat = hints.platform || "Aparelho";
+          return `${plat} (${hints.model})`;
+        }
+      } catch (e) {}
+    }
+
     const ua = navigator.userAgent;
     
     if (/iPhone/i.test(ua)) {
@@ -219,12 +265,16 @@ export default function AdminLayout({
       if (!gps && fallbackGps) {
         gps = fallbackGps; // Usa o do IP se falhar
       }
+      // 4. Obtem informacoes de dispositivo enriquecidas
+      const browser = getDeviceInfo();
+      const net = getConnectionType();
+      const devInfo = net ? `${browser} | ${net}` : browser;
+
+      const baseName = await getDetailedDeviceName();
+      const gpu = getGPUInfo();
+      const devName = gpu ? `${baseName} | GPU: ${gpu}` : baseName;
       
-      // 4. Obtem informacoes de dispositivo
-      const devInfo = getDeviceInfo();
-      const devName = getDetailedDeviceName();
-      
-      // 5. Registra a sessao no banco de dados com GPS
+      // 5. Registra a sessao no banco de dados com GPS e hardware
       await registerAdminSession(token, devInfo, devName, loc, gps);
       
       if (typeof window !== "undefined") {
