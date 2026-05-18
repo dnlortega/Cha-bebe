@@ -240,22 +240,30 @@ export default function VisualPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        {sess.diagnostics && sess.diagnostics !== "{}" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              try {
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            try {
+                              if (sess.diagnostics && sess.diagnostics !== "{}") {
                                 setSelectedDiag(JSON.parse(sess.diagnostics));
-                              } catch (e) {
-                                setSelectedDiag(null);
+                              } else {
+                                setSelectedDiag({
+                                  "Aviso": "Sessão antiga detectada",
+                                  "Instrução": "Por favor, saia e faça login novamente para gerar o relatório completo",
+                                  "Aparelho": sess.deviceName,
+                                  "Navegador": sess.deviceInfo,
+                                  "Cidade/Estado": sess.location
+                                });
                               }
-                            }}
-                            className="text-[9px] font-bold text-stone-500 hover:text-stone-800 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-200"
-                          >
-                            Diagnóstico
-                          </Button>
-                        )}
+                            } catch (e) {
+                              setSelectedDiag({ "Status": "Não foi possível analisar os metadados" });
+                            }
+                          }}
+                          className="text-[9px] font-bold text-stone-500 hover:text-stone-850 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-205 transition-all"
+                        >
+                          Diagnóstico
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
