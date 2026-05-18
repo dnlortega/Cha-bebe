@@ -49,9 +49,9 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
     return (
       <Card className="w-full max-w-md mx-auto border-none shadow-none bg-transparent text-center space-y-8 animate-in zoom-in duration-700">
         <div className="w-16 h-16 bg-primary/5 rounded-full mx-auto flex items-center justify-center mb-4"><Heart className="h-8 w-8 text-primary fill-primary/10" /></div>
-        <div className="space-y-2"><CardTitle className="text-3xl font-serif text-primary tracking-[0.2em]">OBRIGADO</CardTitle><p className="text-[10px] opacity-40 tracking-[0.4em]">RESPOSTA REGISTRADA</p></div>
-        <CardDescription className="text-sm tracking-widest uppercase px-6">{status === "CONFIRMED" ? "Ficamos muito felizes em saber que você virá! Nos vemos em breve." : "Sentiremos sua falta, mas agradecemos por nos avisar."}</CardDescription>
-        <Button variant="outline" onClick={() => setSubmitted(false)} className="text-[9px] tracking-[0.3em] opacity-60 rounded-none h-12 px-8">ALTERAR RESPOSTA</Button>
+        <div className="space-y-2"><CardTitle className="text-3xl font-serif text-primary tracking-[0.2em]" style={{ fontFamily }}>OBRIGADO</CardTitle><p className="text-[10px] opacity-40 tracking-[0.4em]" style={{ fontFamily: 'var(--font-outfit)' }}>RESPOSTA REGISTRADA</p></div>
+        <CardDescription className="text-sm tracking-widest px-6" style={{ fontFamily: 'var(--font-outfit)' }}>{status === "CONFIRMED" ? "Ficamos muito felizes em saber que você virá! Nos vemos em breve." : "Sentiremos sua falta, mas agradecemos por nos avisar."}</CardDescription>
+        <Button variant="outline" onClick={() => setSubmitted(false)} className="text-[9px] tracking-[0.3em] opacity-60 rounded-none h-12 px-8" style={{ fontFamily: 'var(--font-outfit)' }}>ALTERAR RESPOSTA</Button>
       </Card>
     );
   }
@@ -60,7 +60,7 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
     <Card className="w-full max-w-md mx-auto border-none shadow-none bg-transparent">
       <CardHeader className="space-y-6 text-center">
         <div className="w-14 h-14 bg-primary/5 rounded-full mx-auto flex items-center justify-center mb-2">{guest.tipo === "FAMILIA" ? <Users className="h-6 w-6 text-primary/40" /> : <User className="h-6 w-6 text-primary/40" />}</div>
-        <div className="space-y-2"><CardTitle className="text-3xl font-serif tracking-[0.2em] text-primary uppercase">Confirmação</CardTitle><p className="text-[9px] opacity-40 tracking-[0.3em] uppercase">Olá, {guest.nome}!</p></div>
+        <div className="space-y-2"><CardTitle className="text-3xl font-serif tracking-[0.2em] text-primary uppercase" style={{ fontFamily }}>Confirmação</CardTitle><p className="text-[9px] opacity-40 tracking-[0.3em] uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>Olá, {guest.nome}!</p></div>
         <Separator className="w-12 mx-auto bg-primary/20" />
       </CardHeader>
 
@@ -68,10 +68,10 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
         <form onSubmit={handleSubmit} className="space-y-10">
           <RadioGroup value={status} onValueChange={setStatus} className="grid grid-cols-1 gap-3">
             <div className={cn("flex items-center space-x-4 p-5 cursor-pointer border transition-all", status === "CONFIRMED" ? "bg-primary/5 border-primary/20" : "bg-white/50 border-primary/5")} onClick={() => setStatus("CONFIRMED")}>
-              <RadioGroupItem value="CONFIRMED" id="confirmed" /><Label htmlFor="confirmed" className="text-[10px] tracking-widest cursor-pointer flex-1 uppercase">Sim, estarei presente</Label>
+              <RadioGroupItem value="CONFIRMED" id="confirmed" /><Label htmlFor="confirmed" className="text-[10px] tracking-widest cursor-pointer flex-1">Sim, estarei presente</Label>
             </div>
             <div className={cn("flex items-center space-x-4 p-5 cursor-pointer border transition-all", status === "DECLINED" ? "bg-red-50/50 border-red-200" : "bg-white/50 border-primary/5")} onClick={() => setStatus("DECLINED")}>
-              <RadioGroupItem value="DECLINED" id="declined" /><Label htmlFor="declined" className="text-[10px] tracking-widest cursor-pointer flex-1 uppercase">Não poderei ir</Label>
+              <RadioGroupItem value="DECLINED" id="declined" /><Label htmlFor="declined" className="text-[10px] tracking-widest cursor-pointer flex-1">Não poderei ir</Label>
             </div>
           </RadioGroup>
 

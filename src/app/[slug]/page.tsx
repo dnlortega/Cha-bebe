@@ -47,15 +47,15 @@ export default async function GuestPage({ params }: PageProps) {
   const isDefaultTheme = settings.theme === "GOLD" || !settings.theme;
 
   return (
-    <main className={`min-h-screen ${isBoy && isDefaultTheme ? "bg-sky-50" : isGirl && isDefaultTheme ? "bg-rose-50" : "bg-background"} text-foreground flex flex-col items-center p-4 sm:p-12 uppercase tracking-widest transition-colors duration-1000 relative overflow-x-hidden`} style={{ fontFamily: inviteFontFamily, fontSize: `${inviteFontSize}px` }}>
+    <main className={`min-h-screen ${isBoy && isDefaultTheme ? "bg-sky-50" : isGirl && isDefaultTheme ? "bg-rose-50" : "bg-background"} text-foreground flex flex-col items-center p-4 sm:p-12 tracking-wide transition-colors duration-1000 relative overflow-x-hidden`} style={{ fontFamily: 'var(--font-outfit)', fontSize: '15px' }}>
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />
         <div className={`absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl ${isBoy ? "bg-sky-200/50" : isGirl ? "bg-rose-200/50" : "bg-primary/3"}`} />
       </div>
 
       <div className="w-full text-center mt-4 mb-8 relative z-10 animate-in fade-in slide-in-from-top duration-1000">
-         <h1 className={`text-4xl sm:text-6xl font-serif tracking-[0.2em] uppercase ${isBoy ? "text-sky-800" : isGirl ? "text-rose-800" : "text-primary"}`}>{babyName}</h1>
-         <p className="text-[10px] opacity-40 tracking-[0.4em] mt-4">VOCÊ É NOSSO CONVIDADO ESPECIAL</p>
+         <h1 className={`text-4xl sm:text-6xl font-serif tracking-[0.2em] uppercase ${isBoy ? "text-sky-800" : isGirl ? "text-rose-800" : "text-primary"}`} style={{ fontFamily: inviteFontFamily }}>{babyName}</h1>
+         <p className="text-[10px] opacity-40 tracking-[0.4em] mt-4" style={{ fontFamily: 'var(--font-outfit)' }}>VOCÊ É NOSSO CONVIDADO ESPECIAL</p>
       </div>
 
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-start relative z-10 py-4">
@@ -83,7 +83,7 @@ export default async function GuestPage({ params }: PageProps) {
            {/* Event Details */}
            {(settings.eventDate || settings.eventAddress) && (
               <div className="bg-white/50 backdrop-blur-sm border border-primary/5 p-8 sm:p-12 space-y-10 shadow-xl">
-                 <div className="space-y-1"><h2 className="text-2xl font-serif text-primary tracking-[0.2em]">Detalhes</h2><p className="text-[10px] opacity-30 tracking-[0.4em]">INFORMAÇÕES DO EVENTO</p></div>
+                 <div className="space-y-1"><h2 className="text-2xl font-serif text-primary tracking-[0.2em] uppercase" style={{ fontFamily: inviteFontFamily }}>Detalhes</h2><p className="text-[10px] opacity-30 tracking-[0.4em] uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>INFORMAÇÕES DO EVENTO</p></div>
                  <div className="space-y-8">
                     {settings.eventDate && (
                        <div className="flex items-start gap-4"><Calendar className="h-5 w-5 text-primary opacity-40 shrink-0" /><div><p className="text-[11px] font-bold tracking-widest text-primary mb-1 uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>Quando</p><p className="text-[10px] opacity-60 leading-relaxed uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>{eventDateStr}</p></div></div>
@@ -114,7 +114,7 @@ export default async function GuestPage({ params }: PageProps) {
         </div>
       </div>
 
-      <footer className="mt-12 sm:mt-20 opacity-20 text-center relative z-10"><p className="text-[9px] tracking-[0.6em] font-serif uppercase text-primary">CHÁ DE BEBÊ • {new Date().getFullYear()}</p></footer>
+      <footer className="mt-12 sm:mt-20 opacity-20 text-center relative z-10"><p className="text-[9px] tracking-[0.6em] font-serif uppercase text-primary" style={{ fontFamily: inviteFontFamily }}>CHÁ DE BEBÊ • {new Date().getFullYear()}</p></footer>
     </main>
   );
 }

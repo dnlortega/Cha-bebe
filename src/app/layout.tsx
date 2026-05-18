@@ -73,7 +73,7 @@ export default async function RootLayout({
         fontSize: `${systemFontSize}px`,
       }}
     >
-      <body className={`min-h-full flex flex-col uppercase tracking-wide transition-colors duration-500 ${themeConfig.className}`}>
+      <body className={`min-h-full flex flex-col tracking-wide transition-colors duration-500 ${themeConfig.className}`}>
         <ThemeProvider initialTheme={initialTheme}>
           <TooltipProvider>
             {children}
