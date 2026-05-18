@@ -86,12 +86,12 @@ export default async function GuestPage({ params }: PageProps) {
                  <div className="space-y-1"><h2 className="text-2xl font-serif text-primary tracking-[0.2em]">Detalhes</h2><p className="text-[10px] opacity-30 tracking-[0.4em]">INFORMAÇÕES DO EVENTO</p></div>
                  <div className="space-y-8">
                     {settings.eventDate && (
-                       <div className="flex items-start gap-4"><Calendar className="h-5 w-5 text-primary opacity-40 shrink-0" /><div><p className="text-[11px] font-bold tracking-widest text-primary mb-1 uppercase">Quando</p><p className="text-[10px] opacity-60 leading-relaxed uppercase">{eventDateStr}</p></div></div>
+                       <div className="flex items-start gap-4"><Calendar className="h-5 w-5 text-primary opacity-40 shrink-0" /><div><p className="text-[11px] font-bold tracking-widest text-primary mb-1 uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>Quando</p><p className="text-[10px] opacity-60 leading-relaxed uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>{eventDateStr}</p></div></div>
                     )}
                     {settings.eventAddress && (
-                       <div className="flex items-start gap-4"><MapPin className="h-5 w-5 text-primary opacity-40 shrink-0" /><div><p className="text-[11px] font-bold tracking-widest text-primary mb-1 uppercase">Onde</p><p className="text-[10px] opacity-60 leading-relaxed uppercase mb-4">{settings.eventAddress}</p>
+                       <div className="flex items-start gap-4"><MapPin className="h-5 w-5 text-primary opacity-40 shrink-0" /><div><p className="text-[11px] font-bold tracking-widest text-primary mb-1 uppercase" style={{ fontFamily: 'var(--font-outfit)' }}>Onde</p><p className="text-[10px] opacity-60 leading-relaxed uppercase mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>{settings.eventAddress}</p>
                        {settings.eventMapsUrl && (
-                          <a href={settings.eventMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-stone-900 text-white text-[9px] px-4 py-2 hover:bg-stone-800 transition-all tracking-widest">VER NO MAPA</a>
+                          <a href={settings.eventMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-stone-900 text-white text-[9px] px-4 py-2 hover:bg-stone-800 transition-all tracking-widest" style={{ fontFamily: 'var(--font-outfit)' }}>VER NO MAPA</a>
                        )}
                        </div></div>
                     )}
