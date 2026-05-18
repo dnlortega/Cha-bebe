@@ -144,7 +144,7 @@ export default function AdminDashboard() {
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       <header className="flex justify-between items-end border-b border-primary/5 pb-6">
         <div className="space-y-1"><h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Status</h1><p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Visão Geral do Evento</p></div>
-        <Button variant="ghost" size="icon" onClick={fetchData} disabled={loading} className="border border-primary/5 h-11 w-11"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
+        <Button variant="ghost" size="icon" onClick={() => fetchData()} disabled={loading} className="border border-primary/5 h-11 w-11"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
