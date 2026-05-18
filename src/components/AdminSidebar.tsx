@@ -65,7 +65,7 @@ export function AdminSidebar() {
   const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className={cn("flex items-center border-b border-primary/5 py-5", showLabels ? "px-5 gap-3" : "justify-center px-3")}>
+      <div className={cn("flex items-center border-b border-primary/5 py-5", showLabels ? "px-5 gap-3" : "hidden lg:flex justify-center px-3")}>
         <div className="w-9 h-9 relative bg-stone-900 shadow-lg p-1.5 border border-white/5 flex-shrink-0">
           <Image src="/icon.png" alt="Logo" fill className="object-cover" />
         </div>
@@ -78,7 +78,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-2 space-y-1 py-6">
+      <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "pt-20 lg:pt-6")}>
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -156,12 +156,12 @@ export function AdminSidebar() {
         />
       )}
 
-      {/* Mobile Sidebar — with labels */}
+      {/* Mobile Sidebar — icons only */}
       <aside className={cn(
-        "lg:hidden fixed left-0 top-0 h-screen w-56 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10 shadow-2xl",
+        "lg:hidden fixed left-0 top-0 h-screen w-20 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10 shadow-2xl",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <SidebarContent showLabels={true} />
+        <SidebarContent showLabels={false} />
       </aside>
     </>
   );
