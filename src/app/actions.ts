@@ -321,6 +321,11 @@ export async function getHistoryLogs() {
 
 export async function registerAdminSession(token: string, deviceInfo: string) {
   try {
+    // Remove qualquer sessao antiga duplicada com o mesmo deviceInfo
+    await prisma.adminSession.deleteMany({
+      where: { deviceInfo }
+    });
+
     await prisma.adminSession.create({
       data: { token, deviceInfo }
     });
