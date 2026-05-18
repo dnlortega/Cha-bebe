@@ -28,6 +28,31 @@ export default function AdminDashboard() {
   const [guests, setGuests] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const handleCategoryClick = (label: string) => {
+    setSelectedCategory(prev => prev === label ? null : label);
+  };
+
+  const getFilteredGuests = () => {
+    if (!selectedCategory) return [];
+    switch (selectedCategory) {
+      case "CONFIRMADOS":
+        return guests.filter(g => g.status_confirmacao === "CONFIRMED");
+      case "PENDENTES":
+        return guests.filter(g => !g.status_confirmacao);
+      case "RECUSADOS":
+        return guests.filter(g => g.status_confirmacao === "DECLINED");
+      case "ADULTOS":
+        return guests.filter(g => g.status_confirmacao === "CONFIRMED" && g.qtd_adultos > 0);
+      case "CRIANÇAS":
+        return guests.filter(g => g.status_confirmacao === "CONFIRMED" && g.qtd_criancas > 0);
+      case "TOTAL":
+        return guests;
+      default:
+        return [];
+    }
+  };
 
   useEffect(() => { fetchData(); }, []);
 
@@ -58,7 +83,6 @@ export default function AdminDashboard() {
           <div className="relative"><CircularProgress value={confirmed} max={total} size={130} strokeWidth={10} /><div className="absolute inset-0 flex items-center justify-center"><p className="text-4xl font-serif">{total > 0 ? Math.round((confirmed/total)*100) : 0}%</p></div></div>
           <p className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-50">Taxa de Confirmação</p>
         </Card>
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
             { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
             { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
@@ -67,10 +91,92 @@ export default function AdminDashboard() {
             { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-400", bg: "bg-sky-50" },
             { label: "TOTAL", value: total, icon: Users, color: "text-stone-400", bg: "bg-stone-50" }
           ].map((s, i) => (
-            <Card key={i} className="border-none shadow-lg rounded-none bg-white p-6 flex flex-col gap-3 group hover:translate-y-[-2px] transition-all"><div className={`p-3 ${s.bg} rounded-none w-fit`}><s.icon className={`h-4 w-4 ${s.color}`} /></div><div><p className="text-3xl font-serif text-primary leading-none">{s.value}</p><p className="text-[8px] font-bold tracking-[0.2em] opacity-30 uppercase mt-1">{s.label}</p></div></Card>
+            <Card 
+              key={i} 
+              onClick={() => handleCategoryClick(s.label)}
+              className={cn(
+                "border border-primary/5 shadow-lg rounded-none bg-white p-6 flex flex-col gap-3 group hover:translate-y-[-2px] transition-all cursor-pointer select-none",
+                selectedCategory === s.label && "ring-1 ring-primary border-primary/20 bg-primary/[0.01]"
+              )}
+            >
+              <div className={`p-3 ${s.bg} rounded-none w-fit`}>
+                <s.icon className={`h-4 w-4 ${s.color}`} />
+              </div>
+              <div>
+                <p className="text-3xl font-serif text-primary leading-none">{s.value}</p>
+                <p className="text-[8px] font-bold tracking-[0.2em] opacity-30 uppercase mt-1">{s.label}</p>
+              </div>
+            </Card>
           ))}
         </div>
       </div>
+
+      {/* Detalhes da Categoria Selecionada */}
+      {selectedCategory && (
+        <div className="bg-white border border-primary/10 p-8 shadow-xl space-y-6 animate-in slide-in-from-top duration-300 rounded-none">
+          <div className="flex justify-between items-center border-b border-primary/5 pb-4">
+            <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-primary">
+              Lista: {selectedCategory} ({getFilteredGuests().length})
+            </h3>
+            <button 
+              onClick={() => setSelectedCategory(null)} 
+              className="text-[9px] font-bold tracking-widest uppercase opacity-40 hover:opacity-100 flex items-center gap-1 transition-all"
+            >
+              <XCircle className="h-4 w-4 text-red-400" /> Fechar Detalhes
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[300px] overflow-y-auto pr-2">
+            {getFilteredGuests().map((guest, idx) => (
+              <div key={idx} className="bg-stone-50/50 border border-primary/5 p-4 hover:bg-stone-50 transition-all flex flex-col gap-1.5">
+                <span className="text-[11px] font-bold tracking-wider text-stone-700 uppercase truncate">
+                  {guest.nome}
+                </span>
+                
+                {/* Legendas inteligentes para cada categoria */}
+                {selectedCategory === "CONFIRMADOS" && (
+                  <span className="text-[8px] opacity-40 uppercase tracking-widest font-bold">
+                    {guest.tipo === "FAMILIA" ? "Família" : "Individual"}
+                  </span>
+                )}
+                {selectedCategory === "PENDENTES" && (
+                  <span className="text-[8px] opacity-40 uppercase tracking-widest font-bold">
+                    Sem resposta
+                  </span>
+                )}
+                {selectedCategory === "RECUSADOS" && (
+                  <span className="text-[8px] text-red-400 opacity-60 uppercase tracking-widest font-bold">
+                    Recusou
+                  </span>
+                )}
+                {selectedCategory === "ADULTOS" && (
+                  <span className="text-[8px] text-primary opacity-60 uppercase tracking-widest font-bold">
+                    {guest.qtd_adultos} {guest.qtd_adultos === 1 ? "Adulto" : "Adultos"}
+                  </span>
+                )}
+                {selectedCategory === "CRIANÇAS" && (
+                  <span className="text-[8px] text-sky-500 opacity-60 uppercase tracking-widest font-bold">
+                    {guest.qtd_criancas} {guest.qtd_criancas === 1 ? "Criança" : "Crianças"}
+                  </span>
+                )}
+                {selectedCategory === "TOTAL" && (
+                  <span className={`text-[8px] uppercase tracking-widest font-bold ${
+                    guest.status_confirmacao === "CONFIRMED" ? "text-emerald-500" : guest.status_confirmacao === "DECLINED" ? "text-red-400" : "opacity-35"
+                  }`}>
+                    {guest.status_confirmacao === "CONFIRMED" ? "Confirmado" : guest.status_confirmacao === "DECLINED" ? "Recusado" : "Pendente"}
+                  </span>
+                )}
+              </div>
+            ))}
+            
+            {getFilteredGuests().length === 0 && (
+              <div className="col-span-full py-10 text-center text-[10px] tracking-widest uppercase opacity-35">
+                Nenhum convidado nessa categoria
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Mural de Recados */}
