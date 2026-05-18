@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getGuests, getRecentMessages } from "@/app/actions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -29,6 +30,12 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Ref para contornar closures antigas do setInterval e obter o estado mais recente
+  const guestsRef = useRef<any[]>([]);
+  useEffect(() => {
+    guestsRef.current = guests;
+  }, [guests]);
 
   const handleCategoryClick = (label: string) => {
     setSelectedCategory(prev => prev === label ? null : label);
@@ -57,6 +64,34 @@ export default function AdminDashboard() {
   const fetchData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     const [gData, mData] = await Promise.all([getGuests(), getRecentMessages()]);
+    
+    // Compara o novo gData com o estado anterior em guestsRef para detectar novos confirmados
+    const currentGuests = guestsRef.current;
+    if (currentGuests.length > 0) {
+      gData.forEach(newGuest => {
+        const oldGuest = currentGuests.find(g => g.id === newGuest.id);
+        const wasConfirmed = oldGuest?.status_confirmacao === "CONFIRMED";
+        const isNowConfirmed = newGuest.status_confirmacao === "CONFIRMED";
+        
+        if (isNowConfirmed && !wasConfirmed) {
+          // Play a premium Success chime notification
+          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+          audio.volume = 0.55;
+          audio.play().catch(() => {});
+
+          // Display a beautiful Toast notification
+          toast.success(`🎉 ${newGuest.nome} confirmou presença!`, {
+            description: newGuest.mensagem ? `"${newGuest.mensagem}"` : "Presença confirmada no evento.",
+            duration: 8000,
+            action: {
+              label: "Ver Detalhes",
+              onClick: () => setSelectedCategory("CONFIRMADOS")
+            }
+          });
+        }
+      });
+    }
+
     setGuests(gData);
     setMessages(mData);
     if (!isSilent) setLoading(false);
