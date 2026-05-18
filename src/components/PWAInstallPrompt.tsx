@@ -14,26 +14,46 @@ export default function PWAInstallPrompt() {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .then(() => console.log("SW registrado com sucesso para PWA!"))
-        .catch((err) => console.log("SW falhou ao registrar:", err));
+        .then(() => console.log("PWA: SW registrado com sucesso!"))
+        .catch((err) => console.log("PWA: SW falhou ao registrar:", err));
     }
 
-    // 2. Escutar o evento do navegador de que o app é instalável (Chrome/Edge/Firefox etc.)
-    const handleBeforeInstallPrompt = (e: Event) => {
+    // 2. Função interna para tratar o evento e mostrar o prompt de instalação
+    const handlePrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShowPrompt(true);
     };
 
+    // LER EVENTO GLOBAL (Se o evento disparou super rápido antes da hidratação do React)
+    if (typeof window !== "undefined" && (window as any).deferredPrompt) {
+      console.log("PWA: Evento de instalação já estava capturado no objeto window.");
+      handlePrompt((window as any).deferredPrompt);
+    }
+
+    // DEFINE CALLBACK GLOBAL (Caso o evento dispare a qualquer momento depois do mount)
+    if (typeof window !== "undefined") {
+      (window as any).onBeforeInstallPrompt = (e: any) => {
+        console.log("PWA: Evento capturado via callback global do head.");
+        handlePrompt(e);
+      };
+    }
+
+    // OUVINTE PADRÃO (Para navegadores que disparam o evento após a hidratação)
+    const handleBeforeInstallPrompt = (e: Event) => {
+      console.log("PWA: Evento capturado via addEventListener padrão.");
+      handlePrompt(e);
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // 3. Detectar iOS (Safari do iPhone/iPad não suporta beforeinstallprompt, então mostramos dicas)
+    // 3. Detectar iOS (Safari do iPhone/iPad não possui beforeinstallprompt, usamos tooltip de compartilhamento)
     const ua = window.navigator.userAgent;
     const isIPad = !!ua.match(/iPad/i);
     const isIPhone = !!ua.match(/iPhone/i);
     const isIOSDevice = isIPad || isIPhone;
     
-    // Verifica se já não está rodando de forma instalada
+    // Verifica se já não está rodando em modo aplicativo standalone
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     
     if (isIOSDevice && !isStandalone) {
@@ -43,18 +63,40 @@ export default function PWAInstallPrompt() {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      if (typeof window !== "undefined") {
+        (window as any).onBeforeInstallPrompt = null;
+      }
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      console.log("Usuário instalou o aplicativo!");
+    // Busca o evento da React State ou do Window global como fallback
+    const promptEvent = deferredPrompt || (typeof window !== "undefined" && (window as any).deferredPrompt);
+    
+    if (!promptEvent) {
+      console.error("PWA: Nenhum evento de instalação ativo capturado!");
+      return;
     }
-    setDeferredPrompt(null);
-    setShowPrompt(false);
+    
+    try {
+      console.log("PWA: Solicitando prompt nativo de instalação...");
+      // Dispara o prompt nativo de forma síncrona
+      await promptEvent.prompt();
+      
+      // Aguarda a resposta do usuário
+      const { outcome } = await promptEvent.userChoice;
+      console.log(`PWA: Usuário escolheu: ${outcome}`);
+      
+      if (outcome === "accepted") {
+        if (typeof window !== "undefined") {
+          (window as any).deferredPrompt = null;
+        }
+        setDeferredPrompt(null);
+        setShowPrompt(false);
+      }
+    } catch (err) {
+      console.error("PWA: Falha ao invocar prompt nativo:", err);
+    }
   };
 
   if (!showPrompt) return null;

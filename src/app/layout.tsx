@@ -73,6 +73,21 @@ export default async function RootLayout({
         fontSize: `${systemFontSize}px`,
       }}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                window.deferredPrompt = e;
+                if (typeof window.onBeforeInstallPrompt === 'function') {
+                  window.onBeforeInstallPrompt(e);
+                }
+              });
+            `
+          }}
+        />
+      </head>
       <body className={`min-h-full flex flex-col tracking-wide transition-colors duration-500 ${themeConfig.className}`}>
         <ThemeProvider initialTheme={initialTheme}>
           <TooltipProvider>
