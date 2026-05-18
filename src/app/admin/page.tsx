@@ -83,6 +83,7 @@ export default function AdminDashboard() {
           <div className="relative"><CircularProgress value={confirmed} max={total} size={130} strokeWidth={10} /><div className="absolute inset-0 flex items-center justify-center"><p className="text-4xl font-serif">{total > 0 ? Math.round((confirmed/total)*100) : 0}%</p></div></div>
           <p className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-50">Taxa de Confirmação</p>
         </Card>
+        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
             { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
             { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
