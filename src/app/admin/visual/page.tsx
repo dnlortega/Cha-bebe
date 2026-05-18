@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSettings, updateSettings, updateAdminCredentials } from "@/app/actions";
+import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { THEMES } from "@/lib/themes";
 import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Calendar, Lock } from "lucide-react";
@@ -29,7 +30,18 @@ export default function VisualPage() {
   const [newPassword, setNewPassword] = useState("");
   const [updatingAdmin, setUpdatingAdmin] = useState(false);
 
-  useEffect(() => { fetchSettings(); }, []);
+  // Estados de controle de sessões ativas
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [currentSessionToken, setCurrentSessionToken] = useState("");
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+    fetchSessions();
+    if (typeof window !== "undefined") {
+      setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
+    }
+  }, []);
 
   const fetchSettings = async () => {
     const data = await getSettings();
@@ -46,6 +58,38 @@ export default function VisualPage() {
       setEventDate(data.eventDate ? new Date(data.eventDate).toISOString().slice(0, 16) : "");
       setEventAddress(data.eventAddress || "");
       setEventMapsUrl(data.eventMapsUrl || "");
+    }
+  };
+
+  const fetchSessions = async () => {
+    setLoadingSessions(true);
+    try {
+      const data = await getAdminSessions();
+      setSessions(data);
+    } catch (e) {
+      console.error("Erro ao carregar sessões:", e);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (id: string, token: string) => {
+    const res = await revokeAdminSession(id);
+    if (res.success) {
+      toast.success("DISPOSITIVO DESCONECTADO");
+      // Se desconectou a si mesmo, força deslogar
+      if (token === currentSessionToken) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("admin_session_token");
+          localStorage.removeItem("admin_authorized");
+          localStorage.removeItem("admin_username");
+          window.location.reload();
+        }
+      } else {
+        fetchSessions();
+      }
+    } else {
+      toast.error("Erro ao desconectar dispositivo");
     }
   };
 
@@ -100,24 +144,97 @@ export default function VisualPage() {
           </div>
         </Card>
 
-        <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
-          <div className="flex items-center gap-3 text-primary"><Calendar className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Data & Local</h3></div>
+        <div className="space-y-8">
+          <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
+            <div className="flex items-center gap-3 text-primary"><Calendar className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Data & Local</h3></div>
+            <div className="space-y-4">
+              <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Data do Evento</label><Input type="datetime-local" value={eventDate} onChange={e => setEventDate(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
+              <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Endereço Exibido</label><Input value={eventAddress} onChange={e => setEventAddress(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Rua exemplo, 123" /></div>
+              <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Link Google Maps</label><Input value={eventMapsUrl} onChange={e => setEventMapsUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="https://goo.gl/maps/..." /></div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-8">
+        <Card className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
+          <div className="flex items-center gap-3 mb-8"><Lock className="h-4 w-4 text-primary" /><h3 className="text-xs font-bold tracking-widest uppercase">Acesso Administrativo</h3></div>
+          <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
+            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Novo Usuário</label><Input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
+            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nova Senha</label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
+            <Button type="submit" disabled={updatingAdmin} className="h-12 rounded-none bg-primary text-primary-foreground hover:bg-primary/95">{updatingAdmin ? <Loader2 className="animate-spin" /> : "ATUALIZAR ACESSO"}</Button>
+          </form>
+        </Card>
+
+        {/* Dispositivos Logados */}
+        <Card className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+            <div className="flex items-center gap-3 text-primary">
+              <Lock className="h-4 w-4 animate-pulse" />
+              <h3 className="text-xs font-bold tracking-widest uppercase">Dispositivos Logados</h3>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchSessions} 
+              disabled={loadingSessions}
+              className="text-[9px] font-bold tracking-wider rounded-none uppercase h-8 bg-stone-50 border-stone-200"
+            >
+              {loadingSessions ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : null}
+              Atualizar Lista
+            </Button>
+          </div>
+
           <div className="space-y-4">
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Data do Evento</label><Input type="datetime-local" value={eventDate} onChange={e => setEventDate(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Endereço Exibido</label><Input value={eventAddress} onChange={e => setEventAddress(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Rua exemplo, 123" /></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Link Google Maps</label><Input value={eventMapsUrl} onChange={e => setEventMapsUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="https://goo.gl/maps/..." /></div>
+            {sessions.length === 0 ? (
+              <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
+                Nenhum dispositivo registrado.
+              </p>
+            ) : (
+              <div className="divide-y divide-stone-100">
+                {sessions.map((sess) => {
+                  const isCurrent = sess.token === currentSessionToken;
+                  const formattedDate = new Date(sess.lastActive).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  });
+
+                  return (
+                    <div key={sess.id} className="flex items-center justify-between py-4 group">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-700">
+                            {sess.deviceInfo}
+                          </span>
+                          {isCurrent && (
+                            <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.2 border-none">
+                              Este Dispositivo
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-[9px] text-stone-400 uppercase tracking-widest font-semibold">
+                          Última atividade: {formattedDate}
+                        </p>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRevokeSession(sess.id, sess.token)}
+                        className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
+                      >
+                        {isCurrent ? "Sair" : "Desconectar"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </Card>
       </div>
-
-      <Card className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
-        <div className="flex items-center gap-3 mb-8"><Lock className="h-4 w-4 text-primary" /><h3 className="text-xs font-bold tracking-widest uppercase">Segurança</h3></div>
-        <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
-          <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Novo Usuário</label><Input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
-          <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nova Senha</label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
-          <Button type="submit" disabled={updatingAdmin} className="h-12 rounded-none">{updatingAdmin ? <Loader2 className="animate-spin" /> : "ATUALIZAR ACESSO"}</Button>
-        </form>
-      </Card>
     </div>
   );
 }

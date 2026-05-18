@@ -79,3 +79,11 @@ model GuestHistory {
   giftName          String?  // Nome do presente no momento da resposta
 }
 
+model AdminSession {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  deviceInfo String
+  lastActive DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+

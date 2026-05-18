@@ -318,3 +318,63 @@ export async function getHistoryLogs() {
     data_resposta: l.data_resposta.toISOString()
   }));
 }
+
+export async function registerAdminSession(token: string, deviceInfo: string) {
+  try {
+    await prisma.adminSession.create({
+      data: { token, deviceInfo }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao registrar sessao:", error);
+    return { success: false };
+  }
+}
+
+export async function verifyAdminSession(token: string) {
+  try {
+    const session = await prisma.adminSession.findUnique({
+      where: { token }
+    });
+    if (!session) return false;
+
+    // Atualiza o lastActive da sessao
+    await prisma.adminSession.update({
+      where: { token },
+      data: { lastActive: new Date() }
+    });
+    return true;
+  } catch (error) {
+    console.error("Erro ao verificar sessao:", error);
+    return false;
+  }
+}
+
+export async function getAdminSessions() {
+  noStore();
+  try {
+    const sessions = await prisma.adminSession.findMany({
+      orderBy: { lastActive: "desc" }
+    });
+    return sessions.map(s => ({
+      ...s,
+      lastActive: s.lastActive.toISOString(),
+      createdAt: s.createdAt.toISOString()
+    }));
+  } catch (error) {
+    console.error("Erro ao carregar sessoes:", error);
+    return [];
+  }
+}
+
+export async function revokeAdminSession(id: string) {
+  try {
+    await prisma.adminSession.delete({
+      where: { id }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao revogar sessao:", error);
+    return { success: false };
+  }
+}

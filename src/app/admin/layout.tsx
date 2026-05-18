@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import { verifyAdmin, getSettings } from "@/app/actions";
+import { verifyAdmin, getSettings, registerAdminSession, verifyAdminSession } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,25 +36,68 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
 
-  useEffect(() => {
-    // Restaura a sessão do localStorage se existir
-    if (typeof window !== "undefined") {
-      const isAuth = localStorage.getItem("admin_authorized") === "true";
-      const savedUser = localStorage.getItem("admin_username");
-      if (isAuth && savedUser) {
-        setAuthorized(true);
-        setCurrentUser(savedUser);
-      }
+  const getDeviceInfo = () => {
+    if (typeof window === "undefined" || !navigator) return "Dispositivo Desconhecido";
+    const ua = navigator.userAgent;
+    let device = "Computador";
+    if (/Mobi|Android|iPhone|iPad/i.test(ua)) {
+      device = "Celular";
+      if (/Android/i.test(ua)) device = "Android Mobile";
+      else if (/iPhone/i.test(ua)) device = "iPhone";
+      else if (/iPad/i.test(ua)) device = "iPad";
     }
     
-    // Fetch timeout setting
-    getSettings().then(settings => {
+    let browser = "Web Browser";
+    if (/Chrome/i.test(ua)) browser = "Chrome";
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+    else if (/Firefox/i.test(ua)) browser = "Firefox";
+    else if (/Edg/i.test(ua)) browser = "Edge";
+    
+    return `${device} (${browser})`;
+  };
+
+  useEffect(() => {
+    const initAuth = async () => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("admin_session_token");
+        const savedUser = localStorage.getItem("admin_username");
+        if (token) {
+          // Verifica se o token de sessao ainda é valido no banco de dados
+          const isValid = await verifyAdminSession(token);
+          if (isValid && savedUser) {
+            setAuthorized(true);
+            setCurrentUser(savedUser);
+          } else {
+            // Sessao foi revogada! Desloga
+            localStorage.removeItem("admin_session_token");
+            localStorage.removeItem("admin_authorized");
+            localStorage.removeItem("admin_username");
+            setAuthorized(false);
+            setCurrentUser(null);
+          }
+        } else {
+          // Retrocompatibilidade se tiver o admin_authorized legado
+          const isAuth = localStorage.getItem("admin_authorized") === "true";
+          if (isAuth && savedUser) {
+            // Gera um novo token e registra
+            const newToken = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            const devInfo = getDeviceInfo();
+            await registerAdminSession(newToken, devInfo);
+            localStorage.setItem("admin_session_token", newToken);
+            setAuthorized(true);
+            setCurrentUser(savedUser);
+          }
+        }
+      }
+      
+      const settings = await getSettings();
       if (settings && settings.sessionTimeout) {
         setTimeoutSeconds(settings.sessionTimeout);
       }
-    });
+      setChecking(false);
+    };
 
-    setChecking(false);
+    initAuth();
   }, []);
 
   // Idle Timer Logic (DESATIVADO por solicitação do usuário)
@@ -67,12 +110,23 @@ export default function AdminLayout({
     e.preventDefault();
     const isCorrect = await verifyAdmin(username, password);
     if (isCorrect) {
-      setAuthorized(true);
-      setCurrentUser(username);
+      // 1. Gera um novo token de sessao unico
+      const token = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      
+      // 2. Obtem as informacoes do dispositivo
+      const devInfo = getDeviceInfo();
+      
+      // 3. Registra a sessao no banco de dados
+      await registerAdminSession(token, devInfo);
+      
       if (typeof window !== "undefined") {
+        localStorage.setItem("admin_session_token", token);
         localStorage.setItem("admin_authorized", "true");
         localStorage.setItem("admin_username", username);
       }
+      
+      setAuthorized(true);
+      setCurrentUser(username);
     } else {
       toast.error("USUÁRIO OU SENHA INCORRETOS");
     }
