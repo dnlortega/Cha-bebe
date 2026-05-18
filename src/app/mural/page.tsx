@@ -11,6 +11,7 @@ export default function MuralLivePage() {
   const [loading, setLoading] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(30000); // Default 30s
   const [showSettings, setShowSettings] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const fetchData = useCallback(async () => {
     const [msgData, settsData] = await Promise.all([getRecentMessages(), getSettings()]);
@@ -20,6 +21,7 @@ export default function MuralLivePage() {
   }, []);
 
   useEffect(() => {
+    setIsMounted(true);
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
@@ -34,9 +36,9 @@ export default function MuralLivePage() {
     <main className={`min-h-screen transition-colors duration-1000 overflow-hidden relative flex flex-col items-center p-10 sm:p-20 ${
       isBoy ? "bg-sky-50 text-sky-900" : isGirl ? "bg-rose-50 text-rose-900" : "bg-stone-50 text-stone-900"
     }`}>
-      {/* Efeitos de Fundo Flutuantes */}
+      {/* Efeitos de Fundo Flutuantes (Apenas renderizados após o mount no cliente) */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
+        {isMounted && [...Array(15)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ 
