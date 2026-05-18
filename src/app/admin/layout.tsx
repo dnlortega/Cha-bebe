@@ -37,7 +37,15 @@ export default function AdminLayout({
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
 
   useEffect(() => {
-    // Removed session persistence to force login on refresh
+    // Restaura a sessão do localStorage se existir
+    if (typeof window !== "undefined") {
+      const isAuth = localStorage.getItem("admin_authorized") === "true";
+      const savedUser = localStorage.getItem("admin_username");
+      if (isAuth && savedUser) {
+        setAuthorized(true);
+        setCurrentUser(savedUser);
+      }
+    }
     
     // Fetch timeout setting
     getSettings().then(settings => {
@@ -49,42 +57,10 @@ export default function AdminLayout({
     setChecking(false);
   }, []);
 
-  // Idle Timer Logic
+  // Idle Timer Logic (DESATIVADO por solicitação do usuário)
   useEffect(() => {
-    if (!authorized) return;
-
-    let timer: NodeJS.Timeout;
-
-    const resetTimer = () => {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        handleLogout();
-      }, timeoutSeconds * 1000);
-    };
-
-    const handleLogout = () => {
-      setAuthorized(false);
-      setCurrentUser(null);
-      toast.info("SESSÃO ENCERRADA POR INATIVIDADE");
-    };
-
-    // Events to track activity
-    window.addEventListener("mousemove", resetTimer);
-    window.addEventListener("keydown", resetTimer);
-    window.addEventListener("mousedown", resetTimer);
-    window.addEventListener("scroll", resetTimer);
-    window.addEventListener("touchstart", resetTimer);
-
-    resetTimer(); // Initialize timer
-
-    return () => {
-      if (timer) clearTimeout(timer);
-      window.removeEventListener("mousemove", resetTimer);
-      window.removeEventListener("keydown", resetTimer);
-      window.removeEventListener("mousedown", resetTimer);
-      window.removeEventListener("scroll", resetTimer);
-      window.removeEventListener("touchstart", resetTimer);
-    };
+    // Timer de inatividade inativo
+    return;
   }, [authorized, timeoutSeconds]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -93,6 +69,10 @@ export default function AdminLayout({
     if (isCorrect) {
       setAuthorized(true);
       setCurrentUser(username);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("admin_authorized", "true");
+        localStorage.setItem("admin_username", username);
+      }
     } else {
       toast.error("USUÁRIO OU SENHA INCORRETOS");
     }

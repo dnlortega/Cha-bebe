@@ -121,7 +121,12 @@ export function AdminSidebar() {
       {/* Logout */}
       <div className="p-2 border-t border-primary/5 pb-5">
         <button
-          onClick={() => { sessionStorage.removeItem("admin_auth"); window.location.href = "/"; }}
+          onClick={() => { 
+            sessionStorage.removeItem("admin_auth"); 
+            localStorage.removeItem("admin_authorized"); 
+            localStorage.removeItem("admin_username"); 
+            window.location.href = "/"; 
+          }}
           className={cn(
             "w-full flex items-center py-3 px-3 text-red-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 rounded-none",
             showLabels ? "gap-3" : "justify-center"
