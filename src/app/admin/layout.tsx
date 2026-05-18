@@ -106,6 +106,31 @@ export default function AdminLayout({
     return;
   }, [authorized, timeoutSeconds]);
 
+  // Monitoramento ativo e instantâneo da revogação de sessão (Derrubar dispositivo automaticamente)
+  useEffect(() => {
+    if (!authorized) return;
+
+    const sessionChecker = setInterval(async () => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("admin_session_token");
+        if (token) {
+          const isValid = await verifyAdminSession(token);
+          if (!isValid) {
+            // Sessão foi deletada/revogada no banco! Desconecta imediatamente
+            localStorage.removeItem("admin_session_token");
+            localStorage.removeItem("admin_authorized");
+            localStorage.removeItem("admin_username");
+            setAuthorized(false);
+            setCurrentUser(null);
+            toast.error("SUA SESSÃO FOI ENCERRADA REMOTAMENTE");
+          }
+        }
+      }
+    }, 5000); // Roda a cada 5 segundos de forma ultra leve
+
+    return () => clearInterval(sessionChecker);
+  }, [authorized]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const isCorrect = await verifyAdmin(username, password);
