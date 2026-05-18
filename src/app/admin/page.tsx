@@ -79,6 +79,11 @@ export default function AdminDashboard() {
           audio.volume = 0.55;
           audio.play().catch(() => {});
 
+          // Vibrar no celular Android se disponível
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            navigator.vibrate([150, 80, 150]);
+          }
+
           // Display a beautiful Toast notification
           toast.success(`🎉 ${newGuest.nome} confirmou presença!`, {
             description: newGuest.mensagem ? `"${newGuest.mensagem}"` : "Presença confirmada no evento.",
@@ -103,6 +108,29 @@ export default function AdminDashboard() {
       fetchData(true);
     }, 15000); // Sincroniza silenciosamente em segundo plano a cada 15 segundos
     return () => clearInterval(interval);
+  }, []);
+
+  // Efeito para liberar o áudio em navegadores mobile no primeiro toque na tela
+  useEffect(() => {
+    const unlockAudio = () => {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+      audio.volume = 0; // Toca silenciosamente apenas para habilitar o canal
+      audio.play()
+        .then(() => {
+          // Desbloqueado com sucesso! Remove os listeners para economizar recursos
+          window.removeEventListener("touchstart", unlockAudio);
+          window.removeEventListener("click", unlockAudio);
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+    window.addEventListener("click", unlockAudio, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("click", unlockAudio);
+    };
   }, []);
 
   const total = guests.length;
