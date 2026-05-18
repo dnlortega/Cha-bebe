@@ -2,6 +2,7 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { verifyAdmin, getSettings } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -174,6 +175,7 @@ export default function AdminLayout({
             {children}
           </div>
         </main>
+        <PWAInstallPrompt />
       </div>
     </AdminAuthContext.Provider>
   );
