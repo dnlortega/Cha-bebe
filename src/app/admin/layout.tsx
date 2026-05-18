@@ -37,23 +37,67 @@ export default function AdminLayout({
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
 
   const getDeviceInfo = () => {
-    if (typeof window === "undefined" || !navigator) return "Dispositivo Desconhecido";
+    if (typeof window === "undefined" || !navigator) return "Navegador Desconhecido";
     const ua = navigator.userAgent;
-    let device = "Computador";
-    if (/Mobi|Android|iPhone|iPad/i.test(ua)) {
-      device = "Celular";
-      if (/Android/i.test(ua)) device = "Android Mobile";
-      else if (/iPhone/i.test(ua)) device = "iPhone";
-      else if (/iPad/i.test(ua)) device = "iPad";
-    }
-    
     let browser = "Web Browser";
     if (/Chrome/i.test(ua)) browser = "Chrome";
     else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
     else if (/Firefox/i.test(ua)) browser = "Firefox";
     else if (/Edg/i.test(ua)) browser = "Edge";
+    return browser;
+  };
+
+  const getDetailedDeviceName = () => {
+    if (typeof window === "undefined" || !navigator) return "Dispositivo Desconhecido";
+    const ua = navigator.userAgent;
     
-    return `${device} (${browser})`;
+    if (/iPhone/i.test(ua)) {
+      return "Apple iPhone";
+    }
+    if (/iPad/i.test(ua)) {
+      return "Apple iPad";
+    }
+    if (/Macintosh/i.test(ua)) {
+      return "Macbook / Apple Mac";
+    }
+    if (/Windows/i.test(ua)) {
+      let osVersion = "Windows PC";
+      if (/Windows NT 10.0/i.test(ua)) osVersion = "Windows 10/11 PC";
+      else if (/Windows NT 6.3/i.test(ua)) osVersion = "Windows 8.1 PC";
+      else if (/Windows NT 6.2/i.test(ua)) osVersion = "Windows 8 PC";
+      else if (/Windows NT 6.1/i.test(ua)) osVersion = "Windows 7 PC";
+      return osVersion;
+    }
+    if (/Android/i.test(ua)) {
+      const matches = ua.match(/\(([^)]+)\)/);
+      if (matches && matches[1]) {
+        const parts = matches[1].split(";");
+        const modelPart = parts.find(p => p.includes("Build/") || (!p.includes("Linux") && !p.includes("Android") && p.trim().length > 3));
+        if (modelPart) {
+          return `Celular Android (${modelPart.replace("Build/", "").trim()})`;
+        }
+      }
+      return "Celular Android";
+    }
+    if (/Linux/i.test(ua)) {
+      return "Linux Desktop";
+    }
+    return "Dispositivo Desconhecido";
+  };
+
+  const getLocation = async () => {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.city && data.region_code) {
+          return `${data.city}, ${data.region_code} - ${data.country_name || "Brasil"}`;
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao obter localizacao:", e);
+    }
+    return "Localização Desconhecida";
   };
 
   useEffect(() => {
@@ -133,11 +177,13 @@ export default function AdminLayout({
       // 1. Gera um novo token de sessao unico
       const token = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
       
-      // 2. Obtem as informacoes do dispositivo
+      // 2. Obtem as informacoes de dispositivo, nome e localizacao
       const devInfo = getDeviceInfo();
+      const devName = getDetailedDeviceName();
+      const loc = await getLocation();
       
       // 3. Registra a sessao no banco de dados
-      await registerAdminSession(token, devInfo);
+      await registerAdminSession(token, devInfo, devName, loc);
       
       if (typeof window !== "undefined") {
         localStorage.setItem("admin_session_token", token);

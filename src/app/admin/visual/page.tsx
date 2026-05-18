@@ -203,20 +203,28 @@ export default function VisualPage() {
 
                   return (
                     <div key={sess.id} className="flex items-center justify-between py-4 group">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-700">
-                            {sess.deviceInfo}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                            {sess.deviceName}
                           </span>
+                          <Badge className="bg-stone-100 text-stone-500 hover:bg-stone-100 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
+                            {sess.deviceInfo}
+                          </Badge>
                           {isCurrent && (
-                            <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.2 border-none">
+                            <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
                               Este Dispositivo
                             </Badge>
                           )}
                         </div>
-                        <p className="text-[9px] text-stone-400 uppercase tracking-widest font-semibold">
-                          Última atividade: {formattedDate}
-                        </p>
+                        <div className="space-y-0.5">
+                          <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
+                            📍 {sess.location}
+                          </p>
+                          <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
+                            Última atividade: {formattedDate}
+                          </p>
+                        </div>
                       </div>
 
                       <Button
