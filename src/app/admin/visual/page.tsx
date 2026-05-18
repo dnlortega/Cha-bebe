@@ -34,6 +34,7 @@ export default function VisualPage() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [currentSessionToken, setCurrentSessionToken] = useState("");
   const [loadingSessions, setLoadingSessions] = useState(false);
+  const [selectedDiag, setSelectedDiag] = useState<any | null>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -238,14 +239,32 @@ export default function VisualPage() {
                         </div>
                       </div>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRevokeSession(sess.id, sess.token)}
-                        className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
-                      >
-                        {isCurrent ? "Sair" : "Desconectar"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {sess.diagnostics && sess.diagnostics !== "{}" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              try {
+                                setSelectedDiag(JSON.parse(sess.diagnostics));
+                              } catch (e) {
+                                setSelectedDiag(null);
+                              }
+                            }}
+                            className="text-[9px] font-bold text-stone-500 hover:text-stone-800 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-200"
+                          >
+                            Diagnóstico
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeSession(sess.id, sess.token)}
+                          className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
+                        >
+                          {isCurrent ? "Sair" : "Desconectar"}
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
@@ -254,6 +273,42 @@ export default function VisualPage() {
           </div>
         </Card>
       </div>
+
+      {/* Modal de Diagnóstico Avançado */}
+      {selectedDiag && (
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="border border-stone-200 shadow-2xl bg-white rounded-none p-8 max-w-md w-full space-y-6 relative">
+            <div className="border-b border-stone-100 pb-4">
+              <h3 className="text-xs font-bold tracking-widest uppercase text-stone-800 flex items-center gap-2">
+                ⚙️ DIAGNÓSTICO DE HARDWARE
+              </h3>
+              <p className="text-[9px] text-stone-400 uppercase tracking-widest font-semibold mt-1">
+                Relatório técnico detalhado do dispositivo
+              </p>
+            </div>
+            
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+              {Object.entries(selectedDiag).map(([key, val]) => (
+                <div key={key} className="flex justify-between items-center py-2 border-b border-stone-50 text-[10px]">
+                  <span className="font-bold text-stone-500 uppercase tracking-wider">{key}</span>
+                  <span className="font-semibold text-stone-800 text-right uppercase tracking-wider">{String(val)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedDiag(null)}
+                className="text-[9px] font-bold tracking-wider rounded-none uppercase h-9 bg-stone-900 text-white hover:bg-stone-800 border-none px-6"
+              >
+                Fechar Relatório
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

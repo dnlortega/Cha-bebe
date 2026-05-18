@@ -165,6 +165,35 @@ export default function AdminLayout({
     return "Localização Desconhecida";
   };
 
+  const getDiagnosticsReport = async (): Promise<string> => {
+    if (typeof window === "undefined") return "{}";
+    
+    const diag: Record<string, any> = {
+      "Resolução de Tela": `${window.screen.width}x${window.screen.height}`,
+      "Resolução Útil": `${window.screen.availWidth}x${window.screen.availHeight}`,
+      "Densidade de Pixels": `${window.devicePixelRatio}x`,
+      "Cores da Tela": `${window.screen.colorDepth} bits`,
+      "Núcleos de Processamento (CPU)": `${navigator.hardwareConcurrency || "Desconhecido"} threads`,
+      "Memória RAM (Aproximada)": (navigator as any).deviceMemory ? `${(navigator as any).deviceMemory} GB` : "Desconhecido",
+      "Idioma do Sistema": navigator.language || "Desconhecido",
+      "Plataforma do Motor": navigator.platform || "Desconhecido",
+      "Fuso Horário": Intl.DateTimeFormat().resolvedOptions().timeZone || "Desconhecido",
+      "Navegador Online": navigator.onLine ? "Sim" : "Não",
+      "Cookies Habilitados": navigator.cookieEnabled ? "Sim" : "Não",
+      "Local Storage Habilitado": typeof localStorage !== "undefined" ? "Sim" : "Não"
+    };
+
+    if ((navigator as any).getBattery) {
+      try {
+        const battery = await (navigator as any).getBattery();
+        diag["Nível da Bateria"] = `${Math.round(battery.level * 100)}%`;
+        diag["Carregando Bateria"] = battery.charging ? "Sim" : "Não";
+      } catch (e) {}
+    }
+
+    return JSON.stringify(diag);
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       if (typeof window !== "undefined") {
@@ -274,8 +303,11 @@ export default function AdminLayout({
       const gpu = getGPUInfo();
       const devName = gpu ? `${baseName} | GPU: ${gpu}` : baseName;
       
-      // 5. Registra a sessao no banco de dados com GPS e hardware
-      await registerAdminSession(token, devInfo, devName, loc, gps);
+      // 5. Gera relatório avançado de diagnóstico de hardware
+      const diagnostics = await getDiagnosticsReport();
+      
+      // 6. Registra a sessao no banco de dados com GPS, hardware e diagnóstico
+      await registerAdminSession(token, devInfo, devName, loc, gps, diagnostics);
       
       if (typeof window !== "undefined") {
         localStorage.setItem("admin_session_token", token);
