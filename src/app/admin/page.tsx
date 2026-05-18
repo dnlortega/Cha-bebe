@@ -54,15 +54,21 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     const [gData, mData] = await Promise.all([getGuests(), getRecentMessages()]);
     setGuests(gData);
     setMessages(mData);
-    setLoading(false);
+    if (!isSilent) setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 15000); // Sincroniza silenciosamente em segundo plano a cada 15 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   const total = guests.length;
   const confirmed = guests.filter(g => g.status_confirmacao === "CONFIRMED").length;
