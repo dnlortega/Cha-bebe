@@ -93,6 +93,19 @@ export default function AdminDashboard() {
               onClick: () => setSelectedCategory("CONFIRMADOS")
             }
           });
+
+          // Notificação Nativa do Sistema Operacional (Android Lockscreen / PC status bar)
+          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification(`🍼 Chá da Louise`, {
+                body: `${newGuest.nome} confirmou presença!`,
+                icon: "/icon.png",
+                vibrate: [200, 100, 200]
+              });
+            } catch (e) {
+              console.error("Erro ao enviar notificação de sistema:", e);
+            }
+          }
         }
       });
     }
@@ -108,6 +121,15 @@ export default function AdminDashboard() {
       fetchData(true);
     }, 15000); // Sincroniza silenciosamente em segundo plano a cada 15 segundos
     return () => clearInterval(interval);
+  }, []);
+
+  // Solicita permissão para notificações nativas do sistema no Android/PC
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+    }
   }, []);
 
   // Efeito para liberar o áudio em navegadores mobile no primeiro toque na tela

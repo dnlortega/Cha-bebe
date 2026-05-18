@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getHistoryLogs } from "@/app/actions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   History, 
@@ -28,6 +29,47 @@ export default function HistoryPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const logsRef = useRef<any[]>([]);
+
+  // Mantém logsRef.current sincronizado com o estado mais recente de logs
+  useEffect(() => {
+    logsRef.current = logs;
+  }, [logs]);
+
+  // Solicita permissão para notificações nativas do sistema no Android/PC
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            toast.success("🔔 Notificações nativas ativadas no seu celular!");
+          }
+        });
+      }
+    }
+  }, []);
+
+  // Ouvinte de primeiro toque na tela para desbloqueio de áudio mobile no Android
+  useEffect(() => {
+    const unlockAudio = () => {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+      audio.volume = 0;
+      audio.play()
+        .then(() => {
+          window.removeEventListener("touchstart", unlockAudio);
+          window.removeEventListener("click", unlockAudio);
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("touchstart", unlockAudio, { passive: true });
+    window.addEventListener("click", unlockAudio, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("click", unlockAudio);
+    };
+  }, []);
 
   const fetchHistory = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -35,6 +77,52 @@ export default function HistoryPage() {
 
     try {
       const data = await getHistoryLogs();
+      const currentLogs = logsRef.current;
+
+      // Se já temos registros anteriores carregados, verifica se surgiu um novo log de RSVP
+      if (currentLogs.length > 0) {
+        data.forEach((newLog: any) => {
+          const exists = currentLogs.some((l: any) => l.id === newLog.id);
+          if (!exists) {
+            // Nova resposta / alteração detectada!
+            const isConfirmed = newLog.status_confirmacao === "CONFIRMED";
+            const notificationTitle = isConfirmed ? `🟢 Confirmação: ${newLog.guestNome}` : `🔴 Recusa: ${newLog.guestNome}`;
+            const notificationBody = isConfirmed 
+              ? `Confirmou presença com ${newLog.qtd_adultos} adulto(s).` 
+              : `Recusou o convite.`;
+
+            // 1. Toca o som de sino premium
+            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+            audio.volume = 0.55;
+            audio.play().catch(() => {});
+
+            // 2. Dispara a vibração física dupla no Android
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate([150, 80, 150]);
+            }
+
+            // 3. Exibe o toast visual na interface
+            toast.success(notificationTitle, {
+              description: notificationBody,
+              duration: 8000
+            });
+
+            // 4. Envia a notificação nativa para a barra de status do celular Android (mesmo em segundo plano)
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+              try {
+                new Notification(`🍼 Chá da Louise`, {
+                  body: `${newLog.guestNome} ${isConfirmed ? "confirmou presença!" : "recusou o convite."}`,
+                  icon: "/icon.png",
+                  vibrate: [200, 100, 200]
+                });
+              } catch (e) {
+                console.error("Erro ao enviar notificação de sistema:", e);
+              }
+            }
+          }
+        });
+      }
+
       setLogs(data);
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
@@ -229,44 +317,44 @@ export default function HistoryPage() {
                             <MessageSquare className="h-3.5 w-3.5 text-primary opacity-50 flex-shrink-0 mt-0.5" />
                             <p className="text-[11px] opacity-75 italic text-stone-600 leading-relaxed normal-case">
                               "{latestLog.mensagem}"
-                          </p>
-                        </div>
-                      )}
+                            </p>
+                          </div>
+                        )}
 
-                      {/* Histórico de Alterações Anteriores */}
-                      {history.length > 0 && (
-                        <div className="pt-4 border-t border-stone-100 space-y-2.5 mt-4">
-                          <p className="text-[8px] font-bold tracking-[0.2em] text-stone-400 uppercase flex items-center gap-1.5">
-                            <Calendar className="h-3 w-3 opacity-60" /> Alterações Anteriores:
-                          </p>
-                          <div className="space-y-2 pl-0.5">
-                            {history.map((histLog: any) => {
-                              const hConfirmed = histLog.status_confirmacao === "CONFIRMED";
-                              return (
-                                <div key={histLog.id} className="flex items-center justify-between text-[9px] text-stone-500 font-medium bg-stone-50/50 p-2 border border-stone-100">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`w-1.5 h-1.5 rounded-full ${hConfirmed ? "bg-emerald-500" : "bg-red-400"}`} />
-                                    <span className="font-bold uppercase tracking-wider">
-                                      {hConfirmed ? "Confirmou" : "Recusou"}
+                        {/* Histórico de Alterações Anteriores */}
+                        {history.length > 0 && (
+                          <div className="pt-4 border-t border-stone-100 space-y-2.5 mt-4">
+                            <p className="text-[8px] font-bold tracking-[0.2em] text-stone-400 uppercase flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3 opacity-60" /> Alterações Anteriores:
+                            </p>
+                            <div className="space-y-2 pl-0.5">
+                              {history.map((histLog: any) => {
+                                const hConfirmed = histLog.status_confirmacao === "CONFIRMED";
+                                return (
+                                  <div key={histLog.id} className="flex items-center justify-between text-[9px] text-stone-500 font-medium bg-stone-50/50 p-2 border border-stone-100">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-1.5 h-1.5 rounded-full ${hConfirmed ? "bg-emerald-500" : "bg-red-400"}`} />
+                                      <span className="font-bold uppercase tracking-wider">
+                                        {hConfirmed ? "Confirmou" : "Recusou"}
+                                      </span>
+                                    </div>
+                                    <span className="text-stone-400 text-[8px] font-bold">
+                                      {formatDate(histLog.data_resposta)}
                                     </span>
                                   </div>
-                                  <span className="text-stone-400 text-[8px] font-bold">
-                                    {formatDate(histLog.data_resposta)}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </Card>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                        )}
+                      </Card>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
       )}
 
       {/* Caso não haja nenhuma resposta ainda */}
