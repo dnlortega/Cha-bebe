@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import { verifyAdmin, getSettings, registerAdminSession, verifyAdminSession } from "@/app/actions";
+import { verifyAdmin, getSettings, registerAdminSession, verifyAdminSession, updateGoogleSessionDetails } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -219,38 +219,117 @@ export default function AdminLayout({
 
   useEffect(() => {
     const initAuth = async () => {
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("admin_session_token");
-        const savedUser = localStorage.getItem("admin_username");
-        if (token) {
-          // Verifica se o token de sessao ainda é valido no banco de dados
-          const isValid = await verifyAdminSession(token);
-          if (isValid && savedUser) {
+      try {
+        if (typeof window !== "undefined") {
+          const urlParams = new URLSearchParams(window.location.search);
+          const googleToken = urlParams.get("google_token");
+          const googleUsername = urlParams.get("google_username");
+          const googleError = urlParams.get("google_error");
+
+          if (googleError) {
+            toast.error(decodeURIComponent(googleError));
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+
+          if (googleToken && googleUsername) {
+            setChecking(true);
+            
+            // Execute exactly the same diagnostics/geofencing check as local login!
+            let loc = "Localização Desconhecida";
+            let fallbackGps = "";
+            try {
+              const res = await fetch("https://ipapi.co/json/");
+              if (res.ok) {
+                const data = await res.json();
+                if (data.city && data.region_code) {
+                  loc = `${data.city}, ${data.region_code} - ${data.country_name || "Brasil"}`;
+                }
+                if (data.latitude && data.longitude) {
+                  fallbackGps = `${data.latitude},${data.longitude}`;
+                }
+              }
+            } catch (err) {
+              console.error("Erro no fetch de localizacao por IP:", err);
+            }
+
+            let gps = await getGPSCoordinates();
+            if (!gps && fallbackGps) {
+              gps = fallbackGps;
+            }
+
+            // Bloqueio geográfico: o admin deve estar em Bauru, SP
+            const isFromBauru = loc.toLowerCase().includes("bauru") || (gps && isWithinBauruGPS(gps));
+            if (!isFromBauru) {
+              toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
+              setChecking(false);
+              window.history.replaceState({}, document.title, window.location.pathname);
+              return;
+            }
+
+            // Obtem informacoes de dispositivo enriquecidas
+            const browser = getDeviceInfo();
+            const net = getConnectionType();
+            const devInfo = net ? `${browser} | ${net}` : browser;
+
+            const baseName = await getDetailedDeviceName();
+            const gpu = getGPUInfo();
+            const devName = gpu ? `${baseName} | GPU: ${gpu}` : baseName;
+            const diagnostics = await getDiagnosticsReport();
+
+            // Enriquece a sessão criada no callback
+            await updateGoogleSessionDetails(googleToken, devInfo, devName, loc, gps, diagnostics);
+
+            // Salva as credenciais no localStorage
+            localStorage.setItem("admin_session_token", googleToken);
+            localStorage.setItem("admin_authorized", "true");
+            localStorage.setItem("admin_username", googleUsername);
+
             setAuthorized(true);
-            setCurrentUser(savedUser);
+            setCurrentUser(googleUsername);
+            toast.success("CONECTADO COM SUCESSO VIA GOOGLE!");
+
+            // Limpa os parâmetros da URL para evitar expor o token
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setChecking(false);
+            return;
+          }
+
+          // --- Normal Session Validation ---
+          const token = localStorage.getItem("admin_session_token");
+          const savedUser = localStorage.getItem("admin_username");
+          if (token) {
+            // Verifica se o token de sessao ainda é valido no banco de dados
+            const isValid = await verifyAdminSession(token);
+            if (isValid && savedUser) {
+              setAuthorized(true);
+              setCurrentUser(savedUser);
+            } else {
+              // Sessao foi revogada! Desloga imediatamente
+              localStorage.removeItem("admin_session_token");
+              localStorage.removeItem("admin_authorized");
+              localStorage.removeItem("admin_username");
+              setAuthorized(false);
+              setCurrentUser(null);
+            }
           } else {
-            // Sessao foi revogada! Desloga imediatamente
+            // Sem token ativo no banco! Desloga imediatamente
             localStorage.removeItem("admin_session_token");
             localStorage.removeItem("admin_authorized");
             localStorage.removeItem("admin_username");
             setAuthorized(false);
             setCurrentUser(null);
           }
-        } else {
-          // Sem token ativo no banco! Desloga imediatamente
-          localStorage.removeItem("admin_session_token");
-          localStorage.removeItem("admin_authorized");
-          localStorage.removeItem("admin_username");
-          setAuthorized(false);
-          setCurrentUser(null);
         }
+        
+        const settings = await getSettings();
+        if (settings && settings.sessionTimeout) {
+          setTimeoutSeconds(settings.sessionTimeout);
+        }
+      } catch (error) {
+        console.warn("Erro temporário de conexão com o servidor durante a inicialização:", error);
+      } finally {
+        setChecking(false);
       }
-      
-      const settings = await getSettings();
-      if (settings && settings.sessionTimeout) {
-        setTimeoutSeconds(settings.sessionTimeout);
-      }
-      setChecking(false);
     };
 
     initAuth();
@@ -413,6 +492,41 @@ export default function AdminLayout({
                 className="w-full bg-stone-900 hover:bg-stone-800 text-white h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-2xl hover:translate-y-[-2px]"
               >
                 LOGIN
+              </Button>
+
+              <div className="flex items-center my-6">
+                <div className="flex-1 border-t border-stone-200"></div>
+                <span className="px-4 text-[9px] text-stone-400 tracking-[0.3em] font-bold uppercase">OU</span>
+                <div className="flex-1 border-t border-stone-200"></div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setChecking(true);
+                  window.location.href = "/api/auth/google";
+                }}
+                className="w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-200 h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-md hover:translate-y-[-2px] flex items-center justify-center gap-3 font-semibold"
+              >
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#EA4335"
+                    d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.284 2.68 1.258 6.586l3.923 3.149z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M23.536 12.218c0-.791-.073-1.582-.218-2.345H12v4.455h6.473a5.53 5.53 0 0 1-2.4 3.636v3.018h3.873c2.264-2.09 3.59-5.173 3.59-8.764z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.266 14.235l-3.923 3.15A11.954 11.954 0 0 0 12 24c3.082 0 5.673-.973 7.573-2.655l-3.873-3.018c-1.073.718-2.436 1.154-3.7 1.154-2.855 0-5.264-1.927-6.136-4.527v-3.719z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M5.266 9.765c-.218.655-.345 1.355-.345 2.1 0 .745.127 1.445.345 2.1l-3.923 3.15A11.942 11.942 0 0 1 0 12c0-1.89.445-3.673 1.236-5.273l4.03 3.038z"
+                  />
+                </svg>
+                ENTRAR COM GOOGLE
               </Button>
             </form>
           </CardContent>

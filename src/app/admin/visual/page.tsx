@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession, getSessionHistoryLogs } from "@/app/actions";
+import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession, getSessionHistoryLogs, getAdminCredentials } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export default function VisualPage() {
   
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [googleEmail, setGoogleEmail] = useState("");
   const [updatingAdmin, setUpdatingAdmin] = useState(false);
 
   // Estados de controle de sessões ativas e histórico
@@ -45,10 +46,19 @@ export default function VisualPage() {
     fetchSettings();
     fetchSessions();
     fetchHistory();
+    fetchCredentials();
     if (typeof window !== "undefined") {
       setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
     }
   }, []);
+
+  const fetchCredentials = async () => {
+    const data = await getAdminCredentials();
+    if (data) {
+      setNewUsername(data.username || "");
+      setGoogleEmail(data.googleEmail || "");
+    }
+  };
 
   const fetchSettings = async () => {
     const data = await getSettings();
@@ -127,8 +137,23 @@ export default function VisualPage() {
   const handleUpdateAdmin = async (e: any) => {
     e.preventDefault();
     setUpdatingAdmin(true);
-    const result = await updateAdminCredentials("admin", newUsername, newPassword);
-    if (result.success) toast.success("ACESSO ATUALIZADO");
+    
+    let currentUsername = "admin";
+    if (typeof window !== "undefined") {
+      currentUsername = localStorage.getItem("admin_username") || "admin";
+    }
+
+    const result = await updateAdminCredentials(currentUsername, newUsername, newPassword, googleEmail);
+    if (result.success) {
+      toast.success("ACESSO ATUALIZADO COM SUCESSO!");
+      if (typeof window !== "undefined" && newUsername) {
+        localStorage.setItem("admin_username", newUsername);
+      }
+      setNewPassword(""); // Limpa o campo de senha após salvar
+      fetchCredentials(); // Recarrega os dados do banco
+    } else {
+      toast.error(result.error || "Erro ao atualizar credenciais.");
+    }
     setUpdatingAdmin(false);
   };
 
@@ -179,10 +204,43 @@ export default function VisualPage() {
       <div className="grid grid-cols-1 gap-8">
         <Card className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
           <div className="flex items-center gap-3 mb-8"><Lock className="h-4 w-4 text-primary" /><h3 className="text-xs font-bold tracking-widest uppercase">Acesso Administrativo</h3></div>
-          <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Novo Usuário</label><Input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nova Senha</label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="rounded-none h-12 bg-white/5 border-white/10" /></div>
-            <Button type="submit" disabled={updatingAdmin} className="h-12 rounded-none bg-primary text-primary-foreground hover:bg-primary/95">{updatingAdmin ? <Loader2 className="animate-spin" /> : "ATUALIZAR ACESSO"}</Button>
+          <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <div className="space-y-1">
+              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">Usuário</label>
+              <Input 
+                value={newUsername} 
+                onChange={e => setNewUsername(e.target.value)} 
+                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
+                placeholder="admin" 
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">Nova Senha (deixe em branco)</label>
+              <Input 
+                type="password" 
+                value={newPassword} 
+                onChange={e => setNewPassword(e.target.value)} 
+                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
+                placeholder="••••••••" 
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">E-mail do Google (login)</label>
+              <Input 
+                type="email" 
+                value={googleEmail} 
+                onChange={e => setGoogleEmail(e.target.value)} 
+                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
+                placeholder="seu-email@gmail.com" 
+              />
+            </div>
+            <Button 
+              type="submit" 
+              disabled={updatingAdmin} 
+              className="h-12 rounded-none bg-primary text-primary-foreground hover:bg-primary/95 font-bold tracking-widest text-[10px] uppercase transition-all"
+            >
+              {updatingAdmin ? <Loader2 className="animate-spin" /> : "ATUALIZAR ACESSO"}
+            </Button>
           </form>
         </Card>
 

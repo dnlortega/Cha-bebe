@@ -60,9 +60,10 @@ model Gift {
 }
 
 model Admin {
-  id       String @id @default(cuid())
-  username String @unique
-  password String
+  id          String  @id @default(cuid())
+  username    String  @unique
+  password    String
+  googleEmail String? @unique
 }
 
 model GuestHistory {
