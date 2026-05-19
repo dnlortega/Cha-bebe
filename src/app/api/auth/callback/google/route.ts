@@ -104,7 +104,7 @@ export async function GET(request: Request) {
     }
 
     if (!admin) {
-      return NextResponse.redirect(`${proto}://${host}/admin?google_error=${encodeURIComponent("Este e-mail do Google (" + email + ") não possui acesso administrativo configurado.")}`);
+      return NextResponse.redirect(`${proto}://${host}/admin?blocked_email=${encodeURIComponent(email)}`);
     }
 
     // 4. Cria o token de sessão único do painel

@@ -10,7 +10,8 @@ export async function GET(request: Request) {
   if (proto.includes(",")) {
     proto = proto.split(",")[0];
   }
-  const redirectUri = `${proto}://${host}/api/auth/google/callback`;
+  const origin = `${proto}://${host}`;
+  const redirectUri = `${origin}/api/auth/google/callback`;
 
   // If there's an error query param from Google
   const googleErr = url.searchParams.get("error");
@@ -106,7 +107,7 @@ export async function GET(request: Request) {
     }
 
     if (!admin) {
-      return NextResponse.redirect(`${origin}/admin?google_error=${encodeURIComponent("Este e-mail do Google (" + email + ") não possui acesso administrativo configurado.")}`);
+      return NextResponse.redirect(`${origin}/admin?blocked_email=${encodeURIComponent(email)}`);
     }
 
     // 4. Generate the admin session token
