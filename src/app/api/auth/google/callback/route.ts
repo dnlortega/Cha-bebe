@@ -84,29 +84,54 @@ export async function GET(request: Request) {
       }
     });
 
-    // Fallback: Check if it matches the allowed Google email env variable
-    if (!admin && allowedEmail && email === allowedEmail.toLowerCase()) {
-      // Find the first admin to automatically link it to
-      admin = await prisma.admin.findFirst();
+    const isMaster = allowedEmail && email === allowedEmail.toLowerCase();
+
+    if (isMaster) {
       if (admin) {
-        // Automatically link this Google email to the admin account
-        admin = await prisma.admin.update({
-          where: { id: admin.id },
-          data: { googleEmail: email }
-        });
+        if (admin.status !== "APPROVED") {
+          admin = await prisma.admin.update({
+            where: { id: admin.id },
+            data: { status: "APPROVED" }
+          });
+        }
       } else {
-        // If there is NO admin at all (which shouldn't happen), create a default one
+        const firstAdmin = await prisma.admin.findFirst({
+          where: { googleEmail: null }
+        });
+        if (firstAdmin) {
+          admin = await prisma.admin.update({
+            where: { id: firstAdmin.id },
+            data: { googleEmail: email, status: "APPROVED" }
+          });
+        } else {
+          admin = await prisma.admin.create({
+            data: {
+              username: "admin",
+              password: "admin123",
+              googleEmail: email,
+              status: "APPROVED"
+            }
+          });
+        }
+      }
+    } else {
+      if (!admin) {
         admin = await prisma.admin.create({
           data: {
-            username: "admin",
-            password: "admin123", // default fallback password
-            googleEmail: email
+            username: email,
+            password: "google_auth_random_" + Math.random().toString(36).substring(2),
+            googleEmail: email,
+            status: "PENDING"
           }
         });
       }
     }
 
-    if (!admin) {
+    if (admin.status === "PENDING") {
+      return NextResponse.redirect(`${origin}/admin?pending_email=${encodeURIComponent(email)}`);
+    }
+
+    if (admin.status === "BLOCKED") {
       return NextResponse.redirect(`${origin}/admin?blocked_email=${encodeURIComponent(email)}`);
     }
 
@@ -122,7 +147,8 @@ export async function GET(request: Request) {
       "Google Sign-In | Autenticando...",
       "Localização Desconhecida",
       null,
-      "{}"
+      "{}",
+      email
     );
 
     // 6. Redirect back to the admin area with the token and username

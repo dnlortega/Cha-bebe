@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -15,7 +15,8 @@ import {
   X,
   Info,
   Package,
-  History
+  History,
+  ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,11 @@ const menuItems = [
     href: "/admin/gifts",
   },
   {
+    title: "Acessos",
+    icon: ShieldAlert,
+    href: "/admin/access",
+  },
+  {
     title: "Visual",
     icon: Settings,
     href: "/admin/visual",
@@ -66,6 +72,33 @@ const menuItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaster, setIsMaster] = useState(false);
+
+  useEffect(() => {
+    const checkMaster = async () => {
+      const token = localStorage.getItem("admin_session_token") || "";
+      const masterEmail = "dnlortega@gmail.com";
+      
+      // Fast local storage-based check for instant client render
+      const savedUser = localStorage.getItem("admin_username") || "";
+      if (savedUser.toLowerCase() === masterEmail.toLowerCase()) {
+        setIsMaster(true);
+      }
+      
+      // Strict server-side verification double check
+      const { isMasterAdmin } = await import("@/app/actions");
+      const realMaster = await isMasterAdmin(token);
+      setIsMaster(realMaster);
+    };
+    checkMaster();
+  }, []);
+
+  const visibleMenuItems = menuItems.filter(item => {
+    if (item.href === "/admin/access") {
+      return isMaster;
+    }
+    return true;
+  });
 
   // Icon-only on desktop; labeled in mobile drawer
   const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
@@ -85,7 +118,7 @@ export function AdminSidebar() {
 
       {/* Nav */}
       <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "pt-20 lg:pt-6")}>
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

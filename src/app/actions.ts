@@ -374,7 +374,7 @@ export async function getHistoryLogs() {
   }));
 }
 
-export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string, gpsCoords: string | null, diagnostics: string) {
+export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string, gpsCoords: string | null, diagnostics: string, adminEmail?: string) {
   try {
     // Remove qualquer sessao antiga duplicada com o mesmo deviceInfo E deviceName juntas
     const duplicateSessions = await prisma.adminSession.findMany({
@@ -400,7 +400,7 @@ export async function registerAdminSession(token: string, deviceInfo: string, de
     });
 
     await prisma.adminSession.create({
-      data: { token, deviceInfo, deviceName, location, gpsCoords, diagnostics }
+      data: { token, deviceInfo, deviceName, location, gpsCoords, diagnostics, adminEmail }
     });
 
     // Registra o início da nova sessão no histórico de auditoria
@@ -420,12 +420,32 @@ export async function registerAdminSession(token: string, deviceInfo: string, de
   }
 }
 
+
 export async function verifyAdminSession(token: string) {
   try {
     const session = await prisma.adminSession.findUnique({
       where: { token }
     });
     if (!session) return false;
+
+    // Se a sessão tiver um email associado, verifica se o admin correspondente ainda está APPROVED
+    if (session.adminEmail) {
+      const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+      const isMaster = session.adminEmail.toLowerCase() === masterEmail.toLowerCase();
+      
+      const admin = await prisma.admin.findUnique({
+        where: { googleEmail: session.adminEmail }
+      });
+      
+      // dnlortega@gmail.com é sempre aprovado. Outros precisam existir e estar APPROVED
+      if (!isMaster && (!admin || admin.status !== "APPROVED")) {
+        // Exclui a sessão inválida
+        await prisma.adminSession.delete({
+          where: { token }
+        });
+        return false;
+      }
+    }
 
     // Atualiza o lastActive da sessao
     await prisma.adminSession.update({
@@ -438,6 +458,7 @@ export async function verifyAdminSession(token: string) {
     return false;
   }
 }
+
 
 export async function getAdminSessions() {
   noStore();
@@ -499,3 +520,127 @@ export async function getSessionHistoryLogs() {
     return [];
   }
 }
+
+export async function getAdminAccounts(sessionToken: string) {
+  noStore();
+  try {
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const session = await prisma.adminSession.findUnique({
+      where: { token: sessionToken }
+    });
+    if (!session || session.adminEmail?.toLowerCase() !== masterEmail.toLowerCase()) {
+      return { success: false, error: "Não autorizado. Apenas o administrador principal pode gerenciar acessos." };
+    }
+
+    const admins = await prisma.admin.findMany({
+      orderBy: { googleEmail: "asc" }
+    });
+
+    return { 
+      success: true, 
+      admins: admins.map(a => ({
+        id: a.id,
+        username: a.username,
+        googleEmail: a.googleEmail || "",
+        status: a.status
+      }))
+    };
+  } catch (error) {
+    console.error("Erro ao carregar contas de administrador:", error);
+    return { success: false, error: "Erro ao buscar contas de administrador." };
+  }
+}
+
+export async function updateAdminAccountStatus(sessionToken: string, adminId: string, status: string) {
+  try {
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const session = await prisma.adminSession.findUnique({
+      where: { token: sessionToken }
+    });
+    if (!session || session.adminEmail?.toLowerCase() !== masterEmail.toLowerCase()) {
+      return { success: false, error: "Não autorizado." };
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin) {
+      return { success: false, error: "Administrador não encontrado." };
+    }
+
+    if (admin.googleEmail?.toLowerCase() === masterEmail.toLowerCase()) {
+      return { success: false, error: "Não é possível alterar o status do administrador principal." };
+    }
+
+    await prisma.admin.update({
+      where: { id: adminId },
+      data: { status }
+    });
+
+    // Se o status for alterado para BLOCKED ou PENDING, deleta todas as sessões ativas desse usuário para deslogá-lo
+    if (status !== "APPROVED" && admin.googleEmail) {
+      await prisma.adminSession.deleteMany({
+        where: { adminEmail: admin.googleEmail }
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar status do administrador:", error);
+    return { success: false, error: "Erro ao atualizar status." };
+  }
+}
+
+export async function deleteAdminAccount(sessionToken: string, adminId: string) {
+  try {
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const session = await prisma.adminSession.findUnique({
+      where: { token: sessionToken }
+    });
+    if (!session || session.adminEmail?.toLowerCase() !== masterEmail.toLowerCase()) {
+      return { success: false, error: "Não autorizado." };
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin) {
+      return { success: false, error: "Administrador não encontrado." };
+    }
+
+    if (admin.googleEmail?.toLowerCase() === masterEmail.toLowerCase()) {
+      return { success: false, error: "Não é possível excluir o administrador principal." };
+    }
+
+    if (admin.googleEmail) {
+      await prisma.adminSession.deleteMany({
+        where: { adminEmail: admin.googleEmail }
+      });
+    }
+
+    await prisma.admin.delete({
+      where: { id: adminId }
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir administrador:", error);
+    return { success: false, error: "Erro ao excluir administrador." };
+  }
+}
+
+export async function isMasterAdmin(sessionToken: string) {
+  noStore();
+  try {
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const session = await prisma.adminSession.findUnique({
+      where: { token: sessionToken }
+    });
+    return session?.adminEmail?.toLowerCase() === masterEmail.toLowerCase();
+  } catch (e) {
+    return false;
+  }
+}
+

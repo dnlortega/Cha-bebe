@@ -83,41 +83,69 @@ export async function GET(request: Request) {
       }
     });
 
-    // Fallback: Se bater com o e-mail cadastrado no .env
-    if (!admin && allowedEmail && email === allowedEmail.toLowerCase()) {
-      admin = await prisma.admin.findFirst();
+    const isMaster = allowedEmail && email === allowedEmail.toLowerCase();
+
+    if (isMaster) {
       if (admin) {
-        // Vincula no banco de dados para agilizar acessos futuros
-        admin = await prisma.admin.update({
-          where: { id: admin.id },
-          data: { googleEmail: email }
-        });
+        if (admin.status !== "APPROVED") {
+          admin = await prisma.admin.update({
+            where: { id: admin.id },
+            data: { status: "APPROVED" }
+          });
+        }
       } else {
+        const firstAdmin = await prisma.admin.findFirst({
+          where: { googleEmail: null }
+        });
+        if (firstAdmin) {
+          admin = await prisma.admin.update({
+            where: { id: firstAdmin.id },
+            data: { googleEmail: email, status: "APPROVED" }
+          });
+        } else {
+          admin = await prisma.admin.create({
+            data: {
+              username: "admin",
+              password: "admin123",
+              googleEmail: email,
+              status: "APPROVED"
+            }
+          });
+        }
+      }
+    } else {
+      if (!admin) {
         admin = await prisma.admin.create({
           data: {
-            username: "admin",
-            password: "admin123",
-            googleEmail: email
+            username: email,
+            password: "google_auth_random_" + Math.random().toString(36).substring(2),
+            googleEmail: email,
+            status: "PENDING"
           }
         });
       }
     }
 
-    if (!admin) {
+    if (admin.status === "PENDING") {
+      return NextResponse.redirect(`${proto}://${host}/admin?pending_email=${encodeURIComponent(email)}`);
+    }
+
+    if (admin.status === "BLOCKED") {
       return NextResponse.redirect(`${proto}://${host}/admin?blocked_email=${encodeURIComponent(email)}`);
     }
 
     // 4. Cria o token de sessão único do painel
     const token = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-    // 5. Registra a sessão
+    // 5. Registra a sessão vinculando ao email
     await registerAdminSession(
       token,
       "Google Sign-In | Autenticando...",
       "Google Sign-In | Autenticando...",
       "Localização Desconhecida",
       null,
-      "{}"
+      "{}",
+      email
     );
 
     // 6. Redireciona de volta para o painel com o token gerado

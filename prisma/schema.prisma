@@ -64,7 +64,9 @@ model Admin {
   username    String  @unique
   password    String
   googleEmail String? @unique
+  status      String  @default("PENDING") // "PENDING", "APPROVED", "BLOCKED"
 }
+
 
 model GuestHistory {
   id                String   @id @default(cuid())
@@ -90,6 +92,7 @@ model AdminSession {
   diagnostics String   @default("{}")
   lastActive  DateTime @default(now())
   createdAt   DateTime @default(now())
+  adminEmail  String?
 }
 
 model SessionHistoryLog {

@@ -34,6 +34,8 @@ export default function AdminLayout({
   const [checking, setChecking] = useState(true);
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
   const [blockedEmail, setBlockedEmail] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
 
   const getDeviceInfo = () => {
     if (typeof window === "undefined" || !navigator) return "Navegador Desconhecido";
@@ -231,6 +233,13 @@ export default function AdminLayout({
             window.history.replaceState({}, document.title, window.location.pathname);
           }
 
+          const pending = urlParams.get("pending_email");
+          if (pending) {
+            setPendingEmail(pending);
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+
+
           if (googleError) {
             toast.error(decodeURIComponent(googleError));
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -383,7 +392,49 @@ export default function AdminLayout({
     );
   }
 
+  if (pendingEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6 font-sans">
+        <Card className="w-full max-w-sm border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-white rounded-none animate-in fade-in zoom-in duration-1000 overflow-hidden">
+          <div className="h-2 w-full bg-amber-500 animate-pulse" />
+          <CardHeader className="space-y-6 text-center pt-16 pb-10">
+            <div className="w-20 h-20 bg-stone-900 mx-auto flex items-center justify-center rotate-45 transition-all duration-700 shadow-2xl relative overflow-hidden group hover:rotate-0">
+               <div className="-rotate-45 group-hover:rotate-0 transition-all duration-700 w-full h-full p-2 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+               </div>
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-xl font-serif tracking-[0.2em] text-amber-600 uppercase">Acesso Pendente</CardTitle>
+              <p className="text-[9px] opacity-40 tracking-[0.5em] uppercase font-light">Aguardando Liberação</p>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-16 px-12 text-center space-y-8">
+            <div className="space-y-4">
+              <p className="text-[11px] leading-relaxed text-stone-500 font-medium">
+                O e-mail <span className="font-bold text-stone-800 underline">{pendingEmail}</span> está registrado como pendente de liberação.
+              </p>
+              <p className="text-[10px] leading-relaxed text-stone-400">
+                Apenas o e-mail administrador principal (<span className="font-bold text-stone-600">dnlortega@gmail.com</span>) pode conceder novos acessos no menu do painel.
+              </p>
+            </div>
+            
+            <Button
+              type="button"
+              onClick={() => {
+                setPendingEmail(null);
+              }}
+              className="w-full bg-stone-900 hover:bg-stone-800 text-white h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-2xl hover:translate-y-[-2px] flex items-center justify-center font-bold"
+            >
+              VOLTAR AO LOGIN
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (blockedEmail) {
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6 font-sans">
         <Card className="w-full max-w-sm border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-white rounded-none animate-in fade-in zoom-in duration-1000 overflow-hidden">
