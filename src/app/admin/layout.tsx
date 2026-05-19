@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import { verifyAdmin, getSettings, registerAdminSession, verifyAdminSession, updateGoogleSessionDetails } from "@/app/actions";
+import { getSettings, registerAdminSession, verifyAdminSession, updateGoogleSessionDetails } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,8 +31,6 @@ export default function AdminLayout({
 }) {
   const [authorized, setAuthorized] = useState(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [checking, setChecking] = useState(true);
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
 
@@ -332,7 +330,9 @@ export default function AdminLayout({
       }
     };
 
-    initAuth();
+    initAuth().catch(err => {
+      console.warn("Rejeição tratada em initAuth:", err);
+    });
   }, []);
 
   // Idle Timer Logic (DESATIVADO por solicitação do usuário)
@@ -366,71 +366,7 @@ export default function AdminLayout({
     return () => clearInterval(sessionChecker);
   }, [authorized]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const isCorrect = await verifyAdmin(username, password);
-    if (isCorrect) {
-      // 1. Gera um novo token de sessao unico
-      const token = "session_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
-      
-      // 2. Obtem as informacoes de localizacao via IP e fallback de GPS
-      let loc = "Localização Desconhecida";
-      let fallbackGps = "";
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        if (res.ok) {
-          const data = await res.json();
-          if (data.city && data.region_code) {
-            loc = `${data.city}, ${data.region_code} - ${data.country_name || "Brasil"}`;
-          }
-          if (data.latitude && data.longitude) {
-            fallbackGps = `${data.latitude},${data.longitude}`;
-          }
-        }
-      } catch (err) {
-        console.error("Erro no fetch de localizacao por IP:", err);
-      }
 
-      // 3. Tenta obter o GPS real do navegador
-      let gps = await getGPSCoordinates();
-      if (!gps && fallbackGps) {
-        gps = fallbackGps; // Usa o do IP se falhar
-      }
-      
-      // 3.5 Bloqueio geográfico: o admin deve estar em Bauru, SP
-      const isFromBauru = loc.toLowerCase().includes("bauru") || (gps && isWithinBauruGPS(gps));
-      if (!isFromBauru) {
-        toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
-        return;
-      }
-      
-      // 4. Obtem informacoes de dispositivo enriquecidas
-      const browser = getDeviceInfo();
-      const net = getConnectionType();
-      const devInfo = net ? `${browser} | ${net}` : browser;
-
-      const baseName = await getDetailedDeviceName();
-      const gpu = getGPUInfo();
-      const devName = gpu ? `${baseName} | GPU: ${gpu}` : baseName;
-      
-      // 5. Gera relatório avançado de diagnóstico de hardware
-      const diagnostics = await getDiagnosticsReport();
-      
-      // 6. Registra a sessao no banco de dados com GPS, hardware e diagnóstico
-      await registerAdminSession(token, devInfo, devName, loc, gps, diagnostics);
-      
-      if (typeof window !== "undefined") {
-        localStorage.setItem("admin_session_token", token);
-        localStorage.setItem("admin_authorized", "true");
-        localStorage.setItem("admin_username", username);
-      }
-      
-      setAuthorized(true);
-      setCurrentUser(username);
-    } else {
-      toast.error("USUÁRIO OU SENHA INCORRETOS");
-    }
-  };
 
   if (checking) {
     return (
@@ -461,52 +397,15 @@ export default function AdminLayout({
               <p className="text-[9px] opacity-30 tracking-[0.5em] uppercase font-light">Acesso Administrativo</p>
             </div>
           </CardHeader>
-          <CardContent className="pb-20 px-12">
-            <form onSubmit={handleLogin} className="space-y-8">
-              <div className="space-y-6">
-                <div className="relative group">
-                  <Input 
-                    type="text" 
-                    placeholder="USERNAME" 
-                    className="bg-transparent border-0 border-b border-stone-200 rounded-none focus-visible:ring-0 focus-visible:border-primary text-[11px] tracking-[0.3em] h-12 text-center transition-all placeholder:opacity-20 uppercase font-bold"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-primary group-focus-within:w-full transition-all duration-500" />
-                </div>
-
-                <div className="relative group">
-                  <Input 
-                    type="password" 
-                    placeholder="PASSWORD" 
-                    className="bg-transparent border-0 border-b border-stone-200 rounded-none focus-visible:ring-0 focus-visible:border-primary text-[11px] tracking-[0.3em] h-12 text-center transition-all placeholder:opacity-20 uppercase font-bold"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-primary group-focus-within:w-full transition-all duration-500" />
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full bg-stone-900 hover:bg-stone-800 text-white h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-2xl hover:translate-y-[-2px]"
-              >
-                LOGIN
-              </Button>
-
-              <div className="flex items-center my-6">
-                <div className="flex-1 border-t border-stone-200"></div>
-                <span className="px-4 text-[9px] text-stone-400 tracking-[0.3em] font-bold uppercase">OU</span>
-                <div className="flex-1 border-t border-stone-200"></div>
-              </div>
-
+          <CardContent className="pb-20 px-12 pt-6">
+            <div className="space-y-6">
               <Button
                 type="button"
                 onClick={() => {
                   setChecking(true);
                   window.location.href = "/api/auth/google";
                 }}
-                className="w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-200 h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-md hover:translate-y-[-2px] flex items-center justify-center gap-3 font-semibold"
+                className="w-full bg-stone-900 hover:bg-stone-800 text-white h-14 text-[10px] tracking-[0.4em] rounded-none transition-all shadow-2xl hover:translate-y-[-2px] flex items-center justify-center gap-3 font-semibold uppercase"
               >
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -528,7 +427,7 @@ export default function AdminLayout({
                 </svg>
                 ENTRAR COM GOOGLE
               </Button>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
