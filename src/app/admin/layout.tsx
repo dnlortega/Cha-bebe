@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext } from "react";
+import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { getSettings, registerAdminSession, verifyAdminSession, updateGoogleSessionDetails } from "@/app/actions";
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Settings as SettingsIcon, UserCircle, ShieldAlert } from "lucide-react";
+import { Loader2, Settings as SettingsIcon, UserCircle, ShieldAlert, Lock } from "lucide-react";
 import Image from "next/image";
 
 const AdminAuthContext = createContext<{
@@ -35,6 +36,13 @@ export default function AdminLayout({
   const [timeoutSeconds, setTimeoutSeconds] = useState(30);
   const [blockedEmail, setBlockedEmail] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const pathname = usePathname();
+  const [allowedScreens, setAllowedScreens] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("admin_allowed_screens") || "ALL";
+    }
+    return "ALL";
+  });
 
 
   const getDeviceInfo = () => {
@@ -226,6 +234,7 @@ export default function AdminLayout({
           const googleToken = urlParams.get("google_token");
           const googleUsername = urlParams.get("google_username");
           const googleError = urlParams.get("google_error");
+          const googleAvatar = urlParams.get("google_avatar");
           const blocked = urlParams.get("blocked_email");
 
           if (blocked) {
@@ -239,6 +248,9 @@ export default function AdminLayout({
             window.history.replaceState({}, document.title, window.location.pathname);
           }
 
+          if (googleAvatar) {
+            localStorage.setItem("admin_avatar", googleAvatar);
+          }
 
           if (googleError) {
             toast.error(decodeURIComponent(googleError));
@@ -298,6 +310,18 @@ export default function AdminLayout({
             localStorage.setItem("admin_authorized", "true");
             localStorage.setItem("admin_username", googleUsername);
 
+            const { getAdminSessionDetails } = await import("@/app/actions");
+            const details = await getAdminSessionDetails(googleToken);
+            if (details.success) {
+              if (details.avatarUrl) {
+                localStorage.setItem("admin_avatar", details.avatarUrl);
+              }
+              if (details.allowedScreens) {
+                localStorage.setItem("admin_allowed_screens", details.allowedScreens);
+                setAllowedScreens(details.allowedScreens);
+              }
+            }
+
             setAuthorized(true);
             setCurrentUser(googleUsername);
             toast.success("CONECTADO COM SUCESSO VIA GOOGLE!");
@@ -312,16 +336,25 @@ export default function AdminLayout({
           const token = localStorage.getItem("admin_session_token");
           const savedUser = localStorage.getItem("admin_username");
           if (token) {
-            // Verifica se o token de sessao ainda é valido no banco de dados
-            const isValid = await verifyAdminSession(token);
-            if (isValid && savedUser) {
+            const { getAdminSessionDetails } = await import("@/app/actions");
+            const details = await getAdminSessionDetails(token);
+            if (details.success && savedUser) {
               setAuthorized(true);
-              setCurrentUser(savedUser);
+              setCurrentUser(details.email || savedUser);
+              if (details.avatarUrl) {
+                localStorage.setItem("admin_avatar", details.avatarUrl);
+              }
+              if (details.allowedScreens) {
+                localStorage.setItem("admin_allowed_screens", details.allowedScreens);
+                setAllowedScreens(details.allowedScreens);
+              }
             } else {
               // Sessao foi revogada! Desloga imediatamente
               localStorage.removeItem("admin_session_token");
               localStorage.removeItem("admin_authorized");
               localStorage.removeItem("admin_username");
+              localStorage.removeItem("admin_avatar");
+              localStorage.removeItem("admin_allowed_screens");
               setAuthorized(false);
               setCurrentUser(null);
             }
@@ -330,6 +363,8 @@ export default function AdminLayout({
             localStorage.removeItem("admin_session_token");
             localStorage.removeItem("admin_authorized");
             localStorage.removeItem("admin_username");
+            localStorage.removeItem("admin_avatar");
+            localStorage.removeItem("admin_allowed_screens");
             setAuthorized(false);
             setCurrentUser(null);
           }
@@ -530,6 +565,70 @@ export default function AdminLayout({
           </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  // --- Route Guard: Verifica se a rota atual é permitida para o usuário ---
+  const SCREEN_ROUTE_MAP: Record<string, string> = {
+    Dashboard: "/admin",
+    Convites: "/admin/guests",
+    Histórico: "/admin/history",
+    Cadastrar: "/admin/add",
+    "Lista Final": "/admin/final-list",
+    Presentes: "/admin/gifts",
+    Acessos: "/admin/access",
+    Visual: "/admin/visual",
+    Sobre: "/admin/about",
+  };
+
+  const isRouteAllowed = (): boolean => {
+    if (allowedScreens === "ALL") return true;
+    const allowedList = allowedScreens.split(",").map((s) => s.trim());
+    // Dashboard é sempre permitido para operadores aprovados
+    if (pathname === "/admin") return true;
+    for (const screenName of allowedList) {
+      const route = SCREEN_ROUTE_MAP[screenName];
+      if (route && pathname.startsWith(route)) return true;
+    }
+    return false;
+  };
+
+  if (authorized && !isRouteAllowed()) {
+    return (
+      <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser }}>
+        <div className="min-h-screen bg-background">
+          <AdminSidebar />
+          <main className="lg:pl-20 min-h-screen transition-all duration-300">
+            <div className="p-4 sm:p-8 lg:p-12 max-w-7xl mx-auto pt-20 lg:pt-12">
+              <div className="min-h-[70vh] flex items-center justify-center">
+                <div className="w-full max-w-md bg-white border border-red-100 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.12)] overflow-hidden animate-in fade-in duration-700">
+                  <div className="h-1.5 w-full bg-red-600" />
+                  <div className="pt-16 pb-16 px-12 text-center space-y-8">
+                    <div className="w-20 h-20 bg-stone-900 mx-auto flex items-center justify-center rotate-45 transition-all duration-700 shadow-2xl relative overflow-hidden group hover:rotate-0">
+                      <div className="-rotate-45 group-hover:rotate-0 transition-all duration-700 w-full h-full p-3 flex items-center justify-center">
+                        <Lock className="h-8 w-8 text-red-500" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h2 className="text-xl font-serif tracking-[0.2em] text-red-600 uppercase">Tela Restrita</h2>
+                      <p className="text-[9px] opacity-40 tracking-[0.5em] uppercase font-light">Sem Permissão</p>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-stone-500 font-medium">
+                      Você não tem permissão para acessar esta seção. Solicite ao administrador principal (<span className="font-bold text-stone-700">dnlortega@gmail.com</span>) que libere o acesso a esta tela.
+                    </p>
+                    <Button
+                      onClick={() => window.location.href = "/admin"}
+                      className="w-full bg-stone-900 hover:bg-stone-800 text-white h-12 text-[10px] tracking-[0.4em] rounded-none transition-all"
+                    >
+                      VOLTAR AO DASHBOARD
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </AdminAuthContext.Provider>
     );
   }
 

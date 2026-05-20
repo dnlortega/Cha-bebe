@@ -542,7 +542,9 @@ export async function getAdminAccounts(sessionToken: string) {
         id: a.id,
         username: a.username,
         googleEmail: a.googleEmail || "",
-        status: a.status
+        status: a.status,
+        allowedScreens: a.allowedScreens,
+        avatarUrl: a.avatarUrl
       }))
     };
   } catch (error) {
@@ -641,6 +643,93 @@ export async function isMasterAdmin(sessionToken: string) {
     return session?.adminEmail?.toLowerCase() === masterEmail.toLowerCase();
   } catch (e) {
     return false;
+  }
+}
+
+export async function getAdminSessionDetails(token: string) {
+  noStore();
+  try {
+    const session = await prisma.adminSession.findUnique({
+      where: { token }
+    });
+    if (!session) return { success: false };
+
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const isMaster = session.adminEmail?.toLowerCase() === masterEmail.toLowerCase();
+
+    if (session.adminEmail) {
+      const admin = await prisma.admin.findUnique({
+        where: { googleEmail: session.adminEmail }
+      });
+      if (isMaster) {
+        return {
+          success: true,
+          email: session.adminEmail,
+          isMaster: true,
+          allowedScreens: "ALL",
+          avatarUrl: admin?.avatarUrl || null
+        };
+      }
+      if (!admin || admin.status !== "APPROVED") {
+        return { success: false };
+      }
+      return {
+        success: true,
+        email: session.adminEmail,
+        isMaster: false,
+        allowedScreens: admin.allowedScreens,
+        avatarUrl: admin.avatarUrl
+      };
+    } else {
+      // Conta de credencial local (admin clássico), tem acesso a ALL
+      return {
+        success: true,
+        email: null,
+        isMaster: false,
+        allowedScreens: "ALL",
+        avatarUrl: null
+      };
+    }
+  } catch (e) {
+    console.error("Erro ao obter detalhes da sessão:", e);
+    return { success: false };
+  }
+}
+
+export async function updateAdminAllowedScreens(sessionToken: string, adminId: string, allowedScreens: string) {
+  try {
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const session = await prisma.adminSession.findUnique({
+      where: { token: sessionToken }
+    });
+    if (!session || session.adminEmail?.toLowerCase() !== masterEmail.toLowerCase()) {
+      return { success: false, error: "Não autorizado. Apenas o administrador principal pode alterar permissões." };
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId }
+    });
+
+    if (!admin) {
+      return { success: false, error: "Administrador não encontrado." };
+    }
+
+    if (admin.googleEmail?.toLowerCase() === masterEmail.toLowerCase()) {
+      return { success: false, error: "Não é possível alterar as permissões do administrador principal." };
+    }
+
+    await prisma.admin.update({
+      where: { id: adminId },
+      data: { allowedScreens }
+    });
+
+    // Revalida o caminho para atualizar os dados no cache
+    revalidatePath("/admin/access");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar telas do administrador:", error);
+    return { success: false, error: "Erro ao atualizar telas permitidas." };
   }
 }
 

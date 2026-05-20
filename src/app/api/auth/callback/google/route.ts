@@ -68,6 +68,7 @@ export async function GET(request: Request) {
 
     const userInfo = await userInfoResponse.json();
     const email = userInfo.email?.toLowerCase();
+    const picture = userInfo.picture || null;
 
     if (!email) {
       return NextResponse.redirect(`${proto}://${host}/admin?google_error=${encodeURIComponent("Não foi possível obter o e-mail da conta do Google.")}`);
@@ -87,12 +88,13 @@ export async function GET(request: Request) {
 
     if (isMaster) {
       if (admin) {
-        if (admin.status !== "APPROVED") {
-          admin = await prisma.admin.update({
-            where: { id: admin.id },
-            data: { status: "APPROVED" }
-          });
-        }
+        admin = await prisma.admin.update({
+          where: { id: admin.id },
+          data: { 
+            status: "APPROVED",
+            avatarUrl: picture
+          }
+        });
       } else {
         const firstAdmin = await prisma.admin.findFirst({
           where: { googleEmail: null }
@@ -100,7 +102,7 @@ export async function GET(request: Request) {
         if (firstAdmin) {
           admin = await prisma.admin.update({
             where: { id: firstAdmin.id },
-            data: { googleEmail: email, status: "APPROVED" }
+            data: { googleEmail: email, status: "APPROVED", avatarUrl: picture }
           });
         } else {
           admin = await prisma.admin.create({
@@ -108,7 +110,8 @@ export async function GET(request: Request) {
               username: "admin",
               password: "admin123",
               googleEmail: email,
-              status: "APPROVED"
+              status: "APPROVED",
+              avatarUrl: picture
             }
           });
         }
@@ -120,8 +123,15 @@ export async function GET(request: Request) {
             username: email,
             password: "google_auth_random_" + Math.random().toString(36).substring(2),
             googleEmail: email,
-            status: "PENDING"
+            status: "PENDING",
+            avatarUrl: picture
           }
+        });
+      } else {
+        // Atualiza o avatar do admin existente
+        admin = await prisma.admin.update({
+          where: { id: admin.id },
+          data: { avatarUrl: picture }
         });
       }
     }
@@ -149,7 +159,7 @@ export async function GET(request: Request) {
     );
 
     // 6. Redireciona de volta para o painel com o token gerado
-    return NextResponse.redirect(`${proto}://${host}/admin?google_token=${token}&google_username=${encodeURIComponent(admin.username)}`);
+    return NextResponse.redirect(`${proto}://${host}/admin?google_token=${token}&google_username=${encodeURIComponent(admin.username)}&google_avatar=${encodeURIComponent(admin.avatarUrl || "")}`);
   } catch (error) {
     console.error("Erro interno no callback do Google Auth:", error);
     return NextResponse.redirect(`${proto}://${host}/admin?google_error=${encodeURIComponent("Erro interno no callback de autenticação.")}`);

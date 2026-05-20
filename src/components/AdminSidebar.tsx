@@ -21,71 +21,40 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/admin",
-  },
-  {
-    title: "Convites",
-    icon: Users,
-    href: "/admin/guests",
-  },
-  {
-    title: "Histórico",
-    icon: History,
-    href: "/admin/history",
-  },
-  {
-    title: "Cadastrar",
-    icon: UserPlus,
-    href: "/admin/add",
-  },
-  {
-    title: "Lista Final",
-    icon: ClipboardList,
-    href: "/admin/final-list",
-  },
-  {
-    title: "Presentes",
-    icon: Package,
-    href: "/admin/gifts",
-  },
-  {
-    title: "Acessos",
-    icon: ShieldAlert,
-    href: "/admin/access",
-  },
-  {
-    title: "Visual",
-    icon: Settings,
-    href: "/admin/visual",
-  },
-  {
-    title: "Sobre",
-    icon: Info,
-    href: "/admin/about",
-  },
+const ALL_MENU_ITEMS = [
+  { title: "Dashboard",   icon: LayoutDashboard, href: "/admin" },
+  { title: "Convites",    icon: Users,            href: "/admin/guests" },
+  { title: "Histórico",   icon: History,          href: "/admin/history" },
+  { title: "Cadastrar",   icon: UserPlus,         href: "/admin/add" },
+  { title: "Lista Final", icon: ClipboardList,    href: "/admin/final-list" },
+  { title: "Presentes",   icon: Package,          href: "/admin/gifts" },
+  { title: "Acessos",     icon: ShieldAlert,      href: "/admin/access" },
+  { title: "Visual",      icon: Settings,         href: "/admin/visual" },
+  { title: "Sobre",       icon: Info,             href: "/admin/about" },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMaster, setIsMaster] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
 
   useEffect(() => {
+    // Lê os dados do localStorage (salvos durante o login)
+    setAvatarUrl(localStorage.getItem("admin_avatar") || null);
+    setAdminEmail(localStorage.getItem("admin_username") || null);
+    setAllowedScreens(localStorage.getItem("admin_allowed_screens") || "ALL");
+
+    // Verifica se é master via servidor
     const checkMaster = async () => {
       const token = localStorage.getItem("admin_session_token") || "";
       const masterEmail = "dnlortega@gmail.com";
-      
-      // Fast local storage-based check for instant client render
       const savedUser = localStorage.getItem("admin_username") || "";
       if (savedUser.toLowerCase() === masterEmail.toLowerCase()) {
         setIsMaster(true);
       }
-      
-      // Strict server-side verification double check
       const { isMasterAdmin } = await import("@/app/actions");
       const realMaster = await isMasterAdmin(token);
       setIsMaster(realMaster);
@@ -93,14 +62,26 @@ export function AdminSidebar() {
     checkMaster();
   }, []);
 
-  const visibleMenuItems = menuItems.filter(item => {
-    if (item.href === "/admin/access") {
-      return isMaster;
-    }
-    return true;
+  // Filtra os itens do menu com base nas telas permitidas
+  const visibleMenuItems = ALL_MENU_ITEMS.filter((item) => {
+    // "Acessos" só para master
+    if (item.href === "/admin/access") return isMaster;
+    // Se allowedScreens é ALL, mostra tudo
+    if (allowedScreens === "ALL") return true;
+    // Dashboard sempre visível para operadores aprovados
+    if (item.href === "/admin") return true;
+    // Filtra pela lista de telas permitidas
+    const allowedList = allowedScreens.split(",").map((s) => s.trim());
+    return allowedList.includes(item.title);
   });
 
-  // Icon-only on desktop; labeled in mobile drawer
+  // Iniciais do email para fallback de avatar
+  const getInitials = (email: string | null) => {
+    if (!email) return "A";
+    const parts = email.split("@")[0].split(/[._-]/);
+    return parts.slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
+  };
+
   const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
@@ -119,7 +100,7 @@ export function AdminSidebar() {
       {/* Nav */}
       <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "pt-20 lg:pt-6")}>
         {visibleMenuItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
@@ -151,13 +132,56 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-2 border-t border-primary/5 pb-5">
+      {/* Avatar + Logout */}
+      <div className="p-2 border-t border-primary/5 pb-5 space-y-3">
+        {/* Avatar do usuário */}
+        <div className={cn("flex items-center gap-2.5 px-2 py-2", !showLabels && "justify-center")}>
+          {avatarUrl ? (
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              {isMaster && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+              )}
+            </div>
+          ) : (
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
+                <span className="text-white text-[9px] font-black tracking-wider">
+                  {getInitials(adminEmail)}
+                </span>
+              </div>
+              {isMaster && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+              )}
+            </div>
+          )}
+          {showLabels && adminEmail && (
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-bold tracking-wider text-stone-700 truncate uppercase">
+                {isMaster ? "Master" : "Operador"}
+              </p>
+              <p className="text-[8px] text-stone-400 truncate">{adminEmail}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Botão de logout */}
         <button
           onClick={() => { 
             sessionStorage.removeItem("admin_auth"); 
             localStorage.removeItem("admin_authorized"); 
-            localStorage.removeItem("admin_username"); 
+            localStorage.removeItem("admin_username");
+            localStorage.removeItem("admin_avatar");
+            localStorage.removeItem("admin_allowed_screens");
+            localStorage.removeItem("admin_session_token");
             window.location.href = "/"; 
           }}
           className={cn(
@@ -200,12 +224,12 @@ export function AdminSidebar() {
         />
       )}
 
-      {/* Mobile Sidebar — icons only */}
+      {/* Mobile Sidebar */}
       <aside className={cn(
-        "lg:hidden fixed left-0 top-0 h-screen w-20 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10 shadow-2xl",
+        "lg:hidden fixed left-0 top-0 h-screen w-64 bg-white z-[55] flex flex-col transition-transform duration-300 ease-in-out border-r border-primary/10 shadow-2xl",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <SidebarContent showLabels={false} />
+        <SidebarContent showLabels={true} />
       </aside>
     </>
   );

@@ -60,11 +60,13 @@ model Gift {
 }
 
 model Admin {
-  id          String  @id @default(cuid())
-  username    String  @unique
-  password    String
-  googleEmail String? @unique
-  status      String  @default("PENDING") // "PENDING", "APPROVED", "BLOCKED"
+  id             String  @id @default(cuid())
+  username       String  @unique
+  password       String
+  googleEmail    String? @unique
+  status         String  @default("PENDING") // "PENDING", "APPROVED", "BLOCKED"
+  allowedScreens String  @default("ALL")     // "ALL" ou lista de nomes de tela delimitados por vírgula
+  avatarUrl      String?
 }
 
 
