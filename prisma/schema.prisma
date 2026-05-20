@@ -21,6 +21,7 @@ model Guest {
   fralda_tamanho    String?   // "RN", "P", "M", "G", "GG"
   kit_churrasco     Boolean  @default(false)
   mensagem          String?   // Recado para os pais
+  exibir_mensagem   Boolean  @default(true) // Controle de exibição do recado no mural
   giftId            String?   // ID do presente escolhido
   gift              Gift?     @relation(fields: [giftId], references: [id])
   createdAt         DateTime @default(now())

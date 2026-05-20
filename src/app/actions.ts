@@ -69,11 +69,15 @@ export async function updateSettings(data: any) {
 }
 
 // Guestbook / Mural Actions
-export async function getRecentMessages() {
+export async function getRecentMessages(forAdmin = false) {
   noStore();
   const messages = await prisma.guest.findMany({
-    where: { mensagem: { not: null }, status_confirmacao: "CONFIRMED" },
-    select: { nome: true, mensagem: true, data_resposta: true },
+    where: { 
+      mensagem: { not: null }, 
+      status_confirmacao: "CONFIRMED",
+      ...(forAdmin ? {} : { exibir_mensagem: true })
+    },
+    select: { id: true, nome: true, mensagem: true, data_resposta: true, exibir_mensagem: true },
     orderBy: { data_resposta: "desc" },
     take: 60
   });
@@ -83,6 +87,21 @@ export async function getRecentMessages() {
     ...m,
     data_resposta: m.data_resposta ? m.data_resposta.toISOString() : null
   }));
+}
+
+export async function toggleMessageVisibility(id: string, exibir_mensagem: boolean) {
+  try {
+    await prisma.guest.update({
+      where: { id },
+      data: { exibir_mensagem }
+    });
+    revalidatePath("/admin");
+    revalidatePath("/mural");
+    return { success: true };
+  } catch (error) {
+    console.error("Error toggling message visibility:", error);
+    return { success: false, error: "Falha ao alterar a exibição da mensagem." };
+  }
 }
 
 // Gift Actions

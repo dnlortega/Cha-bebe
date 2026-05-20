@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getGuests, getRecentMessages } from "@/app/actions";
+import { getGuests, getRecentMessages, toggleMessageVisibility } from "@/app/actions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, 
-  ChevronRight, PackageCheck, XCircle, MessageSquareQuote, Stars, ArrowUpRight
+  ChevronRight, PackageCheck, XCircle, MessageSquareQuote, Stars, ArrowUpRight, Eye, EyeOff
 } from "lucide-react";
 
 function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "var(--primary)" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string; }) {
@@ -63,7 +64,7 @@ export default function AdminDashboard() {
 
   const fetchData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
-    const [gData, mData] = await Promise.all([getGuests(), getRecentMessages()]);
+    const [gData, mData] = await Promise.all([getGuests(), getRecentMessages(true)]);
     
     const currentGuests = guestsRef.current;
     if (currentGuests.length > 0) {
@@ -335,21 +336,50 @@ export default function AdminDashboard() {
               </Card>
             ) : (
               messages.map((m, i) => (
-                <Card key={i} className="border border-stone-200/60 shadow-sm hover:shadow-md bg-white/70 backdrop-blur-md rounded-2xl p-6 md:p-8 space-y-4 transition-all hover:border-primary/30">
-                  <div className="flex items-start justify-between gap-4">
+                <Card key={i} className={`border ${m.exibir_mensagem ? 'border-stone-200/60 shadow-sm hover:shadow-md bg-white/70 hover:border-primary/30' : 'border-dashed border-stone-300 bg-stone-50/50 opacity-60'} backdrop-blur-md rounded-2xl p-6 md:p-8 space-y-4 transition-all relative`}>
+                  <div className="absolute right-6 top-6">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={m.exibir_mensagem ? "text-primary" : "text-stone-400"}
+                          onClick={async () => {
+                            const newStatus = !m.exibir_mensagem;
+                            const res = await toggleMessageVisibility(m.id, newStatus);
+                            if (res.success) {
+                              setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, exibir_mensagem: newStatus } : msg));
+                              toast.success(newStatus ? "Mensagem visível no mural." : "Mensagem oculta do mural.");
+                            } else {
+                              toast.error(res.error || "Erro ao alterar visibilidade.");
+                            }
+                          }}
+                        >
+                          {m.exibir_mensagem ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-[9px]">
+                        {m.exibir_mensagem ? "Ocultar do Mural" : "Mostrar no Mural"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 pr-10">
                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-bold text-xs uppercase">{m.nome.substring(0,2)}</span>
+                        <div className={`w-10 h-10 rounded-full ${m.exibir_mensagem ? 'bg-primary/10' : 'bg-stone-200'} flex items-center justify-center`}>
+                          <span className={`${m.exibir_mensagem ? 'text-primary' : 'text-stone-500'} font-bold text-xs uppercase`}>{m.nome.substring(0,2)}</span>
                         </div>
-                        <p className="text-xs md:text-sm tracking-widest font-bold text-stone-800 uppercase">{m.nome}</p>
+                        <p className={`text-xs md:text-sm tracking-widest font-bold ${m.exibir_mensagem ? 'text-stone-800' : 'text-stone-500'} uppercase`}>{m.nome}</p>
                      </div>
                      <p className="text-[9px] text-stone-400 uppercase font-bold tracking-wider bg-stone-100 px-3 py-1.5 rounded-lg">
                        {new Date(m.data_resposta).toLocaleDateString()}
                      </p>
                   </div>
-                  <p className="text-sm text-stone-600 leading-relaxed font-serif italic normal-case px-2 border-l-2 border-primary/20">
+                  <p className={`text-sm ${m.exibir_mensagem ? 'text-stone-600 border-primary/20' : 'text-stone-400 border-stone-300'} leading-relaxed font-serif italic normal-case px-2 border-l-2`}>
                     "{m.mensagem}"
                   </p>
+                  {!m.exibir_mensagem && (
+                    <p className="text-[9px] uppercase tracking-widest text-red-500 font-bold mt-2">Mensagem Oculta</p>
+                  )}
                 </Card>
               ))
             )}
