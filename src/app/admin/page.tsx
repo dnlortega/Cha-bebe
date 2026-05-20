@@ -32,6 +32,7 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [hasMuralAccess, setHasMuralAccess] = useState(false);
 
   const guestsRef = useRef<any[]>([]);
   useEffect(() => {
@@ -113,6 +114,13 @@ export default function AdminDashboard() {
     const interval = setInterval(() => {
       fetchData(true);
     }, 15000);
+    
+    // Check Mural permission
+    if (typeof window !== "undefined") {
+      const screens = localStorage.getItem("admin_allowed_screens") || "";
+      setHasMuralAccess(screens === "ALL" || screens.split(",").map(s => s.trim()).includes("Mural"));
+    }
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -325,6 +333,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Mural de Recados */}
+        {hasMuralAccess && (
         <motion.section variants={itemVariants} className="lg:col-span-7 space-y-6">
           <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
             <MessageSquareQuote className="h-4 w-4" /> Mural de Recados
@@ -385,9 +394,10 @@ export default function AdminDashboard() {
             )}
           </div>
         </motion.section>
+        )}
 
         {/* Atividade Recente & Ações */}
-        <div className="lg:col-span-5 space-y-10">
+        <div className={`space-y-10 ${hasMuralAccess ? 'lg:col-span-5' : 'lg:col-span-12'}`}>
           <motion.section variants={itemVariants} className="space-y-6">
              <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
                <TrendingUp className="h-4 w-4" /> Ações Rápidas
