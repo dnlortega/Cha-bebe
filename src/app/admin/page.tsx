@@ -6,12 +6,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, ClipboardList, ChevronRight, PackageCheck, Flame, XCircle, ArrowUpRight, MessageSquareQuote, Stars
+  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, 
+  ChevronRight, PackageCheck, XCircle, MessageSquareQuote, Stars, ArrowUpRight
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "var(--primary)" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string; }) {
   const radius = (size - strokeWidth) / 2;
@@ -19,8 +19,9 @@ function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "va
   const progress = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - progress * circumference;
   return (
-    <svg width={size} height={size} className="rotate-[-90deg]"><circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-stone-100" />
-      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease-in-out" }} />
+    <svg width={size} height={size} className="rotate-[-90deg] drop-shadow-md">
+      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-stone-200/50" />
+      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)" }} />
     </svg>
   );
 }
@@ -31,7 +32,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Ref para contornar closures antigas do setInterval e obter o estado mais recente
   const guestsRef = useRef<any[]>([]);
   useEffect(() => {
     guestsRef.current = guests;
@@ -65,7 +65,6 @@ export default function AdminDashboard() {
     if (!isSilent) setLoading(true);
     const [gData, mData] = await Promise.all([getGuests(), getRecentMessages()]);
     
-    // Compara o novo gData com o estado anterior em guestsRef para detectar novos confirmados
     const currentGuests = guestsRef.current;
     if (currentGuests.length > 0) {
       gData.forEach(newGuest => {
@@ -74,17 +73,14 @@ export default function AdminDashboard() {
         const isNowConfirmed = newGuest.status_confirmacao === "CONFIRMED";
         
         if (isNowConfirmed && !wasConfirmed) {
-          // Play a premium Success chime notification
           const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
           audio.volume = 0.55;
           audio.play().catch(() => {});
 
-          // Vibrar no celular Android se disponível
           if (typeof navigator !== "undefined" && navigator.vibrate) {
             navigator.vibrate([150, 80, 150]);
           }
 
-          // Display a beautiful Toast notification
           toast.success(`🎉 ${newGuest.nome} confirmou presença!`, {
             description: newGuest.mensagem ? `"${newGuest.mensagem}"` : "Presença confirmada no evento.",
             duration: 8000,
@@ -94,16 +90,13 @@ export default function AdminDashboard() {
             }
           });
 
-          // Notificação Nativa do Sistema Operacional (Android Lockscreen / PC status bar)
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
             try {
               new Notification(`🍼 Chá da Louise`, {
                 body: `${newGuest.nome} confirmou presença!`,
                 icon: "/icon.png"
               });
-            } catch (e) {
-              console.error("Erro ao enviar notificação de sistema:", e);
-            }
+            } catch (e) {}
           }
         }
       });
@@ -118,11 +111,10 @@ export default function AdminDashboard() {
     fetchData();
     const interval = setInterval(() => {
       fetchData(true);
-    }, 15000); // Sincroniza silenciosamente em segundo plano a cada 15 segundos
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
-  // Solicita permissão para notificações nativas do sistema no Android/PC
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -131,14 +123,12 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // Efeito para liberar o áudio em navegadores mobile no primeiro toque na tela
   useEffect(() => {
     const unlockAudio = () => {
       const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
-      audio.volume = 0; // Toca silenciosamente apenas para habilitar o canal
+      audio.volume = 0;
       audio.play()
         .then(() => {
-          // Desbloqueado com sucesso! Remove os listeners para economizar recursos
           window.removeEventListener("touchstart", unlockAudio);
           window.removeEventListener("click", unlockAudio);
         })
@@ -161,150 +151,255 @@ export default function AdminDashboard() {
   const adults = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_adultos || 0) : acc, 0);
   const children = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_criancas || 0) : acc, 0);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
-      <header className="flex justify-between items-end border-b border-primary/5 pb-6">
-        <div className="space-y-1"><h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Status</h1><p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Visão Geral do Evento</p></div>
-        <Button variant="ghost" size="icon" onClick={() => fetchData()} disabled={loading} className="border border-primary/5 h-11 w-11"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-12 pb-20 relative">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-primary/10 pb-8 relative z-10">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+             <div className="h-10 w-2 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
+             <h1 className="text-4xl md:text-5xl font-serif text-stone-800 tracking-tight">Status</h1>
+          </div>
+          <p className="text-[10px] text-primary/60 tracking-[0.4em] uppercase font-bold pl-5">Visão Geral do Evento</p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => fetchData()} 
+          disabled={loading} 
+          className="border border-primary/20 bg-white/50 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-sm rounded-xl h-11 px-6 group"
+        >
+          <RefreshCw className={cn("h-4 w-4 mr-2 text-primary group-hover:text-white transition-colors", loading && "animate-spin")} />
+          <span className="text-[10px] tracking-widest uppercase font-bold">Sincronizar</span>
+        </Button>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-stone-900 text-white rounded-none p-10 flex flex-col items-center justify-center text-center gap-6 shadow-2xl">
-          <div className="relative"><CircularProgress value={confirmed} max={total} size={130} strokeWidth={10} /><div className="absolute inset-0 flex items-center justify-center"><p className="text-4xl font-serif">{total > 0 ? Math.round((confirmed/total)*100) : 0}%</p></div></div>
-          <p className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-50">Taxa de Confirmação</p>
-        </Card>
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 relative z-10">
+        <motion.div variants={itemVariants} className="xl:col-span-1">
+          <Card className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-8 shadow-2xl border border-stone-700 relative overflow-hidden h-full">
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
+            <div className="absolute -top-20 -left-20 w-48 h-48 bg-primary/20 blur-3xl rounded-full" />
+            
+            <div className="relative z-10">
+              <CircularProgress value={confirmed} max={total} size={160} strokeWidth={12} color="var(--primary)" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <p className="text-5xl font-serif text-white tracking-tighter">{total > 0 ? Math.round((confirmed/total)*100) : 0}<span className="text-2xl text-primary">%</span></p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 relative z-10">
+               <p className="text-[10px] text-stone-400 font-bold tracking-[0.4em] uppercase">Taxa de Confirmação</p>
+               <p className="text-xs text-stone-500 font-light">{confirmed} de {total} pessoas</p>
+            </div>
+          </Card>
+        </motion.div>
+
+        <div className="xl:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
           {[
-            { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
-            { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
-            { label: "RECUSADOS", value: declined, icon: XCircle, color: "text-red-400", bg: "bg-red-50" },
-            { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary", bg: "bg-primary/5" },
-            { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-400", bg: "bg-sky-50" },
-            { label: "TOTAL", value: total, icon: Users, color: "text-stone-400", bg: "bg-stone-50" }
+            { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+            { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+            { label: "RECUSADOS", value: declined, icon: XCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+            { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+            { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-500", bg: "bg-sky-500/10", border: "border-sky-500/20" },
+            { label: "TOTAL", value: total, icon: Users, color: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20" }
           ].map((s, i) => (
-            <Card 
-              key={i} 
-              onClick={() => handleCategoryClick(s.label)}
-              className={cn(
-                "border border-primary/5 shadow-lg rounded-none bg-white p-6 flex flex-col gap-3 group hover:translate-y-[-2px] transition-all cursor-pointer select-none",
-                selectedCategory === s.label && "ring-1 ring-primary border-primary/20 bg-primary/[0.01]"
-              )}
-            >
-              <div className={`p-3 ${s.bg} rounded-none w-fit`}>
-                <s.icon className={`h-4 w-4 ${s.color}`} />
-              </div>
-              <div>
-                <p className="text-3xl font-serif text-primary leading-none">{s.value}</p>
-                <p className="text-[8px] font-bold tracking-[0.2em] opacity-30 uppercase mt-1">{s.label}</p>
-              </div>
-            </Card>
+            <motion.div key={i} variants={itemVariants} whileHover={{ y: -5 }} className="h-full">
+              <Card 
+                onClick={() => handleCategoryClick(s.label)}
+                className={cn(
+                  "h-full border shadow-sm hover:shadow-xl rounded-3xl bg-white/70 backdrop-blur-md p-6 md:p-8 flex flex-col justify-between gap-6 group transition-all duration-300 cursor-pointer select-none relative overflow-hidden",
+                  selectedCategory === s.label ? `ring-2 ring-offset-2 ${s.border.replace('border-', 'ring-').replace('/20', '')}` : s.border
+                )}
+              >
+                <div className={cn("absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-50 transition-opacity duration-500", s.bg)} />
+                <div className={cn(`p-3.5 rounded-2xl w-fit transition-transform group-hover:scale-110 duration-300`, s.bg)}>
+                  <s.icon className={cn(`h-6 w-6`, s.color)} />
+                </div>
+                <div>
+                  <p className="text-4xl md:text-5xl font-serif text-stone-800 leading-none">{s.value}</p>
+                  <p className={cn("text-[9px] font-bold tracking-[0.2em] uppercase mt-3", s.color)}>{s.label}</p>
+                </div>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>
 
       {/* Detalhes da Categoria Selecionada */}
-      {selectedCategory && (
-        <div className="bg-white border border-primary/10 p-8 shadow-xl space-y-6 animate-in slide-in-from-top duration-300 rounded-none">
-          <div className="flex justify-between items-center border-b border-primary/5 pb-4">
-            <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-primary">
-              Lista: {selectedCategory} ({getFilteredGuests().length})
-            </h3>
-            <button 
-              onClick={() => setSelectedCategory(null)} 
-              className="text-[9px] font-bold tracking-widest uppercase opacity-40 hover:opacity-100 flex items-center gap-1 transition-all"
-            >
-              <XCircle className="h-4 w-4 text-red-400" /> Fechar Detalhes
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[300px] overflow-y-auto pr-2">
-            {getFilteredGuests().map((guest, idx) => (
-              <div key={idx} className="bg-stone-50/50 border border-primary/5 p-4 hover:bg-stone-50 transition-all flex flex-col gap-1.5">
-                <span className="text-[11px] font-bold tracking-wider text-stone-700 uppercase truncate">
-                  {guest.nome}
-                </span>
+      <AnimatePresence>
+        {selectedCategory && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0, scale: 0.95 }}
+            animate={{ opacity: 1, height: "auto", scale: 1 }}
+            exit={{ opacity: 0, height: 0, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-white/80 backdrop-blur-xl border border-primary/20 p-8 md:p-10 shadow-2xl rounded-3xl space-y-8 mt-6">
+              <div className="flex justify-between items-center border-b border-primary/10 pb-6">
+                <h3 className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-primary flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Lista: {selectedCategory} ({getFilteredGuests().length})
+                </h3>
+                <button 
+                  onClick={() => setSelectedCategory(null)} 
+                  className="text-[10px] font-bold tracking-widest uppercase text-stone-400 hover:text-red-500 flex items-center gap-2 transition-colors bg-stone-100 hover:bg-red-50 px-4 py-2 rounded-xl"
+                >
+                  <XCircle className="h-4 w-4" /> <span className="hidden sm:inline">Fechar</span>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {getFilteredGuests().map((guest, idx) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    key={idx} 
+                    className="bg-white border border-stone-200/60 p-5 rounded-2xl hover:border-primary/30 hover:shadow-lg transition-all flex flex-col gap-2 group"
+                  >
+                    <span className="text-xs font-bold tracking-wider text-stone-800 uppercase truncate group-hover:text-primary transition-colors">
+                      {guest.nome}
+                    </span>
+                    
+                    {selectedCategory === "CONFIRMADOS" && (
+                      <span className="text-[9px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
+                        {guest.tipo === "FAMILIA" ? "Família" : "Individual"}
+                      </span>
+                    )}
+                    {selectedCategory === "PENDENTES" && (
+                      <span className="text-[9px] text-amber-600 bg-amber-50 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
+                        Aguardando
+                      </span>
+                    )}
+                    {selectedCategory === "RECUSADOS" && (
+                      <span className="text-[9px] text-red-600 bg-red-50 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
+                        Recusou
+                      </span>
+                    )}
+                    {selectedCategory === "ADULTOS" && (
+                      <span className="text-[9px] text-primary bg-primary/10 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
+                        {guest.qtd_adultos} {guest.qtd_adultos === 1 ? "Adulto" : "Adultos"}
+                      </span>
+                    )}
+                    {selectedCategory === "CRIANÇAS" && (
+                      <span className="text-[9px] text-sky-600 bg-sky-50 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
+                        {guest.qtd_criancas} {guest.qtd_criancas === 1 ? "Criança" : "Crianças"}
+                      </span>
+                    )}
+                    {selectedCategory === "TOTAL" && (
+                      <span className={cn(
+                        "text-[9px] px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold",
+                        guest.status_confirmacao === "CONFIRMED" ? "text-emerald-600 bg-emerald-50" : 
+                        guest.status_confirmacao === "DECLINED" ? "text-red-600 bg-red-50" : 
+                        "text-stone-500 bg-stone-100"
+                      )}>
+                        {guest.status_confirmacao === "CONFIRMED" ? "Confirmado" : guest.status_confirmacao === "DECLINED" ? "Recusado" : "Pendente"}
+                      </span>
+                    )}
+                  </motion.div>
+                ))}
                 
-                {/* Legendas inteligentes para cada categoria */}
-                {selectedCategory === "CONFIRMADOS" && (
-                  <span className="text-[8px] opacity-40 uppercase tracking-widest font-bold">
-                    {guest.tipo === "FAMILIA" ? "Família" : "Individual"}
-                  </span>
-                )}
-                {selectedCategory === "PENDENTES" && (
-                  <span className="text-[8px] opacity-40 uppercase tracking-widest font-bold">
-                    Sem resposta
-                  </span>
-                )}
-                {selectedCategory === "RECUSADOS" && (
-                  <span className="text-[8px] text-red-400 opacity-60 uppercase tracking-widest font-bold">
-                    Recusou
-                  </span>
-                )}
-                {selectedCategory === "ADULTOS" && (
-                  <span className="text-[8px] text-primary opacity-60 uppercase tracking-widest font-bold">
-                    {guest.qtd_adultos} {guest.qtd_adultos === 1 ? "Adulto" : "Adultos"}
-                  </span>
-                )}
-                {selectedCategory === "CRIANÇAS" && (
-                  <span className="text-[8px] text-sky-500 opacity-60 uppercase tracking-widest font-bold">
-                    {guest.qtd_criancas} {guest.qtd_criancas === 1 ? "Criança" : "Crianças"}
-                  </span>
-                )}
-                {selectedCategory === "TOTAL" && (
-                  <span className={`text-[8px] uppercase tracking-widest font-bold ${
-                    guest.status_confirmacao === "CONFIRMED" ? "text-emerald-500" : guest.status_confirmacao === "DECLINED" ? "text-red-400" : "opacity-35"
-                  }`}>
-                    {guest.status_confirmacao === "CONFIRMED" ? "Confirmado" : guest.status_confirmacao === "DECLINED" ? "Recusado" : "Pendente"}
-                  </span>
+                {getFilteredGuests().length === 0 && (
+                  <div className="col-span-full py-16 text-center text-xs tracking-widest uppercase text-stone-400 font-medium">
+                    Nenhum convidado nessa categoria
+                  </div>
                 )}
               </div>
-            ))}
-            
-            {getFilteredGuests().length === 0 && (
-              <div className="col-span-full py-10 text-center text-[10px] tracking-widest uppercase opacity-35">
-                Nenhum convidado nessa categoria
-              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+        {/* Mural de Recados */}
+        <motion.section variants={itemVariants} className="lg:col-span-7 space-y-6">
+          <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
+            <MessageSquareQuote className="h-4 w-4" /> Mural de Recados
+          </h3>
+          <div className="grid grid-cols-1 gap-4">
+            {messages.length === 0 ? (
+              <Card className="border border-dashed border-stone-300 shadow-none bg-stone-50/50 rounded-3xl p-12 text-center">
+                <p className="text-xs text-stone-400 tracking-widest uppercase font-medium">Nenhum recado recebido ainda</p>
+              </Card>
+            ) : (
+              messages.map((m, i) => (
+                <Card key={i} className="border border-stone-200/60 shadow-sm hover:shadow-md bg-white/70 backdrop-blur-md rounded-2xl p-6 md:p-8 space-y-4 transition-all hover:border-primary/30">
+                  <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-bold text-xs uppercase">{m.nome.substring(0,2)}</span>
+                        </div>
+                        <p className="text-xs md:text-sm tracking-widest font-bold text-stone-800 uppercase">{m.nome}</p>
+                     </div>
+                     <p className="text-[9px] text-stone-400 uppercase font-bold tracking-wider bg-stone-100 px-3 py-1.5 rounded-lg">
+                       {new Date(m.data_resposta).toLocaleDateString()}
+                     </p>
+                  </div>
+                  <p className="text-sm text-stone-600 leading-relaxed font-serif italic normal-case px-2 border-l-2 border-primary/20">
+                    "{m.mensagem}"
+                  </p>
+                </Card>
+              ))
             )}
           </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Mural de Recados */}
-        <section className="space-y-6">
-          <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><MessageSquareQuote className="h-4 w-4" /> Mural de Recados</h3>
-          <div className="grid grid-cols-1 gap-4">
-            {messages.length === 0 ? <p className="text-[9px] opacity-20 tracking-widest uppercase py-10 text-center bg-white border border-primary/5">Nenhum recado ainda</p> : messages.map((m, i) => (
-              <Card key={i} className="border-none shadow-xl bg-white rounded-none p-6 space-y-3">
-                <p className="text-[11px] tracking-widest font-bold text-primary uppercase">{m.nome}</p>
-                <p className="text-[11px] opacity-70 leading-relaxed italic normal-case">"{m.mensagem}"</p>
-                <p className="text-[8px] opacity-30 uppercase text-right">{new Date(m.data_resposta).toLocaleDateString()}</p>
-              </Card>
-            ))}
-          </div>
-        </section>
+        </motion.section>
 
         {/* Atividade Recente & Ações */}
-        <section className="space-y-10">
-          <div className="space-y-4">
-             <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><TrendingUp className="h-4 w-4" /> Ações Rápidas</h3>
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Link href="/admin/add" className="p-6 bg-stone-900 text-white flex items-center justify-between shadow-lg hover:bg-stone-800 transition-all border-l-4 border-primary"><span className="text-[10px] font-bold tracking-widest uppercase">Cadastrar</span><UserPlus className="h-5 w-5" /></Link>
-                <Link href="/admin/gifts" className="p-6 bg-white border border-primary/10 flex items-center justify-between shadow-sm hover:bg-stone-50 transition-all"><span className="text-[10px] font-bold tracking-widest uppercase text-stone-700">Presentes</span><PackageCheck className="h-5 w-5 text-primary" /></Link>
-                 <Link href="/mural" target="_blank" className="p-6 bg-primary text-primary-foreground flex items-center justify-between shadow-lg hover:bg-primary/90 transition-all border-l-4 border-stone-900"><span className="text-[10px] font-bold tracking-widest uppercase">Mural Live</span><Stars className="h-5 w-5" /></Link>
+        <div className="lg:col-span-5 space-y-10">
+          <motion.section variants={itemVariants} className="space-y-6">
+             <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
+               <TrendingUp className="h-4 w-4" /> Ações Rápidas
+             </h3>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                <Link href="/admin/add" className="group p-6 bg-stone-900 text-white rounded-2xl flex items-center justify-between shadow-xl hover:shadow-2xl hover:bg-stone-800 transition-all overflow-hidden relative">
+                  <div className="absolute right-0 top-0 h-full w-2 bg-primary group-hover:w-full transition-all duration-500 opacity-20" />
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase relative z-10">Novo Convidado</span>
+                  <UserPlus className="h-5 w-5 relative z-10 group-hover:scale-110 transition-transform" />
+                </Link>
+                <Link href="/admin/gifts" className="group p-6 bg-white border border-stone-200 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase text-stone-700 group-hover:text-primary transition-colors">Gerir Presentes</span>
+                  <PackageCheck className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+                </Link>
+                <Link href="/mural" target="_blank" className="group p-6 bg-primary text-primary-foreground rounded-2xl flex items-center justify-between shadow-xl hover:shadow-primary/30 hover:bg-primary/90 transition-all relative overflow-hidden">
+                  <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/20 blur-xl rounded-full group-hover:scale-150 transition-transform duration-700" />
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase relative z-10 flex items-center gap-2">Mural Live <ArrowUpRight className="w-3 h-3 opacity-70" /></span>
+                  <Stars className="h-5 w-5 relative z-10 group-hover:rotate-12 transition-transform" />
+                </Link>
              </div>
-          </div>
-          <div className="space-y-6">
-             <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-30 flex items-center gap-3"><PackageCheck className="h-4 w-4" /> Presentes / Fraldas</h3>
-             <Card className="bg-white border border-primary/5 p-8 shadow-xl">
-                <div className="space-y-4">
-                   <p className="text-[10px] opacity-40 uppercase tracking-widest leading-relaxed">Acompanhe a distribuição de fraldas e presentes reservados na lista de convidados.</p>
-                   <Link href="/admin/guests" className="text-primary text-[10px] font-bold tracking-[0.3em] uppercase flex items-center gap-2 hover:gap-4 transition-all">Ver Detalhes <ChevronRight className="h-3 w-3" /></Link>
+          </motion.section>
+
+          <motion.section variants={itemVariants} className="space-y-6">
+             <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
+               <PackageCheck className="h-4 w-4" /> Monitoramento
+             </h3>
+             <Card className="bg-gradient-to-br from-white to-stone-50/50 border border-stone-200 p-8 shadow-md rounded-[2rem] group hover:border-primary/30 transition-colors">
+                <div className="space-y-6">
+                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <PackageCheck className="h-6 w-6 text-primary" />
+                   </div>
+                   <p className="text-xs text-stone-500 uppercase tracking-widest leading-relaxed">
+                     Acompanhe em tempo real a distribuição de fraldas e presentes reservados na lista.
+                   </p>
+                   <Link href="/admin/guests" className="inline-flex items-center gap-2 bg-stone-900 text-white text-[10px] font-bold tracking-[0.3em] uppercase px-6 py-3 rounded-xl hover:bg-primary hover:shadow-lg hover:shadow-primary/20 transition-all group-hover:gap-4">
+                     Ver Relatório <ChevronRight className="h-4 w-4" />
+                   </Link>
                 </div>
              </Card>
-          </div>
-        </section>
+          </motion.section>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

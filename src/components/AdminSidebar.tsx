@@ -20,6 +20,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ALL_MENU_ITEMS = [
   { title: "Dashboard",   icon: LayoutDashboard, href: "/admin" },
@@ -28,9 +35,6 @@ const ALL_MENU_ITEMS = [
   { title: "Cadastrar",   icon: UserPlus,         href: "/admin/add" },
   { title: "Lista Final", icon: ClipboardList,    href: "/admin/final-list" },
   { title: "Presentes",   icon: Package,          href: "/admin/gifts" },
-  { title: "Acessos",     icon: ShieldAlert,      href: "/admin/access" },
-  { title: "Visual",      icon: Settings,         href: "/admin/visual" },
-  { title: "Sobre",       icon: Info,             href: "/admin/about" },
 ];
 
 export function AdminSidebar() {
@@ -132,67 +136,93 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Avatar + Logout */}
-      <div className="p-2 border-t border-primary/5 pb-5 space-y-3">
-        {/* Avatar do usuário */}
-        <div className={cn("flex items-center gap-2.5 px-2 py-2", !showLabels && "justify-center")}>
-          {avatarUrl ? (
-            <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              {isMaster && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+      {/* Avatar + Logout (Menu) */}
+      <div className="p-2 border-t border-primary/5 pb-5">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className={cn("w-full flex items-center gap-2.5 px-2 py-2 hover:bg-stone-50 rounded-md transition-colors", !showLabels && "justify-center")} title="Opções da conta">
+              {avatarUrl ? (
+                <div className="relative flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={avatarUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  {isMaster && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+                  )}
+                </div>
+              ) : (
+                <div className="relative flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
+                    <span className="text-white text-[9px] font-black tracking-wider">
+                      {getInitials(adminEmail)}
+                    </span>
+                  </div>
+                  {isMaster && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+                  )}
+                </div>
               )}
-            </div>
-          ) : (
-            <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
-                <span className="text-white text-[9px] font-black tracking-wider">
-                  {getInitials(adminEmail)}
-                </span>
-              </div>
-              {isMaster && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />
+              {showLabels && adminEmail && (
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-[9px] font-bold tracking-wider text-stone-700 truncate uppercase">
+                    {isMaster ? "Master" : "Operador"}
+                  </p>
+                  <p className="text-[8px] text-stone-400 truncate">{adminEmail}</p>
+                </div>
               )}
-            </div>
-          )}
-          {showLabels && adminEmail && (
-            <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-bold tracking-wider text-stone-700 truncate uppercase">
-                {isMaster ? "Master" : "Operador"}
-              </p>
-              <p className="text-[8px] text-stone-400 truncate">{adminEmail}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Botão de logout */}
-        <button
-          onClick={() => { 
-            sessionStorage.removeItem("admin_auth"); 
-            localStorage.removeItem("admin_authorized"); 
-            localStorage.removeItem("admin_username");
-            localStorage.removeItem("admin_avatar");
-            localStorage.removeItem("admin_allowed_screens");
-            localStorage.removeItem("admin_session_token");
-            window.location.href = "/"; 
-          }}
-          className={cn(
-            "w-full flex items-center py-3 px-3 text-red-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 rounded-none",
-            showLabels ? "gap-3" : "justify-center"
-          )}
-          title="Sair"
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {showLabels && <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Sair</span>}
-        </button>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align={showLabels ? "center" : "start"} side={showLabels ? "bottom" : "right"} className="w-56 z-[70] mb-2 ml-2 shadow-xl border-primary/10">
+            <div className="px-3 py-2 text-[10px] font-bold tracking-widest uppercase text-stone-400">Minha Conta</div>
+            <DropdownMenuSeparator />
+            {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Visual")) && (
+              <DropdownMenuItem 
+                render={<Link href="/admin/visual" className="cursor-pointer w-full flex items-center gap-3 py-3" />}
+              >
+                <Settings className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Visual</span>
+              </DropdownMenuItem>
+            )}
+            {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Sobre")) && (
+              <DropdownMenuItem 
+                render={<Link href="/admin/about" className="cursor-pointer w-full flex items-center gap-3 py-3" />}
+              >
+                <Info className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Sobre</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            {isMaster && (
+              <DropdownMenuItem 
+                render={<Link href="/admin/access" className="cursor-pointer w-full flex items-center gap-3 py-3" />}
+              >
+                <ShieldAlert className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Acessos e Permissões</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem 
+              className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer w-full flex items-center gap-3 py-3"
+              onClick={() => { 
+                sessionStorage.removeItem("admin_auth"); 
+                localStorage.removeItem("admin_authorized"); 
+                localStorage.removeItem("admin_username");
+                localStorage.removeItem("admin_avatar");
+                localStorage.removeItem("admin_allowed_screens");
+                localStorage.removeItem("admin_session_token");
+                window.location.href = "/"; 
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Sair</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
