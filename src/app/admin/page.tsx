@@ -75,7 +75,7 @@ export default function AdminDashboard() {
         const isNowConfirmed = newGuest.status_confirmacao === "CONFIRMED";
         
         if (isNowConfirmed && !wasConfirmed) {
-          const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+          const audio = new Audio("/audio/confirm.wav");
           audio.volume = 0.55;
           audio.play().catch(() => {});
 
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 relative z-10">
         <motion.div variants={itemVariants} className="xl:col-span-1">
           <Card className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-8 shadow-2xl border border-stone-700 relative overflow-hidden h-full">
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-stone-800 to-transparent opacity-10 mix-blend-overlay" />
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-primary/20 blur-3xl rounded-full" />
             
             <div className="relative z-10">
