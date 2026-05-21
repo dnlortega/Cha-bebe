@@ -67,10 +67,10 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
       <CardContent className="pt-4 pb-12 px-6 sm:px-10">
         <form onSubmit={handleSubmit} className="space-y-10">
           <RadioGroup value={status} onValueChange={setStatus} className="grid grid-cols-1 gap-3">
-            <div className={cn("flex items-center space-x-4 p-5 cursor-pointer border transition-all", status === "CONFIRMED" ? "bg-primary/5 border-primary/20" : "bg-white/50 border-primary/5")} onClick={() => setStatus("CONFIRMED")}>
+            <div className={cn("flex items-center space-x-4 p-3 cursor-pointer border transition-all", status === "CONFIRMED" ? "bg-primary/5 border-primary/20" : "bg-white/50 border-primary/5")} onClick={() => setStatus("CONFIRMED")}>
               <RadioGroupItem value="CONFIRMED" id="confirmed" /><Label htmlFor="confirmed" className="text-[10px] tracking-widest cursor-pointer flex-1">Sim, estarei presente</Label>
             </div>
-            <div className={cn("flex items-center space-x-4 p-5 cursor-pointer border transition-all", status === "DECLINED" ? "bg-red-50/50 border-red-200" : "bg-white/50 border-primary/5")} onClick={() => setStatus("DECLINED")}>
+            <div className={cn("flex items-center space-x-4 p-3 cursor-pointer border transition-all", status === "DECLINED" ? "bg-red-50/50 border-red-200" : "bg-white/50 border-primary/5")} onClick={() => setStatus("DECLINED")}>
               <RadioGroupItem value="DECLINED" id="declined" /><Label htmlFor="declined" className="text-[10px] tracking-widest cursor-pointer flex-1">Não poderei ir</Label>
             </div>
           </RadioGroup>
