@@ -181,7 +181,7 @@ export default function AdminDashboard() {
              <div className="h-10 w-2 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
              <h1 className="text-4xl md:text-5xl font-serif text-stone-800 tracking-tight">Status</h1>
           </div>
-          <p className="text-[10px] text-primary/60 tracking-[0.4em] uppercase font-bold pl-5">Visão Geral do Evento</p>
+
         </div>
         <Button 
           variant="outline" 
