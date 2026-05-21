@@ -29,12 +29,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const ALL_MENU_ITEMS = [
+  // Existing items
+
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
   { title: "Convites", icon: Users, href: "/admin/guests" },
   { title: "Histórico", icon: History, href: "/admin/history" },
   { title: "Cadastrar", icon: UserPlus, href: "/admin/add" },
   { title: "Lista Final", icon: ClipboardList, href: "/admin/final-list" },
   { title: "Presentes", icon: Package, href: "/admin/gifts" },
+  // New access item (visible only to master admins)
+  { title: "Acessos", icon: ShieldAlert, href: "/admin/access" },
 ];
 
 export function AdminSidebar() {
