@@ -261,6 +261,28 @@ export function AdminSidebar() {
       )}>
         <SidebarContent showLabels={true} />
       </aside>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed inset-x-0 bottom-0 bg-white border-t border-primary/5 z-50 flex justify-around py-2">
+        {visibleMenuItems.map((item) => {
+          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "flex flex-col items-center justify-center py-1",
+                isActive ? "text-primary" : "text-stone-500"
+              )}
+              title={item.title}
+            >
+              <item.icon className="h-6 w-6" />
+              <span className="text-xs mt-0.5">{item.title}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </>
   );
 }

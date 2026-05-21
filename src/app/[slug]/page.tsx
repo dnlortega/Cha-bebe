@@ -73,12 +73,12 @@ export default async function GuestPage({ params }: PageProps) {
 
            {/* Mobile Invitation */}
            {settings.showInvitationImage && (
-             <div className="lg:hidden flex justify-center">
-                <div className="relative aspect-[4/5] w-48 shadow-2xl border-8 border-white bg-white overflow-hidden">
+              <div className="lg:hidden flex justify-center">
+                <div className="relative aspect-[4/5] w-full max-w-xs shadow-2xl border-8 border-white bg-white overflow-hidden">
                   <Image src={settings.invitationUrl || "/convite.png"} alt="CONVITE" fill className="object-contain" priority />
                 </div>
-             </div>
-           )}
+              </div>
+            )}
 
            {/* Event Details */}
            {(settings.eventDate || settings.eventAddress) && (
