@@ -228,8 +228,7 @@ export function AdminSidebar() {
               className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500")}
               title={item.title}
             >
-              <item.icon className="h-6 w-6" />
-              <span className="text-xs mt-0.5">{item.title}</span>
+                <item.icon className="h-6 w-6" />
             </Link>
           );
         })}

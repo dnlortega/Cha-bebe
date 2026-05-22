@@ -52,7 +52,7 @@ export default function HistoryPage() {
   // Ouvinte de primeiro toque na tela para desbloqueio de áudio mobile no Android
   useEffect(() => {
     const unlockAudio = () => {
-      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+      const audio = new Audio("/audio/2869-120.wav");
       audio.volume = 0;
       audio.play()
         .then(() => {
@@ -92,7 +92,7 @@ export default function HistoryPage() {
               : `Recusou o convite.`;
 
             // 1. Toca o som de sino premium
-            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+            const audio = new Audio("/audio/2869-120.wav");
             audio.volume = 0.55;
             audio.play().catch(() => {});
 
