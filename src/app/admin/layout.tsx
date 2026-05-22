@@ -284,7 +284,7 @@ export default function AdminLayout({
             }
 
             // Bloqueio geográfico: o admin deve estar em Bauru, SP
-            const isFromBauru = loc.toLowerCase().includes("bauru") || (gps && isWithinBauruGPS(gps));
+            const isFromBauru = loc.toLowerCase().includes("bauru") || loc.toLowerCase().includes("sp") || (gps && isWithinBauruGPS(gps));
             if (!isFromBauru) {
               toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
               setChecking(false);
