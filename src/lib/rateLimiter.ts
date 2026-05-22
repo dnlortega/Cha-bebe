@@ -1,5 +1,5 @@
 // src/lib/rateLimiter.ts
-import { RateLimiter } from 'next-rate-limit';
+import { RateLimiter } from '@daveyplate/next-rate-limit';
 
 /**
  * Simple IP‑based rate limiter.
