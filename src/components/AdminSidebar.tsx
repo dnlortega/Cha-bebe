@@ -232,7 +232,6 @@ export function AdminSidebar() {
             </Link>
           );
         })}
-        {/* Logout button */}
         {/* Avatar button (logout) */}
         <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1" title="Conta">
           {avatarUrl ? (
@@ -242,9 +241,6 @@ export function AdminSidebar() {
               {getInitials(adminEmail)}
             </div>
           )}
-        </button>
-          <LogOut className="h-6 w-6" />
-          <span className="text-xs mt-0.5">Sair</span>
         </button>
       </nav>
     </>
