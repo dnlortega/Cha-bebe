@@ -134,7 +134,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const unlockAudio = () => {
-      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-120.wav");
+      const audio = new Audio("/audio/2869-120.wav");
       audio.volume = 0;
       audio.play()
         .then(() => {
