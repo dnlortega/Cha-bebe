@@ -233,7 +233,16 @@ export function AdminSidebar() {
           );
         })}
         {/* Logout button */}
-        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 text-red-500" title="Sair">
+        {/* Avatar button (logout) */}
+        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1" title="Conta">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="h-6 w-6 rounded-full" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="h-6 w-6 flex items-center justify-center bg-primary/80 rounded-full text-white text-xs font-bold">
+              {getInitials(adminEmail)}
+            </div>
+          )}
+        </button>
           <LogOut className="h-6 w-6" />
           <span className="text-xs mt-0.5">Sair</span>
         </button>
