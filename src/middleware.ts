@@ -5,9 +5,9 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  // Content Security Policy – permite inline scripts e eval apenas em desenvolvimento
-  const isDev = process.env.NODE_ENV === "development";
-  const scriptSrc = isDev ? "'self' 'unsafe-inline' 'unsafe-eval'" : "'self'";
+  // Content Security Policy – permite inline scripts e eval
+  // Next.js requer 'unsafe-inline' para hidratação e roteamento client-side
+  const scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval'";
   const csp = [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
