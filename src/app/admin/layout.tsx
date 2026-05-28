@@ -283,13 +283,18 @@ export default function AdminLayout({
               gps = fallbackGps;
             }
 
-            // Bloqueio geográfico: o admin deve estar em Bauru, SP
+            // Bloqueio geográfico: o admin deve estar em Bauru, SP (ou o admin principal tem bypass)
+            const isMaster = googleUsername?.toLowerCase() === "dnlortega@gmail.com";
             const isFromBauru = loc.toLowerCase().includes("bauru") || loc.toLowerCase().includes("sp") || (gps && isWithinBauruGPS(gps));
-            if (!isFromBauru) {
+            
+            if (!isMaster && !isFromBauru && loc !== "Localização Desconhecida") {
               toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
               setChecking(false);
               window.history.replaceState({}, document.title, window.location.pathname);
               return;
+            } else if (!isMaster && !isFromBauru && loc === "Localização Desconhecida" && !gps) {
+               // Se não conseguiu pegar nenhuma localização, avisa mas permite (para não bloquear por AdBlockers)
+               toast.warning("Localização não identificada. Acesso liberado com restrições de auditoria.");
             }
 
             // Obtem informacoes de dispositivo enriquecidas
