@@ -12,7 +12,7 @@ export function middleware(request: NextRequest) {
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
+    "img-src 'self' data: https://*.googleusercontent.com",
     "font-src 'self'",
     "connect-src 'self'",
     "frame-src 'none'",
