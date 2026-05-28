@@ -17,43 +17,65 @@ import {
   Server,
   Fingerprint,
   Sparkles,
-  MapPin
+  MapPin,
+  MonitorSmartphone,
+  BarChart3,
+  Github,
+  ExternalLink,
+  Rocket,
+  Bell,
+  History,
+  Lock,
+  Users,
+  Gift,
+  MessageSquare,
+  Eye,
+  Smartphone
 } from "lucide-react";
 
 const techStack = [
-  { name: "Next.js", version: "15.0+", icon: Globe, description: "App Router com renderização híbrida e server actions" },
-  { name: "React", version: "19.0+", icon: Code2, description: "Interface reativa e componentes concorrentes" },
-  { name: "Tailwind CSS", version: "4.0+", icon: Palette, description: "Motor de estilização ultra-rápido e flexível" },
-  { name: "Prisma ORM", version: "6.0+", icon: Database, description: "Gerenciamento e queries seguras ao banco de dados" },
-  { name: "PostgreSQL", version: "Neon Tech", icon: Server, description: "Banco de dados serverless escalável" },
-  { name: "Shadcn UI & Base UI", version: "Latest", icon: Layers, description: "Componentes headless com acessibilidade avançada" },
-  { name: "Framer Motion", version: "12.0+", icon: Sparkles, description: "Motor principal de animações fluidas" },
-  { name: "Google Auth", version: "OAuth 2.0", icon: ShieldCheck, description: "Autenticação segura via contas Google" },
-  { name: "Geolocation API", version: "Native", icon: MapPin, description: "Bloqueio de acesso por coordenadas geográficas" },
+  { name: "Next.js", version: "16.2", icon: Globe, description: "App Router, Server Actions, Turbopack e renderização híbrida SSR/SSG" },
+  { name: "React", version: "19.2", icon: Code2, description: "Componentes concorrentes, hooks modernos e Suspense nativo" },
+  { name: "Tailwind CSS", version: "4.0", icon: Palette, description: "Motor de estilização JIT ultra-rápido com variáveis CSS nativas" },
+  { name: "Prisma ORM", version: "6.4", icon: Database, description: "Type-safe queries, migrations e client gerado automaticamente" },
+  { name: "PostgreSQL", version: "Neon Serverless", icon: Server, description: "Banco de dados serverless com escalonamento automático e branching" },
+  { name: "Shadcn/UI + Base UI", version: "v4+", icon: Layers, description: "Componentes headless com acessibilidade WAI-ARIA completa" },
+  { name: "Framer Motion", version: "12.38", icon: Sparkles, description: "Animações baseadas em spring physics, gestures e layout animations" },
+  { name: "Google OAuth 2.0", version: "OAuth 2.0", icon: ShieldCheck, description: "Autenticação segura com validação de e-mail e controle de sessão" },
+  { name: "Vercel Platform", version: "Edge", icon: Rocket, description: "Deploy contínuo, Edge Functions e CDN global de alta performance" },
 ];
 
 const features = [
-  "Dashboard Administrativo Real-time (Zero Cache)",
-  "Autenticação Segura (Google OAuth + Revogação Remota)",
-  "Bloqueio Geográfico Restrito à Região do Evento",
-  "Captura de Detalhes do Dispositivo (Telemetria de Acesso)",
-  "Gestão Avançada de Permissões por Usuário/Tela",
-  "Mural Live Inteligente para Telões e TVs",
-  "Tematização Dinâmica via Banco de Dados (Cores e Fontes)",
-  "Sistema de RSVP Familiar e Individual Inteligente",
-  "Gestão Dinâmica de Lista de Presentes e Fraldas",
-  "Interface Premium Glassmorphism e Mobile-First"
+  { text: "Dashboard Real-time com polling inteligente a cada 15s", icon: BarChart3 },
+  { text: "Autenticação Google OAuth + Geofencing por GPS (raio 50km)", icon: Lock },
+  { text: "Notificações sonoras e push ao receber novas confirmações", icon: Bell },
+  { text: "Telemetria de dispositivo: GPU, RAM, bateria, resolução e rede", icon: MonitorSmartphone },
+  { text: "Gestão granular de permissões por tela para cada operador", icon: Users },
+  { text: "Mural Live para Telões com rotação automática de mensagens", icon: MessageSquare },
+  { text: "13 temas visuais dinâmicos (Gold, BT21, BTS, Toy Story e mais)", icon: Palette },
+  { text: "Sistema de RSVP inteligente com suporte a famílias e individuais", icon: CheckCircle2 },
+  { text: "Lista de presentes com reserva automática e sugestão de fraldas", icon: Gift },
+  { text: "Histórico completo de respostas e auditoria de sessões", icon: History },
+  { text: "Controle de visibilidade de recados no mural público", icon: Eye },
+  { text: "PWA instalável com manifest e suporte offline parcial", icon: Smartphone },
+];
+
+const stats = [
+  { label: "Server Actions", value: "30+", description: "Operações server-side type-safe" },
+  { label: "Componentes", value: "15+", description: "React components reutilizáveis" },
+  { label: "Modelos Prisma", value: "7", description: "Guest, Gift, Admin, Settings e mais" },
+  { label: "Temas Visuais", value: "13", description: "Paletas dinâmicas via banco de dados" },
 ];
 
 export default function AboutPage() {
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } }
   };
 
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120 } }
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 20 } }
   };
 
   return (
@@ -64,25 +86,43 @@ export default function AboutPage() {
         animate="show"
         className="max-w-7xl mx-auto space-y-20 pb-24 mt-12"
       >
+        {/* Header */}
         <motion.header variants={itemVariants} className="space-y-6 relative">
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
           <div className="flex items-center gap-4 relative z-10">
              <div className="h-px w-16 bg-primary" />
-             <p className="text-xs text-primary font-medium tracking-[0.4em] uppercase">System Architecture</p>
+             <p className="text-xs text-primary font-medium tracking-[0.4em] uppercase">System Architecture v2.0</p>
           </div>
           <div className="relative z-10">
             <h1 className="text-5xl md:text-6xl font-serif text-stone-900 tracking-tight leading-tight">
               Sobre o <br/><span className="text-primary italic">Sistema</span>
             </h1>
             <p className="mt-6 text-sm text-stone-500 tracking-[0.2em] font-light uppercase max-w-2xl leading-relaxed">
-              Uma plataforma premium de gestão de eventos desenvolvida com a máxima excelência em UX/UI, 
-              utilizando as tecnologias mais avançadas do ecossistema web para garantir performance extrema e segurança rigorosa.
+              Plataforma full-stack de gestão de eventos desenvolvida com Next.js 16 e React 19. 
+              Combina design premium Glassmorphism com arquitetura real-time, segurança por geolocalização 
+              e um painel administrativo completo com controle de sessões e permissões granulares.
             </p>
           </div>
         </motion.header>
 
+        {/* Stats Strip */}
+        <motion.section variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+          {stats.map((stat) => (
+            <motion.div 
+              key={stat.label}
+              whileHover={{ y: -3 }}
+              className="bg-white/70 backdrop-blur-md border border-white/80 p-6 rounded-2xl shadow-sm text-center group hover:shadow-lg hover:border-primary/20 transition-all"
+            >
+              <p className="text-3xl font-serif text-primary tracking-tight">{stat.value}</p>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-700 mt-2">{stat.label}</p>
+              <p className="text-[9px] text-stone-400 mt-1 font-light">{stat.description}</p>
+            </motion.div>
+          ))}
+        </motion.section>
+
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 relative z-10">
           <div className="xl:col-span-8 space-y-16">
+            {/* Visão Geral */}
             <motion.section variants={itemVariants} className="relative bg-white/70 backdrop-blur-2xl p-10 md:p-14 rounded-[2rem] border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 text-primary/5 group-hover:text-primary/10 transition-colors duration-700">
                 <Cpu className="h-40 w-40 transform rotate-12" />
@@ -98,16 +138,22 @@ export default function AboutPage() {
                     A interface não possui apenas um fim funcional, mas sim o de proporcionar uma experiência visual agradável e sofisticada para organizadores e convidados.
                   </p>
                   <p>
-                    Com operações de banco de dados inteiramente <strong className="font-medium text-stone-900">Real-time (Zero Cache)</strong>, 
-                    a plataforma garante que todo RSVP ou alteração de configurações do evento reflitam de modo imediato em todos os dispositivos,
-                    combinando PostgreSQL Serverless e Server Actions do Next.js.
+                    Com operações de banco de dados inteiramente <strong className="font-medium text-stone-900">Real-time (Zero Cache)</strong> via 
+                    Server Actions do Next.js 16, a plataforma garante que todo RSVP ou alteração de configurações do evento reflitam de modo imediato em todos os dispositivos,
+                    combinando <strong className="font-medium text-stone-900">PostgreSQL Serverless (Neon)</strong> e polling inteligente.
+                  </p>
+                  <p>
+                    A autenticação utiliza <strong className="font-medium text-stone-900">Google OAuth 2.0</strong> com validação de 
+                    geolocalização por GPS/IP, garantindo que apenas usuários autorizados dentro de um raio geográfico definido possam acessar o painel administrativo.
+                    Cada sessão registra dados detalhados do dispositivo (GPU, RAM, bateria, resolução) para auditoria completa.
                   </p>
                 </div>
               </div>
             </motion.section>
 
+            {/* Tecnologias */}
             <motion.section variants={itemVariants} className="space-y-8">
-              <h2 className="text-sm font-serif tracking-[0.3em] text-primary uppercase pl-2">Tecnologias de Base</h2>
+              <h2 className="text-sm font-serif tracking-[0.3em] text-primary uppercase pl-2">Stack Tecnológico</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
                 {techStack.map((tech) => (
                   <motion.div 
@@ -139,6 +185,7 @@ export default function AboutPage() {
           </div>
 
           <div className="xl:col-span-4 space-y-8">
+            {/* Funcionalidades */}
             <motion.section variants={itemVariants} className="bg-stone-900 text-stone-300 p-8 md:p-10 rounded-[2rem] shadow-2xl relative overflow-hidden group">
               <div className="absolute -bottom-20 -right-20 text-white/5 group-hover:text-white/10 transition-colors duration-700">
                  <Zap className="h-64 w-64 transform -rotate-12" />
@@ -146,7 +193,7 @@ export default function AboutPage() {
               <div className="relative z-10 space-y-8">
                 <div>
                   <h2 className="text-sm font-serif tracking-[0.3em] text-white uppercase mb-2">Funcionalidades</h2>
-                  <p className="text-[10px] text-stone-500 tracking-[0.2em] uppercase font-light">Principais Implementações</p>
+                  <p className="text-[10px] text-stone-500 tracking-[0.2em] uppercase font-light">12 Módulos Implementados</p>
                 </div>
                 <ul className="space-y-5">
                   {features.map((feature, i) => (
@@ -156,16 +203,17 @@ export default function AboutPage() {
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
+                      transition={{ delay: i * 0.07 }}
                     >
-                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5 opacity-80" />
-                      <span className="text-xs tracking-wide leading-relaxed font-light text-stone-300">{feature}</span>
+                      <feature.icon className="h-4 w-4 text-primary shrink-0 mt-0.5 opacity-80" />
+                      <span className="text-xs tracking-wide leading-relaxed font-light text-stone-300">{feature.text}</span>
                     </motion.li>
                   ))}
                 </ul>
               </div>
             </motion.section>
 
+            {/* Segurança */}
             <motion.section variants={itemVariants} className="p-8 md:p-10 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 relative overflow-hidden group backdrop-blur-sm">
                <div className="absolute top-0 right-0 p-6 text-primary/10 group-hover:text-primary/20 transition-colors duration-500">
                  <Fingerprint className="h-24 w-24" />
@@ -175,13 +223,50 @@ export default function AboutPage() {
                     <div className="p-2 bg-primary/20 rounded-xl shadow-sm">
                       <ShieldCheck className="h-5 w-5 text-primary" />
                     </div>
-                    <h2 className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Segurança Extrema</h2>
+                    <h2 className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Segurança Multicamada</h2>
                  </div>
-                 <p className="text-xs text-stone-600 leading-relaxed font-light">
-                    O acesso ao painel não só exige autenticação validada pelo <strong className="font-semibold text-stone-800">Google</strong> e aprovação do Master,
-                    mas também telemetria e validação de geolocalização rigorosa para impedir o acesso de regiões não-autorizadas (Geofencing).
-                 </p>
+                 <div className="space-y-4 text-xs text-stone-600 leading-relaxed font-light">
+                   <p>
+                     <strong className="font-semibold text-stone-800">Camada 1 — Autenticação:</strong> Login exclusivo via Google OAuth 2.0 com aprovação do administrador principal.
+                   </p>
+                   <p>
+                     <strong className="font-semibold text-stone-800">Camada 2 — Geofencing:</strong> Validação por GPS nativo e fallback via IP. Acesso bloqueado fora do raio de 50km do evento.
+                   </p>
+                   <p>
+                     <strong className="font-semibold text-stone-800">Camada 3 — Sessões:</strong> Monitoramento a cada 5s com revogação remota instantânea e log completo de auditoria.
+                   </p>
+                   <p>
+                     <strong className="font-semibold text-stone-800">Camada 4 — Permissões:</strong> Controle granular de telas permitidas por operador com route guard client-side.
+                   </p>
+                 </div>
                </div>
+            </motion.section>
+
+            {/* Links */}
+            <motion.section variants={itemVariants} className="p-8 rounded-[2rem] bg-white/70 backdrop-blur-md border border-white/80 shadow-sm space-y-4">
+              <h2 className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Links do Projeto</h2>
+              <div className="space-y-3">
+                <a 
+                  href="https://github.com/dnlortega/Cha-bebe" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 bg-stone-900 text-white rounded-xl hover:bg-stone-800 transition-all group shadow-md"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase flex-1">Código Fonte</span>
+                  <ExternalLink className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
+                </a>
+                <a 
+                  href="https://cha-bebe.vercel.app" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all group shadow-md"
+                >
+                  <Rocket className="h-5 w-5" />
+                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase flex-1">Deploy (Vercel)</span>
+                  <ExternalLink className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
+                </a>
+              </div>
             </motion.section>
           </div>
         </div>
@@ -189,7 +274,7 @@ export default function AboutPage() {
         <motion.footer variants={itemVariants} className="pt-16 mt-16 border-t border-stone-200 text-center relative">
            <div className="absolute left-1/2 -top-px -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
            <p className="text-[10px] tracking-[0.5em] text-stone-400 uppercase font-light">
-              Design & Arquitetura Premium • {new Date().getFullYear()}
+              Design & Arquitetura Premium • Next.js 16 + React 19 • {new Date().getFullYear()}
            </p>
         </motion.footer>
       </motion.div>
