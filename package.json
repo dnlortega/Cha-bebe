@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@daveyplate/next-rate-limit": "^2.0.1",
     "@prisma/client": "^6.4.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -23,8 +24,7 @@
     "react-dom": "19.2.4",
     "shadcn": "^4.7.0",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.6.0",
-    "@daveyplate/next-rate-limit": "^2.0.1"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
