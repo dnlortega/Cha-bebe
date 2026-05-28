@@ -20,7 +20,6 @@ import {
   MapPin,
   MonitorSmartphone,
   BarChart3,
-  Github,
   ExternalLink,
   Rocket,
   Bell,
@@ -252,7 +251,7 @@ export default function AboutPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-stone-900 text-white rounded-xl hover:bg-stone-800 transition-all group shadow-md"
                 >
-                  <Github className="h-5 w-5" />
+                  <Code2 className="h-5 w-5" />
                   <span className="text-[10px] font-bold tracking-[0.2em] uppercase flex-1">Código Fonte</span>
                   <ExternalLink className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
                 </a>
