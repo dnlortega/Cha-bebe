@@ -150,11 +150,11 @@ export function AdminSidebar() {
               )}
               title="Opções da conta"
             >
-              {avatarUrl ? (
+              {avatarUrl && avatarUrl !== "null" ? (
                 <div className="relative flex-shrink-0">
                   <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setAvatarUrl(null)} />
                   </div>
                   {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />}
                 </div>
@@ -234,8 +234,14 @@ export function AdminSidebar() {
         })}
         {/* Avatar button (logout) */}
         <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1" title="Conta">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="h-6 w-6 rounded-full" referrerPolicy="no-referrer" />
+          {avatarUrl && avatarUrl !== "null" ? (
+            <img 
+              src={avatarUrl} 
+              alt="Avatar" 
+              className="h-6 w-6 rounded-full object-cover" 
+              referrerPolicy="no-referrer"
+              onError={() => setAvatarUrl(null)}
+            />
           ) : (
             <div className="h-6 w-6 flex items-center justify-center bg-primary/80 rounded-full text-white text-xs font-bold">
               {getInitials(adminEmail)}
