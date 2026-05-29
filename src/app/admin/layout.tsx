@@ -331,9 +331,16 @@ export default function AdminLayout({
             setCurrentUser(googleUsername);
             toast.success("CONECTADO COM SUCESSO VIA GOOGLE!");
 
+            const { checkActiveEventCookie } = await import("@/app/eventCookieActions");
+            const hasActiveEvent = await checkActiveEventCookie();
+
             // Limpa os parâmetros da URL para evitar expor o token
             window.history.replaceState({}, document.title, window.location.pathname);
             setChecking(false);
+            
+            if (!hasActiveEvent && pathname !== "/admin/events") {
+              window.location.href = "/admin/events";
+            }
             return;
           }
 
@@ -352,6 +359,13 @@ export default function AdminLayout({
               if (details.allowedScreens) {
                 localStorage.setItem("admin_allowed_screens", details.allowedScreens);
                 setAllowedScreens(details.allowedScreens);
+              }
+
+              const { checkActiveEventCookie } = await import("@/app/eventCookieActions");
+              const hasActiveEvent = await checkActiveEventCookie();
+              if (!hasActiveEvent && pathname !== "/admin/events") {
+                window.location.href = "/admin/events";
+                return;
               }
             } else {
               // Sessao foi revogada! Desloga imediatamente
@@ -589,8 +603,8 @@ export default function AdminLayout({
   const isRouteAllowed = (): boolean => {
     if (allowedScreens === "ALL") return true;
     const allowedList = allowedScreens.split(",").map((s) => s.trim());
-    // Dashboard é sempre permitido para operadores aprovados
-    if (pathname === "/admin") return true;
+    // Dashboard e seleção de eventos são sempre permitidos
+    if (pathname === "/admin" || pathname === "/admin/events") return true;
     for (const screenName of allowedList) {
       const route = SCREEN_ROUTE_MAP[screenName];
       if (route && pathname.startsWith(route)) return true;

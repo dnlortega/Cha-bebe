@@ -3,6 +3,15 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
+import { cookies } from "next/headers";
+
+export async function getActiveEventId(): Promise<string> {
+  const cookieStore = await cookies();
+  const eventId = cookieStore.get("activeEventId")?.value;
+  return eventId || "default";
+}
+
+
 export async function generateSlug(name: string) {
   return name
     .toLowerCase()
@@ -14,16 +23,13 @@ export async function generateSlug(name: string) {
     .trim();
 }
 
-export async function getSettings() {
+export async function getSettings(forceEventId?: string) {
+  const eventId = forceEventId || await getActiveEventId();
   noStore();
-  let settings = await prisma.settings.findUnique({
-    where: { id: "default" },
-  });
+  let settings = await prisma.settings.findUnique({ where: { eventId } });
 
   if (!settings) {
-    settings = await prisma.settings.create({
-      data: { 
-        id: "default", 
+    settings = await prisma.settings.create({ data: { id: eventId, eventId, 
         invitationUrl: "/convite.png", 
         theme: "GOLD", 
         sessionTimeout: 30,
@@ -47,15 +53,15 @@ export async function getSettings() {
 }
 
 export async function updateSettings(data: any) {
+  const eventId = await getActiveEventId();
   try {
     await prisma.settings.upsert({
-      where: { id: "default" },
+      where: { eventId },
       update: { 
         ...data,
         eventDate: data.eventDate ? new Date(data.eventDate) : null 
       },
-      create: { 
-        id: "default", 
+      create: { id: eventId, eventId, 
         ...data,
         eventDate: data.eventDate ? new Date(data.eventDate) : null
       }
@@ -69,11 +75,11 @@ export async function updateSettings(data: any) {
 }
 
 // Guestbook / Mural Actions
-export async function getRecentMessages(forAdmin = false) {
+export async function getRecentMessages(forAdmin = false, forceEventId?: string) {
+  const eventId = forceEventId || await getActiveEventId();
   noStore();
   const messages = await prisma.guest.findMany({
-    where: { 
-      mensagem: { not: null }, 
+    where: { eventId, mensagem: { not: null }, 
       status_confirmacao: "CONFIRMED",
       ...(forAdmin ? {} : { exibir_mensagem: true })
     },
@@ -105,16 +111,19 @@ export async function toggleMessageVisibility(id: string, exibir_mensagem: boole
 }
 
 // Gift Actions
-export async function getGifts() {
+export async function getGifts(forceEventId?: string) {
+  const eventId = forceEventId || await getActiveEventId();
   noStore();
   return prisma.gift.findMany({
+    where: { eventId },
     orderBy: { name: "asc" }
   });
 }
 
 export async function addGift(name: string, category: string = "Geral") {
+  const eventId = await getActiveEventId();
   try {
-    await prisma.gift.create({ data: { name, category } });
+    await prisma.gift.create({ data: { eventId, name, category } });
     revalidatePath("/admin/gifts");
     return { success: true };
   } catch (error) {
@@ -132,13 +141,14 @@ export async function deleteGift(id: string) {
   }
 }
 
-export async function updateRSVP(slug: string, status: string, membrosConfirmados?: string, mensagem?: string, giftId?: string) {
+export async function updateRSVP(slug: string, status: string, membrosConfirmados?: string, mensagem?: string, giftId?: string, forceEventId?: string) {
+  const eventId = forceEventId || await getActiveEventId();
   try {
     const count = membrosConfirmados ? membrosConfirmados.split(",").filter(n => n.trim().length > 0).length : (status === "CONFIRMED" ? 1 : 0);
 
     // Se a confirmação foi recusada ou desfeita, libera o presente anterior do convidado se houver
     if (status !== "CONFIRMED") {
-      const currentGuest = await prisma.guest.findUnique({ where: { slug } });
+      const currentGuest = await prisma.guest.findUnique({ where: { eventId_slug: { eventId, slug } } });
       if (currentGuest?.giftId) {
         await prisma.gift.update({
           where: { id: currentGuest.giftId },
@@ -155,8 +165,7 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
       });
     }
 
-    const updatedGuest = await prisma.guest.update({
-      where: { slug },
+    const updatedGuest = await prisma.guest.update({ where: { eventId_slug: { eventId, slug } },
       include: { gift: true },
       data: {
         status_confirmacao: status,
@@ -171,7 +180,7 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
     // Registra o log histórico da resposta
     await prisma.guestHistory.create({
       data: {
-        guestId: updatedGuest.id,
+        eventId, guestId: updatedGuest.id,
         guestNome: updatedGuest.nome,
         status_confirmacao: updatedGuest.status_confirmacao,
         data_resposta: new Date(),
@@ -229,6 +238,7 @@ export async function deleteAllGuests() {
 }
 
 export async function updateGuest(id: string, nome: string, tipo: string, membros?: string, qtdAdultos: number = 1, qtdCriancas: number = 0, fralda?: string, kitChurrasco: boolean = false) {
+  const eventId = await getActiveEventId();
   try {
     const slug = await generateSlug(nome);
     await prisma.guest.update({
@@ -248,9 +258,11 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
   }
 }
 
-export async function getGuests() {
+export async function getGuests(forceEventId?: string) {
+  const eventId = forceEventId || await getActiveEventId();
   noStore();
   const guests = await prisma.guest.findMany({
+    where: { eventId },
     include: { gift: true },
     orderBy: { nome: "asc" },
   });
@@ -268,6 +280,7 @@ export async function getGuests() {
 }
 
 export async function addMultipleGuests(namesText: string) {
+  const eventId = await getActiveEventId();
   try {
     const lines = namesText.split("\n").map(n => n.trim()).filter(n => n.length > 0);
     const results = await Promise.all(lines.map(async (line) => {
@@ -278,10 +291,8 @@ export async function addMultipleGuests(namesText: string) {
       const fralda = parts[3]?.toUpperCase() || null;
       const kitChurrasco = parts[4]?.toUpperCase() === "SIM" || parts[4]?.toUpperCase() === "KIT";
       const slug = await generateSlug(nome);
-      return prisma.guest.upsert({
-        where: { slug },
-        update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
-        create: { nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
+      return prisma.guest.upsert({ where: { eventId_slug: { eventId, slug } }, update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
+        create: { eventId, nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
       });
     }));
     revalidatePath("/admin");
@@ -364,9 +375,10 @@ export async function updateGoogleSessionDetails(token: string, deviceInfo: stri
 }
 
 export async function distributeDiapers() {
+  const eventId = await getActiveEventId();
   try {
     const settings = await getSettings();
-    const guests = await prisma.guest.findMany({ where: { fralda_tamanho: null }, orderBy: { createdAt: "asc" } });
+    const guests = await prisma.guest.findMany({ where: { eventId, fralda_tamanho: null }, orderBy: { createdAt: "asc" } });
     let stocks = { RN: settings.rnQty, P: settings.pQty, M: settings.mQty, G: settings.gQty, GG: settings.ggQty };
     if (Object.values(stocks).reduce((a, b) => a + b, 0) === 0) return { success: false, error: "ESTOQUE ZERADO." };
 
@@ -383,8 +395,10 @@ export async function distributeDiapers() {
 }
 
 export async function getHistoryLogs() {
+  const eventId = await getActiveEventId();
   noStore();
   const logs = await prisma.guestHistory.findMany({
+    where: { eventId },
     orderBy: { data_resposta: "desc" }
   });
   return logs.map(l => ({

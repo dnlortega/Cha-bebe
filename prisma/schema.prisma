@@ -7,10 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Event {
+  id          String   @id @default(cuid())
+  name        String   @default("Meu Evento")
+  slug        String   @unique
+  ownerEmail  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  settings    Settings?
+  guests      Guest[]
+  gifts       Gift[]
+  sharedWith  EventShare[]
+  guestHistory GuestHistory[]
+}
+
+model EventShare {
+  id          String   @id @default(cuid())
+  eventId     String
+  email       String
+  role        String   @default("EDITOR")
+  createdAt   DateTime @default(now())
+  
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  @@unique([eventId, email])
+}
+
 model Guest {
   id                String   @id @default(cuid())
+  eventId           String   @default("default")
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   nome              String
-  slug              String   @unique
+  slug              String
   status_confirmacao String?  // "CONFIRMED", "DECLINED", or null
   tipo              String   @default("INDIVIDUAL") // "INDIVIDUAL" or "FAMILIA"
   membros           String?  // Nomes dos membros da família separados por vírgula
@@ -26,10 +54,14 @@ model Guest {
   gift              Gift?     @relation(fields: [giftId], references: [id])
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@unique([eventId, slug])
 }
 
 model Settings {
   id            String @id @default("default")
+  eventId       String @unique @default("default")
+  event         Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   invitationUrl String @default("/convite.png")
   theme         String @default("GOLD")
   sessionTimeout Int    @default(30)
@@ -49,10 +81,13 @@ model Settings {
   showInvitationImage Boolean @default(true)
   babyName      String?
   babyGender    String?   // "BOY", "GIRL", or "NONE"
+  enableAnimations Boolean @default(true) // Toggle para ligar/desligar animações no sistema
 }
 
 model Gift {
   id          String   @id @default(cuid())
+  eventId     String   @default("default")
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name        String
   category    String?
   isReserved  Boolean  @default(false)
@@ -73,6 +108,8 @@ model Admin {
 
 model GuestHistory {
   id                String   @id @default(cuid())
+  eventId           String   @default("default")
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   guestId           String
   guestNome         String
   status_confirmacao String?  // "CONFIRMED", "DECLINED", or null

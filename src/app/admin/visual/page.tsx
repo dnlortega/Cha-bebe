@@ -24,6 +24,7 @@ export default function VisualPage() {
   const [eventDate, setEventDate] = useState("");
   const [eventAddress, setEventAddress] = useState("");
   const [eventMapsUrl, setEventMapsUrl] = useState("");
+  const [enableAnimations, setEnableAnimations] = useState(true);
   const [loading, setLoading] = useState(false);
   
   const [newUsername, setNewUsername] = useState("");
@@ -75,6 +76,7 @@ export default function VisualPage() {
       setEventDate(data.eventDate ? new Date(data.eventDate).toISOString().slice(0, 16) : "");
       setEventAddress(data.eventAddress || "");
       setEventMapsUrl(data.eventMapsUrl || "");
+      setEnableAnimations(data.enableAnimations ?? true);
     }
   };
 
@@ -125,7 +127,7 @@ export default function VisualPage() {
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl });
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -186,6 +188,7 @@ export default function VisualPage() {
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nome do Bebê</label><Input value={babyName} onChange={e => setBabyName(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Ex: Arthur ou Helena" /></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Sexo do Bebê</label><Select value={babyGender} onValueChange={(v) => v && setBabyGender(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">NÃO DEFINIDO</SelectItem><SelectItem value="BOY">MENINO (AZUL)</SelectItem><SelectItem value="GIRL">MENINA (ROSA)</SelectItem></SelectContent></Select></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Exibir Imagem do Convite</label><Select value={showInvitationImage ? "SIM" : "NAO"} onValueChange={(v) => setShowInvitationImage(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">SIM</SelectItem><SelectItem value="NAO">NÃO</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Animações do Sistema</label><Select value={enableAnimations ? "SIM" : "NAO"} onValueChange={(v) => setEnableAnimations(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">LIGADAS</SelectItem><SelectItem value="NAO">DESLIGADAS</SelectItem></SelectContent></Select></div>
           </div>
         </Card>
 

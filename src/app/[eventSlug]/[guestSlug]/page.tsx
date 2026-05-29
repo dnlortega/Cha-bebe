@@ -7,19 +7,25 @@ import { MapPin, Calendar, Clock } from "lucide-react";
 import { getThemeById } from "@/lib/themes";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ eventSlug: string; guestSlug: string }>;
 }
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function GuestPage({ params }: PageProps) {
-  const { slug } = await params;
-  const settings = await getSettings();
-  const gifts = await getGifts();
+  const { eventSlug, guestSlug } = await params;
+  
+  const event = await prisma.event.findUnique({
+    where: { slug: eventSlug }
+  });
+  if (!event) notFound();
+
+  const settings = await getSettings(event.id);
+  const gifts = await getGifts(event.id);
 
   const guest = await prisma.guest.findUnique({
-    where: { slug },
+    where: { eventId_slug: { eventId: event.id, slug: guestSlug } },
   });
 
   if (!guest) notFound();
@@ -110,6 +116,7 @@ export default async function GuestPage({ params }: PageProps) {
             gifts={gifts}
             fontFamily={inviteFontFamily}
             fontSize={inviteFontSize}
+            eventId={event.id}
           />
         </div>
       </div>

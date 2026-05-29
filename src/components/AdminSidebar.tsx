@@ -177,6 +177,10 @@ export function AdminSidebar() {
           <DropdownMenuContent align={showLabels ? "center" : "start"} side={showLabels ? "bottom" : "right"} className="w-56 z-[70] mb-2 ml-2 shadow-xl border-primary/10">
             <div className="px-3 py-2 text-[10px] font-bold tracking-widest uppercase text-stone-400">Minha Conta</div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/admin/events" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
+              <LayoutDashboard className="h-4 w-4 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Trocar Evento</span>
+            </DropdownMenuItem>
             {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Visual")) && (
               <DropdownMenuItem render={<Link href="/admin/visual" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
                 <Settings className="h-4 w-4 text-primary" />

@@ -19,9 +19,10 @@ interface RSVPFormProps {
   gifts: any[];
   fontFamily?: string;
   fontSize?: number;
+  eventId: string;
 }
 
-export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFormProps) {
+export default function RSVPForm({ guest, gifts, fontFamily, fontSize, eventId }: RSVPFormProps) {
   const [status, setStatus] = useState<string>(guest.status_confirmacao || "CONFIRMED");
   const [selectedMembers, setSelectedMembers] = useState<string[]>(guest.membros_confirmados ? guest.membros_confirmados.split(",").map((s: string) => s.trim()) : []);
   const [mensagem, setMensagem] = useState("");
@@ -36,7 +37,7 @@ export default function RSVPForm({ guest, gifts, fontFamily, fontSize }: RSVPFor
     setIsPending(true);
     const confirmadosString = guest.tipo === "FAMILIA" ? selectedMembers.join(", ") : "";
     const finalStatus = (guest.tipo === "FAMILIA" && selectedMembers.length === 0 && status === "CONFIRMED") ? "DECLINED" : status;
-    const result = await updateRSVP(guest.slug, finalStatus, confirmadosString, mensagem, selectedGift);
+    const result = await updateRSVP(guest.slug, finalStatus, confirmadosString, mensagem, selectedGift, eventId);
     if (result.success) {
       if (finalStatus === "CONFIRMED") confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
       toast.success("RESPOSTA ENVIADA!");
