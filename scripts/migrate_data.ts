@@ -30,25 +30,25 @@ async function main() {
 
   // 2. Update all existing records to use the default eventId
   const guestUpdate = await prisma.guest.updateMany({
-    where: { eventId: null },
+    where: {},
     data: { eventId: 'default' }
   });
   console.log(`Updated ${guestUpdate.count} guests.`);
 
   const settingsUpdate = await prisma.settings.updateMany({
-    where: { eventId: null },
+    where: {},
     data: { eventId: 'default' }
   });
   console.log(`Updated ${settingsUpdate.count} settings.`);
 
   const giftUpdate = await prisma.gift.updateMany({
-    where: { eventId: null },
+    where: {},
     data: { eventId: 'default' }
   });
   console.log(`Updated ${giftUpdate.count} gifts.`);
 
   const guestHistoryUpdate = await prisma.guestHistory.updateMany({
-    where: { eventId: null },
+    where: {},
     data: { eventId: 'default' }
   });
   console.log(`Updated ${guestHistoryUpdate.count} guest histories.`);

@@ -10,7 +10,7 @@ export async function getUserEvents(email: string) {
       OR: [
         { ownerEmail: email },
         {
-          shares: {
+          sharedWith: {
             some: { email: email }
           }
         }
