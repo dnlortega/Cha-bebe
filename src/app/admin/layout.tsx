@@ -283,19 +283,10 @@ export default function AdminLayout({
               gps = fallbackGps;
             }
 
-            // Bloqueio geográfico: o admin deve estar em Bauru, SP (ou o admin principal tem bypass)
+            // Geofence restriction removed: allow all admins (including master) to login from any location.
             const isMaster = googleUsername?.toLowerCase() === "dnlortega@gmail.com";
-            const isFromBauru = loc.toLowerCase().includes("bauru") || loc.toLowerCase().includes("sp") || (gps && isWithinBauruGPS(gps));
-            
-            if (!isMaster && !isFromBauru && loc !== "Localização Desconhecida") {
-              toast.error("ACESSO BLOQUEADO: O painel só pode ser acessado em Bauru, SP.");
-              setChecking(false);
-              window.history.replaceState({}, document.title, window.location.pathname);
-              return;
-            } else if (!isMaster && !isFromBauru && loc === "Localização Desconhecida" && !gps) {
-               // Se não conseguiu pegar nenhuma localização, avisa mas permite (para não bloquear por AdBlockers)
-               toast.warning("Localização não identificada. Acesso liberado com restrições de auditoria.");
-            }
+            // No location check needed; all users are permitted.
+            // (previous location checks and blocking logic have been removed)
 
             // Obtem informacoes de dispositivo enriquecidas
             const browser = getDeviceInfo();
