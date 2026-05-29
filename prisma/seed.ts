@@ -11,11 +11,12 @@ async function main() {
 
   for (const guest of guests) {
     await prisma.guest.upsert({
-      where: { slug: guest.slug },
+      where: { eventId_slug: { eventId: "default", slug: guest.slug } },
       update: {},
       create: {
         nome: guest.nome,
         slug: guest.slug,
+        eventId: "default",
       },
     });
   }

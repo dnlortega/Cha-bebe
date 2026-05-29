@@ -25,10 +25,10 @@ async function testAdd(line: string) {
     console.log(`Adding: ${nome}, Slug: ${slug}, Fralda: ${fralda}, Kit: ${kitChurrasco}`);
     
     const result = await prisma.guest.upsert({
-      where: { slug },
-      update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
-      create: { nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
-    });
+    where: { eventId_slug: { eventId: "default", slug } },
+    update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
+    create: { nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco, eventId: "default" },
+  });
     console.log("Upsert success:", result.nome);
   } catch (error) {
     console.error("Upsert failed:", error);
