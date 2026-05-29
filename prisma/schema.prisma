@@ -15,6 +15,7 @@ model Event {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  shareable      Boolean   @default(false)
   settings    Settings?
   guests      Guest[]
   gifts       Gift[]

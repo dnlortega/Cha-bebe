@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+
 import { getUserEvents, createDefaultEventForUser } from "@/app/eventActions";
+import { Checkbox } from "@/components/ui/checkbox";
 import { setActiveEventCookie } from "@/app/eventCookieActions";
 import { useAdminAuth } from "@/app/admin/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [shareable, setShareable] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -40,7 +42,7 @@ export default function EventsPage() {
   const handleCreateEvent = async () => {
     setCreating(true);
     try {
-      const newEvent = await createDefaultEventForUser(currentUser!);
+      const newEvent = await createDefaultEventForUser(currentUser!, shareable);
       toast.success("Novo evento criado!");
       await handleSelectEvent(newEvent.id);
     } catch (e) {
@@ -63,6 +65,10 @@ export default function EventsPage() {
         <div>
           <h1 className="text-3xl font-serif text-primary tracking-[0.2em] uppercase">Seus Eventos</h1>
           <p className="text-[10px] opacity-50 tracking-[0.4em] uppercase mt-2">Escolha o evento que deseja gerenciar</p>
+        </div>
+        <div className="flex items-center space-x-2 mb-4">
+          <Checkbox id="shareable" checked={shareable} onCheckedChange={(checked) => setShareable(checked as boolean)} />
+          <label htmlFor="shareable" className="text-sm text-primary">Permitir compartilhamento</label>
         </div>
         <Button onClick={handleCreateEvent} disabled={creating} className="h-12 rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-[10px] uppercase shadow-lg">
           {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CalendarPlus className="h-4 w-4 mr-2" />}

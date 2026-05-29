@@ -24,7 +24,7 @@ export async function getUserEvents(email: string) {
   return events;
 }
 
-export async function createDefaultEventForUser(email: string) {
+export async function createDefaultEventForUser(email: string, shareable: boolean = false) {
   // auto-create event
   const eventName = `Chá de Bebê - ${email.split('@')[0]}`;
   const baseSlug = await import('./actions').then(m => m.generateSlug(eventName));
@@ -42,6 +42,7 @@ export async function createDefaultEventForUser(email: string) {
       name: eventName,
       slug: finalSlug,
       ownerEmail: email,
+      shareable: shareable,
       settings: {
         create: {
           invitationUrl: "/convite.png", 
