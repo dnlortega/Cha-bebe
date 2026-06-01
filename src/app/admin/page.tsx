@@ -42,11 +42,25 @@ export default function AdminDashboard() {
     setSelectedCategory(prev => prev === label ? null : label);
   };
 
-  const getFilteredGuests = () => {
+  const expandConfirmedPeople = () => {
+    const list: { id: string; nome: string; tipo: string; grupo?: string }[] = [];
+    guests.filter(g => g.status_confirmacao === "CONFIRMED").forEach(g => {
+      if (g.tipo === "FAMILIA" && g.membros_confirmados) {
+        g.membros_confirmados.split(",").map((n: string) => n.trim()).filter(Boolean).forEach((n: string, i: number) => {
+          list.push({ id: `${g.id}_${i}`, nome: n, tipo: "FAMILIA", grupo: g.nome });
+        });
+      } else {
+        list.push({ id: g.id, nome: g.nome, tipo: g.tipo || "INDIVIDUAL" });
+      }
+    });
+    return list;
+  };
+
+  const getFilteredGuests = (): any[] => {
     if (!selectedCategory) return [];
     switch (selectedCategory) {
       case "CONFIRMADOS":
-        return guests.filter(g => g.status_confirmacao === "CONFIRMED");
+        return expandConfirmedPeople();
       case "PENDENTES":
         return guests.filter(g => !g.status_confirmacao);
       case "RECUSADOS":
@@ -146,12 +160,22 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  const total = guests.length;
-  const confirmed = guests.filter(g => g.status_confirmacao === "CONFIRMED").length;
+  const countPeople = (g: any, field: string) => {
+    if (g.tipo === "FAMILIA" && g[field]) {
+      return g[field].split(",").filter((s: string) => s.trim()).length;
+    }
+    return 1;
+  };
+
+  const totalPeople = guests.reduce((acc, g) => acc + countPeople(g, "membros"), 0);
+  const confirmed = guests.reduce((acc, g) =>
+    g.status_confirmacao === "CONFIRMED" ? acc + countPeople(g, "membros_confirmados") : acc, 0
+  );
   const pending = guests.filter(g => !g.status_confirmacao).length;
   const declined = guests.filter(g => g.status_confirmacao === "DECLINED").length;
   const adults = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_adultos || 0) : acc, 0);
   const children = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_criancas || 0) : acc, 0);
+  const totalInvites = guests.length;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -194,15 +218,15 @@ export default function AdminDashboard() {
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-primary/20 blur-3xl rounded-full" />
             
             <div className="relative z-10">
-              <CircularProgress value={confirmed} max={total} size={160} strokeWidth={12} color="var(--primary)" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-5xl font-serif text-white tracking-tighter">{total > 0 ? Math.round((confirmed/total)*100) : 0}<span className="text-2xl text-primary">%</span></p>
+              <CircularProgress value={confirmed} max={totalPeople} size={160} strokeWidth={12} color="var(--primary)" />
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                 <p className="text-5xl font-serif text-white tracking-tighter">{totalPeople > 0 ? Math.round((confirmed/totalPeople)*100) : 0}<span className="text-2xl text-primary">%</span></p>
               </div>
             </div>
             
             <div className="space-y-2 relative z-10">
                <p className="text-[10px] text-stone-400 font-bold tracking-[0.4em] uppercase">Taxa de Confirmação</p>
-               <p className="text-xs text-stone-500 font-light">{confirmed} de {total} pessoas</p>
+               <p className="text-xs text-stone-500 font-light">{confirmed} de {totalPeople} pessoas</p>
             </div>
           </Card>
         </motion.div>
@@ -214,7 +238,7 @@ export default function AdminDashboard() {
             { label: "RECUSADOS", value: declined, icon: XCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
             { label: "ADULTOS", value: adults, icon: UserCheck, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
             { label: "CRIANÇAS", value: children, icon: Baby, color: "text-sky-500", bg: "bg-sky-500/10", border: "border-sky-500/20" },
-            { label: "TOTAL", value: total, icon: Users, color: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20" }
+            { label: "TOTAL", value: totalPeople, icon: Users, color: "text-stone-500", bg: "bg-stone-500/10", border: "border-stone-500/20" }
           ].map((s, i) => (
             <motion.div key={i} variants={itemVariants} whileHover={{ y: -5 }} className="h-full">
               <Card 
@@ -263,7 +287,7 @@ export default function AdminDashboard() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {getFilteredGuests().map((guest, idx) => (
+                {getFilteredGuests().map((guest: any, idx: number) => (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -277,7 +301,7 @@ export default function AdminDashboard() {
                     
                     {selectedCategory === "CONFIRMADOS" && (
                       <span className="text-[9px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md w-fit uppercase tracking-widest font-bold">
-                        {guest.tipo === "FAMILIA" ? "Família" : "Individual"}
+                        {guest.grupo ? `Família ${guest.grupo}` : "Individual"}
                       </span>
                     )}
                     {selectedCategory === "PENDENTES" && (
