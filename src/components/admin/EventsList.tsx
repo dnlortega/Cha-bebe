@@ -38,6 +38,7 @@ export function EventsList({
   variant,
   onEnter,
   onSharesUpdated,
+  onDelete,
 }: EventsListProps) {
   if (events.length === 0) return null;
 
