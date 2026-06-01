@@ -201,7 +201,7 @@ export default function HistoryPage() {
           <p className="text-[9px] font-bold tracking-[0.3em] uppercase opacity-40">Carregando linha do tempo...</p>
         </div>
       ) : (
-        <div className="relative max-w-3xl mx-auto py-6">
+        <div className="relative w-full py-6">
           {/* Linha vertical central da linha do tempo */}
           {groupedList.length > 0 && (
             <div className="absolute left-6 lg:left-1/2 top-0 bottom-0 w-0.5 bg-primary/10 -translate-x-1/2" />

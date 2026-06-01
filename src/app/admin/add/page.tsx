@@ -36,7 +36,7 @@ export default function AddGuestsPage() {
   };
 
   return (
-    <div className="max-w-6xl space-y-12 animate-in fade-in duration-1000 pb-20">
+    <div className="w-full space-y-12 animate-in fade-in duration-1000 pb-20">
       <header className="space-y-2">
         <h1 className="text-4xl font-serif text-primary tracking-[0.2em]">CADASTRAR</h1>
         <p className="text-[10px] opacity-50 tracking-[0.4em] font-light uppercase">ADICIONE MÚLTIPLOS CONVITES DE UMA VEZ</p>

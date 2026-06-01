@@ -162,7 +162,7 @@ export default function VisualPage() {
   };
 
   return (
-    <div className="max-w-4xl space-y-12 animate-in fade-in duration-1000 pb-20">
+    <div className="w-full space-y-12 animate-in fade-in duration-1000 pb-20">
       <header className="flex justify-between items-end border-b border-primary/5 pb-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Visual & Info</h1>

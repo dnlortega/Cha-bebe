@@ -305,7 +305,7 @@ export default function AccessPage() {
   const masterEmail = "dnlortega@gmail.com";
 
   return (
-    <div className="max-w-5xl space-y-12 animate-in fade-in duration-1000 pb-20">
+    <div className="w-full space-y-12 animate-in fade-in duration-1000 pb-20">
       {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-primary/5 pb-8 gap-4">
         <div className="space-y-2">

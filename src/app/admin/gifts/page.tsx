@@ -35,7 +35,7 @@ export default function GiftsAdminPage() {
   };
 
   return (
-    <div className="max-w-7xl space-y-12 animate-in fade-in duration-700">
+    <div className="w-full space-y-12 animate-in fade-in duration-700">
       <header className="space-y-2">
         <h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Lista de Presentes</h1>
         <p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Gerencie os itens da vitrine</p>

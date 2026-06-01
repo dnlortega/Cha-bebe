@@ -121,7 +121,7 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10">
+    <div className="w-full space-y-10">
       <header className="border-b border-primary/10 pb-6 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end">
         <div>
           <h1 className="text-3xl font-serif text-primary tracking-[0.2em] uppercase">

@@ -83,7 +83,7 @@ export default function AboutPage() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="max-w-7xl mx-auto space-y-20 pb-24 mt-12"
+        className="w-full space-y-20 pb-24 mt-12"
       >
         {/* Header */}
         <motion.header variants={itemVariants} className="space-y-6 relative">
