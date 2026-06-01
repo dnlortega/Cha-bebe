@@ -12,16 +12,22 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, Settings as SettingsIcon, UserCircle, ShieldAlert, Lock } from "lucide-react";
 import Image from "next/image";
+import { isCollaboratorPathAllowed } from "@/lib/eventAccess";
+import type { ActiveEventAccess } from "@/app/eventCookieActions";
 
 const AdminAuthContext = createContext<{
   authorized: boolean;
   setAuthorized: (val: boolean) => void;
   currentUser: string | null;
+  eventAccess: ActiveEventAccess;
 }>({
   authorized: false,
   setAuthorized: () => {},
   currentUser: null,
+  eventAccess: { active: false },
 });
+
+export type { ActiveEventAccess };
 
 export const useAdminAuth = () => useContext(AdminAuthContext);
 
@@ -43,6 +49,7 @@ export default function AdminLayout({
     }
     return "ALL";
   });
+  const [eventAccess, setEventAccess] = useState<ActiveEventAccess>({ active: false });
 
 
   const getDeviceInfo = () => {
@@ -407,6 +414,36 @@ export default function AdminLayout({
     return;
   }, [authorized, timeoutSeconds]);
 
+  // Atualiza se o usuário é colaborador do evento ativo (compartilhamento)
+  useEffect(() => {
+    if (!authorized || !currentUser) {
+      setEventAccess({ active: false });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("event_collaborator");
+      }
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const { getActiveEventAccess } = await import("@/app/eventCookieActions");
+      const access = await getActiveEventAccess(currentUser);
+      if (cancelled) return;
+      setEventAccess(access);
+      if (typeof window !== "undefined") {
+        if (access.active && access.isCollaborator) {
+          localStorage.setItem("event_collaborator", "true");
+        } else {
+          localStorage.removeItem("event_collaborator");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authorized, currentUser, pathname]);
+
   // Monitoramento active e instantâneo da revogação de sessão (Derrubar dispositivo automaticamente)
   useEffect(() => {
     if (!authorized) return;
@@ -601,10 +638,16 @@ export default function AdminLayout({
   };
 
   const isRouteAllowed = (): boolean => {
+    if (pathname === "/admin/events") return true;
+
+    // Colaborador com evento compartilhado: telas de gestão deste evento
+    if (eventAccess.active && eventAccess.isCollaborator) {
+      return isCollaboratorPathAllowed(pathname);
+    }
+
     if (allowedScreens === "ALL") return true;
     const allowedList = allowedScreens.split(",").map((s) => s.trim());
-    // Dashboard e seleção de eventos são sempre permitidos
-    if (pathname === "/admin" || pathname === "/admin/events") return true;
+    if (pathname === "/admin") return true;
     for (const screenName of allowedList) {
       const route = SCREEN_ROUTE_MAP[screenName];
       if (route && pathname.startsWith(route)) return true;
@@ -614,7 +657,7 @@ export default function AdminLayout({
 
   if (authorized && !isRouteAllowed()) {
     return (
-      <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser }}>
+      <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser, eventAccess }}>
         <div className="min-h-screen bg-background">
           <AdminSidebar />
           <main className="lg:pl-20 min-h-screen transition-all duration-300">
@@ -652,7 +695,7 @@ export default function AdminLayout({
   }
 
   return (
-    <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser }}>
+    <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser, eventAccess }}>
       <div className="min-h-screen bg-background">
         <AdminSidebar />
         <main className="lg:pl-20 min-h-screen transition-all duration-300">

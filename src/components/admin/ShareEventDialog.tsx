@@ -18,6 +18,7 @@ import {
   shareEventWithRegisteredUser,
   type RegisteredUserForShare,
 } from "@/app/eventActions";
+import { EVENT_SHARE_INCLUDES_DESCRIPTION } from "@/lib/eventAccess";
 
 type ShareEventDialogProps = {
   ownerEmail: string;
@@ -131,18 +132,21 @@ export function ShareEventDialog({
           <DialogTitle className="font-serif tracking-widest text-primary uppercase text-base">
             Compartilhar evento
           </DialogTitle>
-          <DialogDescription className="text-xs text-stone-500">
+          <DialogDescription className="text-xs text-stone-500 space-y-2">
             {eventName ? (
-              <>
+              <span>
                 Escolha um usuário <span className="font-medium">já cadastrado</span>{" "}
-                no sistema para colaborar em «{eventName}».
-              </>
+                para colaborar em «{eventName}».
+              </span>
             ) : (
-              <>
+              <span>
                 Escolha um usuário <span className="font-medium">já cadastrado</span>{" "}
                 para receber acesso de editor ao criar o evento.
-              </>
+              </span>
             )}
+            <span className="block text-[10px] text-stone-400 leading-relaxed pt-1 border-t border-stone-100">
+              O colaborador poderá gerenciar: {EVENT_SHARE_INCLUDES_DESCRIPTION}
+            </span>
           </DialogDescription>
         </DialogHeader>
 

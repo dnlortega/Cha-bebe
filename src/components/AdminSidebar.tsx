@@ -19,6 +19,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EVENT_COLLABORATOR_SCREEN_TITLES } from "@/lib/eventAccess";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,11 +49,13 @@ export function AdminSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
+  const [isEventCollaborator, setIsEventCollaborator] = useState(false);
 
   useEffect(() => {
     setAvatarUrl(localStorage.getItem("admin_avatar") || null);
     setAdminEmail(localStorage.getItem("admin_username") || null);
     setAllowedScreens(localStorage.getItem("admin_allowed_screens") || "ALL");
+    setIsEventCollaborator(localStorage.getItem("event_collaborator") === "true");
 
     const checkMaster = async () => {
       const token = localStorage.getItem("admin_session_token") || "";
@@ -66,10 +69,15 @@ export function AdminSidebar() {
       setIsMaster(realMaster);
     };
     checkMaster();
-  }, []);
+  }, [pathname]);
 
   const visibleMenuItems = ALL_MENU_ITEMS.filter((item) => {
     if (item.href === "/admin/access") return isMaster;
+    if (isEventCollaborator) {
+      return (EVENT_COLLABORATOR_SCREEN_TITLES as readonly string[]).includes(
+        item.title
+      );
+    }
     if (allowedScreens === "ALL") return true;
     if (item.href === "/admin") return true;
     const allowedList = allowedScreens.split(",").map((s) => s.trim());
@@ -90,6 +98,7 @@ export function AdminSidebar() {
     localStorage.removeItem("admin_username");
     localStorage.removeItem("admin_avatar");
     localStorage.removeItem("admin_allowed_screens");
+    localStorage.removeItem("event_collaborator");
     localStorage.removeItem("admin_session_token");
     window.location.href = "/";
   };

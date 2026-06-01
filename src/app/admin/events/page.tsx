@@ -208,7 +208,7 @@ export default function EventsPage() {
 
           <EventsList
             title="Eventos que você criou"
-            description="Você é o proprietário e pode compartilhar com outros usuários cadastrados."
+            description="Compartilhar inclui Status, Convites, Histórico, Cadastrar, Lista Final e Presentes deste evento."
             events={ownedEvents}
             currentUser={currentUser!}
             variant="owned"
@@ -218,7 +218,7 @@ export default function EventsPage() {
 
           <EventsList
             title="Compartilhados com você"
-            description="Eventos de outros usuários em que você colabora como editor."
+            description="Ao entrar, você gerencia Status, Convites, Histórico, Cadastrar, Lista Final e Presentes só deste evento."
             events={sharedEvents}
             currentUser={currentUser!}
             variant="shared"

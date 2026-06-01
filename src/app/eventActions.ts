@@ -29,7 +29,9 @@ export async function getUserEvents(email: string) {
         { ownerEmail: normalized },
         {
           sharedWith: {
-            some: { email: normalized },
+            some: {
+              email: { equals: normalized, mode: "insensitive" },
+            },
           },
         },
       ],
@@ -163,6 +165,7 @@ export async function shareEventWithEmail(
       data: { shareable: true },
     });
     revalidatePath("/admin/events");
+    revalidatePath("/admin", "layout");
     return { success: true };
   } catch (e) {
     console.error(e);
