@@ -82,6 +82,7 @@ export async function getMuralDataBySlug(slug: string) {
 export async function getActiveEventSlug() {
   const { getActiveEventId } = await import("./actions");
   const eventId = await getActiveEventId();
+  if (!eventId) return "evento-principal";
   const event = await prisma.event.findUnique({
     where: { id: eventId }
   });

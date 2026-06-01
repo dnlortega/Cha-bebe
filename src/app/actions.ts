@@ -18,16 +18,6 @@ export async function generateSlug(name: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s-]/g, "")
-  return eventId || "";
-}
-
-
-export async function generateSlug(name: string) {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/--+/g, "-")
     .trim();
@@ -50,7 +40,10 @@ export async function getSettings(forceEventId?: string) {
       showInvitationImage: true,
       babyName: "O Bebê",
       babyGender: "NONE",
-      eventDate: null
+      eventDate: null,
+      eventAddress: null,
+      eventMapsUrl: null,
+      enableAnimations: true
     };
   }
 
@@ -442,16 +435,20 @@ export async function getHistoryLogs() {
   try {
     const logs = await prisma.guestHistory.findMany({
       where: { eventId },
-      orderBy: { timestamp: "desc" }
+      orderBy: { data_resposta: "desc" }
     });
     return logs.map(l => ({
       ...l,
-      timestamp: l.timestamp.toISOString()
+      data_resposta: l.data_resposta.toISOString()
     }));
   } catch (error) {
     console.error("Erro ao carregar histórico de convidados:", error);
     return [];
   }
+}
+
+export async function getAdminSessions() {
+  noStore();
   try {
     const sessions = await prisma.adminSession.findMany({
       orderBy: { lastActive: "desc" }
@@ -464,6 +461,66 @@ export async function getHistoryLogs() {
   } catch (error) {
     console.error("Erro ao carregar sessoes:", error);
     return [];
+  }
+}
+
+export async function registerAdminSession(
+  token: string,
+  deviceName: string,
+  deviceInfo: string,
+  location: string,
+  gpsCoords: string | null,
+  diagnostics: string,
+  adminEmail?: string
+) {
+  try {
+    await prisma.adminSession.create({
+      data: {
+        token,
+        deviceName,
+        deviceInfo,
+        location,
+        gpsCoords: gpsCoords || null,
+        diagnostics,
+        adminEmail: adminEmail || null,
+        lastActive: new Date()
+      }
+    });
+
+    // Registra no histórico de sessões
+    await prisma.sessionHistoryLog.create({
+      data: {
+        deviceName,
+        deviceInfo,
+        location,
+        action: "INICIADA"
+      }
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao registrar sessão:", error);
+    return { success: false };
+  }
+}
+
+export async function verifyAdminSession(token: string): Promise<boolean> {
+  try {
+    const session = await prisma.adminSession.findUnique({
+      where: { token }
+    });
+    if (!session) return false;
+
+    // Atualiza o lastActive para manter a sessão viva
+    await prisma.adminSession.update({
+      where: { token },
+      data: { lastActive: new Date() }
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Erro ao verificar sessão:", error);
+    return false;
   }
 }
 
