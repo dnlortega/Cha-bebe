@@ -203,6 +203,23 @@ export async function removeEventShare(
   }
 }
 
+export async function removeEvent(eventId: string, ownerEmail: string) {
+  const event = await getOwnedEvent(eventId, ownerEmail);
+  if (!event) {
+    return { success: false, error: "Sem permissão para excluir este evento." };
+  }
+
+  try {
+    await prisma.event.delete({ where: { id: eventId } });
+    revalidatePath("/admin/events");
+    revalidatePath("/admin", "layout");
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Falha ao excluir evento." };
+  }
+}
+
 const defaultSettingsData = {
   invitationUrl: "/convite.png",
   theme: "GOLD",

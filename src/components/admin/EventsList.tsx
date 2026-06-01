@@ -1,9 +1,9 @@
 "use client";
 
-import { Gift, Users, LogIn, X } from "lucide-react";
+import { Gift, Users, LogIn, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareEventDialog } from "@/components/admin/ShareEventDialog";
-import { removeEventShare } from "@/app/eventActions";
+import { removeEventShare, removeEvent } from "@/app/eventActions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -27,6 +27,7 @@ type EventsListProps = {
   variant: "owned" | "shared";
   onEnter: (eventId: string) => void;
   onSharesUpdated: (eventId: string, shares: { id: string; email: string }[]) => void;
+  onDelete?: (eventId: string) => void;
 };
 
 export function EventsList({
@@ -89,6 +90,7 @@ function EventRow({
   onSharesUpdated: (eventId: string, shares: { id: string; email: string }[]) => void;
 }) {
   const [removing, setRemoving] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const isOwner = variant === "owned";
   const shares = event.sharedWith || [];
 
@@ -110,6 +112,24 @@ function EventRow({
   const handleShared = (email: string) => {
     if (shares.some((s) => s.email.toLowerCase() === email.toLowerCase())) return;
     onSharesUpdated(event.id, [...shares, { id: email, email, role: "EDITOR" }]);
+  };
+
+  const handleDeleteEvent = async () => {
+    const confirmed = window.confirm(
+      `Confirma excluir o evento "${event.name}"? Esta ação removerá todo o evento e não pode ser desfeita.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    const result = await removeEvent(event.id, currentUser);
+    setDeleting(false);
+
+    if (result.success) {
+      toast.success("Evento excluído com sucesso.");
+      onDelete?.(event.id);
+    } else {
+      toast.error(result.error || "Erro ao excluir evento.");
+    }
   };
 
   const babyName = event.settings?.babyName;
@@ -168,13 +188,29 @@ function EventRow({
 
       <div className="flex flex-wrap gap-2 sm:justify-end sm:w-52">
         {isOwner && (
-          <ShareEventDialog
-            ownerEmail={currentUser}
-            eventId={event.id}
-            eventName={event.name}
-            onShared={handleShared}
-            alreadySharedEmails={shares.map((s) => s.email)}
-          />
+          <>
+            <ShareEventDialog
+              ownerEmail={currentUser}
+              eventId={event.id}
+              eventName={event.name}
+              onShared={handleShared}
+              alreadySharedEmails={shares.map((s) => s.email)}
+            />
+            <Button
+              type="button"
+              onClick={handleDeleteEvent}
+              disabled={deleting}
+              variant="destructive"
+              className="rounded-none h-9 text-[10px] tracking-widest uppercase"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-1.5" />
+              )}
+              Excluir
+            </Button>
+          </>
         )}
         <Button
           type="button"

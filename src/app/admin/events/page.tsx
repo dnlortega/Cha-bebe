@@ -108,6 +108,10 @@ export default function EventsPage() {
     setShareEmails((prev) => [...prev, normalized]);
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    setEvents((prev) => prev.filter((event) => event.id !== eventId));
+  };
+
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -322,6 +326,7 @@ export default function EventsPage() {
             variant="owned"
             onEnter={handleSelectEvent}
             onSharesUpdated={handleSharesUpdated}
+            onDelete={handleDeleteEvent}
           />
 
           <EventsList

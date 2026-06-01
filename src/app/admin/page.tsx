@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getGuests, getRecentMessages, toggleMessageVisibility } from "@/app/actions";
+import { getGuests } from "@/app/actions";
 import { getActiveEventSlug } from "@/app/eventActions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, 
-  ChevronRight, PackageCheck, XCircle, MessageSquareQuote, Stars, ArrowUpRight, Eye, EyeOff
+  ChevronRight, PackageCheck, XCircle, Stars, ArrowUpRight
 } from "lucide-react";
 
 function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "var(--primary)" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string; }) {
@@ -30,10 +29,8 @@ function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "va
 
 export default function AdminDashboard() {
   const [guests, setGuests] = useState<any[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [hasMuralAccess, setHasMuralAccess] = useState(false);
   const [eventSlug, setEventSlug] = useState<string>("evento-principal");
 
   const guestsRef = useRef<any[]>([]);
@@ -67,7 +64,7 @@ export default function AdminDashboard() {
 
   const fetchData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
-    const [gData, mData, slug] = await Promise.all([getGuests(), getRecentMessages(true), getActiveEventSlug()]);
+    const [gData, slug] = await Promise.all([getGuests(), getActiveEventSlug()]);
     
     setEventSlug(slug);
     const currentGuests = guestsRef.current;
@@ -108,7 +105,6 @@ export default function AdminDashboard() {
     }
 
     setGuests(gData);
-    setMessages(mData);
     if (!isSilent) setLoading(false);
   };
 
@@ -117,12 +113,6 @@ export default function AdminDashboard() {
     const interval = setInterval(() => {
       fetchData(true);
     }, 15000);
-    
-    // Check Mural permission
-    if (typeof window !== "undefined") {
-      const screens = localStorage.getItem("admin_allowed_screens") || "";
-      setHasMuralAccess(screens === "ALL" || screens.split(",").map(s => s.trim()).includes("Mural"));
-    }
     
     return () => clearInterval(interval);
   }, []);
@@ -335,72 +325,7 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-        {/* Mural de Recados */}
-        {hasMuralAccess && (
-        <motion.section variants={itemVariants} className="lg:col-span-7 space-y-6">
-          <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
-            <MessageSquareQuote className="h-4 w-4" /> Mural de Recados
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            {messages.length === 0 ? (
-              <Card className="border border-dashed border-stone-300 shadow-none bg-stone-50/50 rounded-3xl p-12 text-center">
-                <p className="text-xs text-stone-400 tracking-widest uppercase font-medium">Nenhum recado recebido ainda</p>
-              </Card>
-            ) : (
-              messages.map((m, i) => (
-                <Card key={i} className={`border ${m.exibir_mensagem ? 'border-stone-200/60 shadow-sm hover:shadow-md bg-white/70 hover:border-primary/30' : 'border-dashed border-stone-300 bg-stone-50/50 opacity-60'} backdrop-blur-md rounded-2xl p-6 md:p-8 space-y-4 transition-all relative`}>
-                  <div className="absolute right-6 top-6">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={m.exibir_mensagem ? "text-primary" : "text-stone-400"}
-                          onClick={async () => {
-                            const newStatus = !m.exibir_mensagem;
-                            const res = await toggleMessageVisibility(m.id, newStatus);
-                            if (res.success) {
-                              setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, exibir_mensagem: newStatus } : msg));
-                              toast.success(newStatus ? "Mensagem visível no mural." : "Mensagem oculta do mural.");
-                            } else {
-                              toast.error(res.error || "Erro ao alterar visibilidade.");
-                            }
-                          }}
-                        >
-                          {m.exibir_mensagem ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent className="text-[9px]">
-                        {m.exibir_mensagem ? "Ocultar do Mural" : "Mostrar no Mural"}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <div className="flex items-start justify-between gap-4 pr-10">
-                     <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full ${m.exibir_mensagem ? 'bg-primary/10' : 'bg-stone-200'} flex items-center justify-center`}>
-                          <span className={`${m.exibir_mensagem ? 'text-primary' : 'text-stone-500'} font-bold text-xs uppercase`}>{m.nome.substring(0,2)}</span>
-                        </div>
-                        <p className={`text-xs md:text-sm tracking-widest font-bold ${m.exibir_mensagem ? 'text-stone-800' : 'text-stone-500'} uppercase`}>{m.nome}</p>
-                     </div>
-                     <p className="text-[9px] text-stone-400 uppercase font-bold tracking-wider bg-stone-100 px-3 py-1.5 rounded-lg">
-                       {new Date(m.data_resposta).toLocaleDateString()}
-                     </p>
-                  </div>
-                  <p className={`text-sm ${m.exibir_mensagem ? 'text-stone-600 border-primary/20' : 'text-stone-400 border-stone-300'} leading-relaxed font-serif italic normal-case px-2 border-l-2`}>
-                    "{m.mensagem}"
-                  </p>
-                  {!m.exibir_mensagem && (
-                    <p className="text-[9px] uppercase tracking-widest text-red-500 font-bold mt-2">Mensagem Oculta</p>
-                  )}
-                </Card>
-              ))
-            )}
-          </div>
-        </motion.section>
-        )}
-
-        {/* Atividade Recente & Ações */}
-        <div className={`space-y-10 ${hasMuralAccess ? 'lg:col-span-5' : 'lg:col-span-12'}`}>
+        <div className="space-y-10 lg:col-span-12">
           <motion.section variants={itemVariants} className="space-y-6">
              <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
                <TrendingUp className="h-4 w-4" /> Ações Rápidas
