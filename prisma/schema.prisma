@@ -61,8 +61,8 @@ model Guest {
 }
 
 model Settings {
-  id            String @id @default("default")
-  eventId       String @unique @default("default")
+  id            String @id
+  eventId       String @unique
   event         Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   invitationUrl String @default("/convite.png")
   theme         String @default("GOLD")

@@ -24,13 +24,29 @@ export async function getUserEvents(email: string) {
   return events;
 }
 
+const defaultSettingsData = {
+  invitationUrl: "/convite.png",
+  theme: "GOLD",
+  sessionTimeout: 30,
+  rnQty: 0,
+  pQty: 0,
+  mQty: 0,
+  gQty: 0,
+  ggQty: 0,
+  systemFont: "Inter",
+  systemFontSize: 14,
+  inviteFont: "Playfair Display",
+  inviteFontSize: 18,
+  showInvitationImage: true,
+  babyName: "O Bebê",
+  babyGender: "NONE",
+} as const;
+
 export async function createDefaultEventForUser(email: string, shareable: boolean = false) {
-  // auto-create event
-  const eventName = `Chá de Bebê - ${email.split('@')[0]}`;
-  const baseSlug = await import('./actions').then(m => m.generateSlug(eventName));
+  const eventName = `Chá de Bebê - ${email.split("@")[0]}`;
+  const baseSlug = await import("./actions").then((m) => m.generateSlug(eventName));
   let finalSlug = baseSlug;
-  
-  // ensure unique slug
+
   let counter = 1;
   while (await prisma.event.findUnique({ where: { slug: finalSlug } })) {
     finalSlug = `${baseSlug}-${counter}`;
@@ -42,26 +58,19 @@ export async function createDefaultEventForUser(email: string, shareable: boolea
       name: eventName,
       slug: finalSlug,
       ownerEmail: email,
-      shareable: shareable,
-      settings: {
-        create: {
-          invitationUrl: "/convite.png", 
-          theme: "GOLD", 
-          sessionTimeout: 30,
-          rnQty: 0, pQty: 0, mQty: 0, gQty: 0, ggQty: 0,
-          systemFont: "Inter",
-          systemFontSize: 14,
-          inviteFont: "Playfair Display",
-          inviteFontSize: 18,
-          showInvitationImage: true,
-          babyName: "O Bebê",
-          babyGender: "NONE"
-        }
-      }
-    }
+      shareable,
+    },
   });
-  
-  
+
+  // Settings id must match eventId (one row per event); avoid schema default "default"
+  await prisma.settings.create({
+    data: {
+      id: newEvent.id,
+      eventId: newEvent.id,
+      ...defaultSettingsData,
+    },
+  });
+
   return newEvent;
 }
 
