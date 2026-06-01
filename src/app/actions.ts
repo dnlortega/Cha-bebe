@@ -430,6 +430,7 @@ export async function distributeDiapers() {
     revalidatePath("/admin");
     return { success: true };
   } catch (error) {
+    console.error("Erro ao distribuir fraldas:", error);
     return { success: false, error: "Erro ao distribuir fraldas" };
   }
 }
@@ -438,83 +439,19 @@ export async function getHistoryLogs() {
   const eventId = await getActiveEventId();
   if (!eventId) return [];
   noStore();
-  const logs = await prisma.guestHistory.findMany({
-          location: dup.location,
-          action: "FINALIZADA"
-        }
-      });
-    }
-
-    await prisma.adminSession.deleteMany({
-      where: { 
-        deviceInfo,
-        deviceName
-      }
-    });
-
-    await prisma.adminSession.create({
-      data: { token, deviceInfo, deviceName, location, gpsCoords, diagnostics, adminEmail }
-    });
-
-    // Registra o início da nova sessão no histórico de auditoria
-    await prisma.sessionHistoryLog.create({
-      data: {
-        deviceName,
-        deviceInfo,
-        location,
-        action: "INICIADA"
-      }
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao registrar sessao:", error);
-    return { success: false };
-  }
-}
-
-
-export async function verifyAdminSession(token: string) {
   try {
-    const session = await prisma.adminSession.findUnique({
-      where: { token }
+    const logs = await prisma.guestHistory.findMany({
+      where: { eventId },
+      orderBy: { timestamp: "desc" }
     });
-    if (!session) return false;
-
-    // Se a sessão tiver um email associado, verifica se o admin correspondente ainda está APPROVED
-    if (session.adminEmail) {
-      const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
-      const isMaster = session.adminEmail.toLowerCase() === masterEmail.toLowerCase();
-      
-      const admin = await prisma.admin.findUnique({
-        where: { googleEmail: session.adminEmail }
-      });
-      
-      // dnlortega@gmail.com é sempre aprovado. Outros precisam existir e estar APPROVED
-      if (!isMaster && (!admin || admin.status !== "APPROVED")) {
-        // Exclui a sessão inválida
-        await prisma.adminSession.delete({
-          where: { token }
-        });
-        return false;
-      }
-    }
-
-    // Atualiza o lastActive da sessao
-    await prisma.adminSession.update({
-      where: { token },
-      data: { lastActive: new Date() }
-    });
-    return true;
+    return logs.map(l => ({
+      ...l,
+      timestamp: l.timestamp.toISOString()
+    }));
   } catch (error) {
-    console.error("Erro ao verificar sessao:", error);
-    return false;
+    console.error("Erro ao carregar histórico de convidados:", error);
+    return [];
   }
-}
-
-
-export async function getAdminSessions() {
-  noStore();
   try {
     const sessions = await prisma.adminSession.findMany({
       orderBy: { lastActive: "desc" }
