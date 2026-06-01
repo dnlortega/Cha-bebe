@@ -123,68 +123,8 @@ export function AdminSidebar() {
 
   const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className={cn("flex items-center border-b border-primary/5 py-5", showLabels ? "px-5 gap-3" : "hidden lg:flex justify-center px-3")}>
-        {avatarUrl && avatarUrl !== "null" ? (
-          <div className="w-9 h-9 relative rounded-full overflow-hidden shadow-lg border border-white/10 flex-shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-              onError={() => setAvatarUrl(null)}
-            />
-          </div>
-        ) : (
-          <div className="w-9 h-9 relative bg-stone-900 shadow-lg p-1.5 border border-white/5 flex-shrink-0">
-            <Image src="/icon.png" alt="Logo" fill className="object-cover" />
-          </div>
-        )}
-        {showLabels && (
-          <div>
-            <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary">Admin</p>
-            <p className="text-[8px] opacity-30 tracking-widest uppercase">Painel</p>
-          </div>
-        )}
-      </div>
-
-      {/* Nav */}
-      <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "pt-20 lg:pt-6")}>
-        {visibleMenuItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "flex items-center py-3 transition-all duration-200 group rounded-none",
-                showLabels ? "px-3 gap-3" : "justify-center px-3",
-                isActive
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-primary dark:text-stone-400 dark:hover:text-primary"
-              )}
-              title={item.title}
-            >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 flex-shrink-0 transition-all",
-                  isActive ? "text-white" : "opacity-50 group-hover:opacity-100"
-                )}
-              />
-              {showLabels && !item.hideLabel && (
-                <span className={cn("text-[10px] font-bold tracking-[0.2em] uppercase", isActive ? "text-white" : "group-hover:text-primary")}>
-                  {item.title}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Avatar + dropdown */}
-      <div className="p-2 border-t border-primary/5 pb-5">
+      {/* Avatar + dropdown (topo) */}
+      <div className={cn("border-b border-primary/5", showLabels ? "p-4" : "hidden lg:block py-5 px-3")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -196,7 +136,7 @@ export function AdminSidebar() {
             >
               {avatarUrl && avatarUrl !== "null" ? (
                 <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
+                  <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setAvatarUrl(null)} />
                   </div>
@@ -204,15 +144,15 @@ export function AdminSidebar() {
                 </div>
               ) : (
                 <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
-                    <span className="text-white text-[9px] font-black tracking-wider">{getInitials(adminEmail)}</span>
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
+                    <span className="text-white text-[10px] font-black tracking-wider">{getInitials(adminEmail)}</span>
                   </div>
                   {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />}
                 </div>
               )}
               {showLabels && adminEmail && (
                 <div className="min-w-0 flex-1 text-left">
-                  <p className="text-[9px] font-bold tracking-wider text-stone-700 truncate uppercase">{isMaster ? "Master" : "Operador"}</p>
+                  <p className="text-[10px] font-bold tracking-wider text-stone-700 truncate uppercase">{isMaster ? "Master" : "Operador"}</p>
                   <p className="text-[8px] text-stone-400 truncate">{adminEmail}</p>
                 </div>
               )}
@@ -267,6 +207,40 @@ export function AdminSidebar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Nav */}
+      <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "lg:pt-6")}>
+        {visibleMenuItems.map((item) => {
+          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "flex items-center py-3 transition-all duration-200 group rounded-none",
+                showLabels ? "px-3 gap-3" : "justify-center px-3",
+                isActive
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-primary dark:text-stone-400 dark:hover:text-primary"
+              )}
+              title={item.title}
+            >
+              <item.icon
+                className={cn(
+                  "h-5 w-5 flex-shrink-0 transition-all",
+                  isActive ? "text-white" : "opacity-50 group-hover:opacity-100"
+                )}
+              />
+              {showLabels && !item.hideLabel && (
+                <span className={cn("text-[10px] font-bold tracking-[0.2em] uppercase", isActive ? "text-white" : "group-hover:text-primary")}>
+                  {item.title}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 
