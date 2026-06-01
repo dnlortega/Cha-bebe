@@ -205,14 +205,15 @@ function EventRow({
               onClick={handleDeleteEvent}
               disabled={deleting}
               variant="destructive"
-              className="rounded-none h-9 text-[10px] tracking-widest uppercase"
+              className="rounded-none h-9 w-9 p-0 flex items-center justify-center"
+              title="Excluir"
+              aria-label="Excluir evento"
             >
               {deleting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4 mr-1.5" />
+                <Trash2 className="h-4 w-4" />
               )}
-              Excluir
             </Button>
           </>
         )}

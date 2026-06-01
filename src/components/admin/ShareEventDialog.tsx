@@ -120,10 +120,11 @@ export function ShareEventDialog({
             type="button"
             variant="outline"
             size="sm"
-            className={`rounded-none text-[10px] tracking-widest uppercase h-9 ${triggerClassName ?? ""}`}
+            className={`rounded-none h-9 w-9 p-0 flex items-center justify-center ${triggerClassName ?? ""}`}
+            title="Compartilhar"
+            aria-label="Compartilhar evento"
           >
-            <Share2 className="h-3.5 w-3.5 mr-1.5" />
-            Compartilhar
+            <Share2 className="h-4 w-4" />
           </Button>
         }
       />
