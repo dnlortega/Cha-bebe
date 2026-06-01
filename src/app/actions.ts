@@ -13,14 +13,20 @@ export async function getActiveEventId(): Promise<string | null> {
 
 
 export async function generateSlug(name: string) {
-  return name
+  let slug = name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
-    .replace(/--+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .trim();
+
+  if (slug.length > 60) slug = slug.slice(0, 60).replace(/-+$/g, "");
+  if (!slug) slug = "convidado";
+
+  return slug;
 }
 
 export async function getSettings(forceEventId?: string) {
@@ -43,16 +49,17 @@ export async function getSettings(forceEventId?: string) {
       eventDate: null,
       eventAddress: null,
       eventMapsUrl: null,
-      enableAnimations: true
+      enableAnimations: true,
+      whatsappTemplate: null
     };
   }
 
   let settings = await prisma.settings.findUnique({ where: { eventId } });
 
   if (!settings) {
-    settings = await prisma.settings.create({ data: { id: eventId, eventId, 
-        invitationUrl: "/convite.png", 
-        theme: "GOLD", 
+    settings = await prisma.settings.create({ data: { id: eventId, eventId,
+        invitationUrl: "/convite.png",
+        theme: "GOLD",
         sessionTimeout: 30,
         rnQty: 0, pQty: 0, mQty: 0, gQty: 0, ggQty: 0,
         systemFont: "Inter",
@@ -315,6 +322,10 @@ export async function addMultipleGuests(namesText: string) {
   if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     const lines = namesText.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+    const usedSlugs = new Set<string>();
+    const existingGuests = await prisma.guest.findMany({ where: { eventId }, select: { slug: true } });
+    existingGuests.forEach(g => usedSlugs.add(g.slug));
+
     const results = await Promise.all(lines.map(async (line) => {
       const parts = line.split("|").map(s => s.trim());
       const nome = parts[0];
@@ -322,10 +333,16 @@ export async function addMultipleGuests(namesText: string) {
       const membros = parts[2] || null;
       const fralda = parts[3]?.toUpperCase() || null;
       const kitChurrasco = parts[4]?.toUpperCase() === "SIM" || parts[4]?.toUpperCase() === "KIT";
-      const slug = await generateSlug(nome);
-      return prisma.guest.upsert({ where: { eventId_slug: { eventId, slug } }, update: { tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
-        create: { eventId, nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco },
-      });
+
+      let slug = await generateSlug(nome);
+      let counter = 1;
+      while (usedSlugs.has(slug)) {
+        slug = `${await generateSlug(nome)}-${counter}`;
+        counter++;
+      }
+      usedSlugs.add(slug);
+
+      return prisma.guest.create({ data: { eventId, nome, slug, tipo, membros, fralda_tamanho: fralda, kit_churrasco: kitChurrasco } });
     }));
     revalidatePath("/admin");
     return { success: true, count: results.length };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getGuests, deleteGuest, updateGuest, deleteAllGuests } from "@/app/actions";
+import { getGuests, deleteGuest, updateGuest, deleteAllGuests, getSettings } from "@/app/actions";
 import { getActiveEventSlug } from "@/app/eventActions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Loader2, CheckCircle, XCircle, Clock, Trash2, Edit2,
   Copy, ExternalLink, Search, RefreshCw, Save, PackageCheck,
-  Download, SortAsc, SortDesc, MessageCircle
+  Download, SortAsc, SortDesc, MessageCircle, QrCode
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -30,6 +30,10 @@ export default function GuestsPage() {
   const [sortField, setSortField] = useState<SortField>("nome");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [eventSlug, setEventSlug] = useState("evento-principal");
+
+  const [settings, setSettings] = useState<any>(null);
+  const [qrGuest, setQrGuest] = useState<any>(null);
+  const [copyPreview, setCopyPreview] = useState<{ text: string; guest: any } | null>(null);
 
   const [editingGuest, setEditingGuest] = useState<any>(null);
   const [editName, setEditName] = useState("");
@@ -49,9 +53,10 @@ export default function GuestsPage() {
 
   const fetchGuests = async () => {
     setLoading(true);
-    const [data, slug] = await Promise.all([getGuests(), getActiveEventSlug()]);
+    const [data, slug, sett] = await Promise.all([getGuests(), getActiveEventSlug(), getSettings()]);
     setGuests(data);
     setEventSlug(slug);
+    setSettings(sett);
     setLoading(false);
   };
 
@@ -84,14 +89,37 @@ export default function GuestsPage() {
     setIsEditing(false);
   };
 
-  const copyToClipboard = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/${eventSlug}/${slug}`);
-    toast.success("LINK COPIADO!");
+  const formatTemplate = (guest: any) => {
+    const link = `${window.location.origin}/${eventSlug}/${guest.slug}`;
+    const babyName = settings?.babyName || "Bebê";
+    const prefix = settings?.babyGender === "GIRL" ? "da" : settings?.babyGender === "BOY" ? "do" : "de";
+    const dateStr = settings?.eventDate
+      ? new Date(settings.eventDate).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })
+      : "";
+    const template = settings?.whatsappTemplate || "Olá {nome}! Gostaríamos de te convidar para o Chá {prefix} {bebe}. Confirme sua presença aqui: {link}";
+    return template
+      .replace(/\{nome\}/g, guest.nome)
+      .replace(/\{bebe\}/g, babyName)
+      .replace(/\{prefix\}/g, prefix)
+      .replace(/\{data\}/g, dateStr)
+      .replace(/\{endereco\}/g, settings?.eventAddress || "")
+      .replace(/\{link\}/g, link);
+  };
+
+  const copyToClipboard = (guest: any) => {
+    const text = formatTemplate(guest);
+    setCopyPreview({ text, guest });
+  };
+
+  const handleCopyConfirm = async () => {
+    if (!copyPreview) return;
+    await navigator.clipboard.writeText(copyPreview.text);
+    toast.success("TEXTO COPIADO!");
+    setCopyPreview(null);
   };
 
   const sendWhatsApp = (guest: any) => {
-    const link = `${window.location.origin}/${eventSlug}/${guest.slug}`;
-    const text = `Olá ${guest.nome}! Gostaríamos de te convidar para o nosso Chá de Bebê. Confirme sua presença aqui: ${link}`;
+    const text = formatTemplate(guest);
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -187,7 +215,8 @@ export default function GuestsPage() {
                 <TableCell className="text-right pr-8">
                   <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}><MessageCircle className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">WhatsApp</TooltipContent></Tooltip>
-                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => copyToClipboard(guest.slug)}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Copiar Link</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => copyToClipboard(guest)}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Copiar Texto</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setQrGuest(guest)}><QrCode className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">QR Code</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditingGuest(guest); setEditName(guest.nome); setEditType(guest.tipo); setEditMembers(guest.membros || ""); setEditAdults(guest.qtd_adultos || 1); setEditChildren(guest.qtd_criancas || 0); setEditDiaper(guest.fralda_tamanho || null); setEditKitChurrasco(guest.kit_churrasco || false); }}><Edit2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Editar</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-red-400" onClick={() => handleDelete(guest.id)}><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Excluir</TooltipContent></Tooltip>
                   </div>
@@ -230,8 +259,11 @@ export default function GuestsPage() {
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}>
                   <MessageCircle className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => copyToClipboard(guest.slug)}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => copyToClipboard(guest)}>
                   <Copy className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => setQrGuest(guest)}>
+                  <QrCode className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => { setEditingGuest(guest); setEditName(guest.nome); setEditType(guest.tipo); setEditMembers(guest.membros || ""); setEditAdults(guest.qtd_adultos || 1); setEditChildren(guest.qtd_criancas || 0); setEditDiaper(guest.fralda_tamanho || null); setEditKitChurrasco(guest.kit_churrasco || false); }}>
                   <Edit2 className="h-4 w-4" />
@@ -249,6 +281,59 @@ export default function GuestsPage() {
           </div>
         )}
       </div>
+
+      {/* QR Code Dialog */}
+      <Dialog open={!!qrGuest} onOpenChange={o => !o && setQrGuest(null)}>
+        <DialogContent className="rounded-none border-none sm:max-w-[360px] p-0 overflow-hidden shadow-2xl">
+          <div className="bg-primary p-6 text-primary-foreground">
+            <DialogTitle className="text-base font-serif tracking-[0.2em] uppercase">QR Code</DialogTitle>
+          </div>
+          <div className="p-8 bg-white flex flex-col items-center gap-6">
+            {qrGuest && (
+              <>
+                <p className="text-[9px] tracking-widest uppercase opacity-40">{qrGuest.nome}</p>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${window.location.origin}/${eventSlug}/${qrGuest.slug}`)}`}
+                  alt="QR Code"
+                  className="w-52 h-52"
+                />
+                <a
+                  href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`${window.location.origin}/${eventSlug}/${qrGuest.slug}`)}`}
+                  download={`qr-${qrGuest.slug}.png`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] tracking-widest uppercase underline opacity-40 hover:opacity-60"
+                >
+                  BAIXAR QR CODE
+                </a>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Copy Preview Dialog */}
+      <Dialog open={!!copyPreview} onOpenChange={o => !o && setCopyPreview(null)}>
+        <DialogContent className="rounded-none border-none sm:max-w-[500px] p-0 overflow-hidden shadow-2xl">
+          <div className="bg-primary p-6 text-primary-foreground flex justify-between items-center">
+            <DialogTitle className="text-base font-serif tracking-[0.2em] uppercase">Preview do Texto</DialogTitle>
+          </div>
+          <div className="p-6 bg-white space-y-4">
+            <p className="text-[10px] text-stone-400 tracking-widest uppercase">Conteúdo que será enviado:</p>
+            <div className="bg-stone-50 p-4 border border-stone-100 text-xs leading-relaxed whitespace-pre-wrap font-mono">
+              {copyPreview?.text}
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="outline" onClick={() => setCopyPreview(null)} className="rounded-none h-10 text-[10px] tracking-widest uppercase">
+                Cancelar
+              </Button>
+              <Button onClick={handleCopyConfirm} className="rounded-none h-10 text-[10px] tracking-widest uppercase bg-stone-900 text-white hover:bg-stone-800">
+                Copiar Texto
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editingGuest} onOpenChange={o => !o && setEditingGuest(null)}>
         <DialogContent className="rounded-none border-none sm:max-w-[500px] p-0 overflow-hidden shadow-2xl">
