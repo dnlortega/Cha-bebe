@@ -12,6 +12,7 @@ model Event {
   name        String   @default("Meu Evento")
   slug        String   @unique
   ownerEmail  String
+  allowedEmails String[] @default([]) // <--- New whitelist field
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
