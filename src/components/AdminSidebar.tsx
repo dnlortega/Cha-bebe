@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { useDarkMode } from "@/components/DarkModeProvider";
 import {
   Users,
   UserPlus,
@@ -18,6 +19,8 @@ import {
   History,
   ShieldAlert,
   CalendarPlus,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_COLLABORATOR_SCREEN_TITLES } from "@/lib/eventAccess";
@@ -48,6 +51,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMaster, setIsMaster] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
@@ -221,6 +225,16 @@ export function AdminSidebar() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Sobre</span>
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="cursor-pointer w-full flex items-center gap-3 py-3"
+              onClick={toggleDarkMode}
+            >
+              {isDarkMode ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">
+                {isDarkMode ? "Modo Claro" : "Modo Escuro"}
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             {isMaster && (
               <DropdownMenuItem render={<Link href="/admin/access" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>

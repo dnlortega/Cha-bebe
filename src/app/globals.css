@@ -246,3 +246,64 @@ html, body { overflow-x: hidden; }
     @apply font-sans;
   }
 }
+
+/* Dark mode admin sidebar styles */
+.dark aside {
+  @apply bg-stone-950 border-stone-800;
+}
+
+.dark nav {
+  @apply bg-stone-950 border-stone-800;
+}
+
+.dark .bg-white {
+  @apply bg-stone-900;
+}
+
+.dark .text-stone-500 {
+  @apply text-stone-400;
+}
+
+.dark .text-stone-50 {
+  @apply text-stone-100;
+}
+
+.dark .text-stone-600 {
+  @apply text-stone-300;
+}
+
+.dark .text-stone-700 {
+  @apply text-stone-200;
+}
+
+.dark .text-stone-800 {
+  @apply text-stone-100;
+}
+
+.dark .hover\:bg-stone-50 {
+  @apply hover:bg-stone-800;
+}
+
+.dark .border-primary\/5 {
+  @apply border-stone-800;
+}
+
+.dark .border-primary\/8 {
+  @apply border-stone-800;
+}
+
+.dark .border-primary\/10 {
+  @apply border-stone-800;
+}
+
+.dark .bg-primary\/5 {
+  @apply bg-stone-800;
+}
+
+.dark .bg-stone-50 {
+  @apply bg-stone-900;
+}
+
+.dark .focus\:bg-stone-50 {
+  @apply focus:bg-stone-800;
+}

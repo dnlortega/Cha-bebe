@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { DarkModeProvider } from "@/components/DarkModeProvider";
 import { getSettings, registerAdminSession, verifyAdminSession, updateGoogleSessionDetails } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -696,15 +697,17 @@ export default function AdminLayout({
 
   return (
     <AdminAuthContext.Provider value={{ authorized, setAuthorized, currentUser, eventAccess }}>
-      <div className="min-h-screen bg-background">
-        <AdminSidebar />
-        <main className="lg:pl-20 min-h-screen transition-all duration-300">
-          <div className="p-4 sm:p-8 lg:p-12 max-w-7xl mx-auto pt-20 lg:pt-12">
-            {children}
-          </div>
-        </main>
-        <PWAInstallPrompt />
-      </div>
+      <DarkModeProvider>
+        <div className="flex min-h-screen">
+          <AdminSidebar />
+          <main className="lg:pl-20 min-h-screen transition-all duration-300">
+            <div className="p-4 sm:p-8 lg:p-12 max-w-7xl mx-auto pt-20 lg:pt-12">
+              {children}
+            </div>
+          </main>
+          <PWAInstallPrompt />
+        </div>
+      </DarkModeProvider>
     </AdminAuthContext.Provider>
   );
 }
