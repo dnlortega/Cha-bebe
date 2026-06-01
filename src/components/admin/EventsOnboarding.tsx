@@ -19,7 +19,7 @@ const STEPS = [
     icon: CalendarPlus,
     title: "Crie seu primeiro evento",
     description:
-      "Clique em «Criar meu primeiro evento» abaixo. Um chá de bebê padrão será criado com convite, tema e configurações iniciais — você personaliza tudo depois.",
+      "Opcionalmente adicione e-mails de quem vai ajudar a gerenciar o evento. Depois clique em «Criar meu primeiro evento» — convite, tema e configurações já vêm prontos para personalizar.",
   },
   {
     icon: Palette,
@@ -49,13 +49,13 @@ const STEPS = [
 
 type EventsOnboardingProps = {
   creating: boolean;
-  shareable: boolean;
+  shareCount: number;
   onCreate: () => void;
 };
 
 export function EventsOnboarding({
   creating,
-  shareable,
+  shareCount,
   onCreate,
 }: EventsOnboardingProps) {
   return (
@@ -155,10 +155,11 @@ export function EventsOnboarding({
               O botão abaixo cria seu evento e abre o painel automaticamente. Leva poucos
               segundos.
             </p>
-            {shareable && (
+            {shareCount > 0 && (
               <p className="text-[10px] text-stone-400 tracking-wide pt-1">
-                Com «Permitir compartilhamento» ativo, outros e-mails poderão colaborar neste
-                evento depois de criado.
+                {shareCount === 1
+                  ? "1 e-mail receberá acesso de editor ao criar o evento."
+                  : `${shareCount} e-mails receberão acesso de editor ao criar o evento.`}
               </p>
             )}
           </div>

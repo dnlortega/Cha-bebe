@@ -1,27 +1,117 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { generateSlug } from "./actions"; // Or just inline it
+import { revalidatePath } from "next/cache";
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function getOwnedEvent(eventId: string, ownerEmail: string) {
+  return prisma.event.findFirst({
+    where: {
+      id: eventId,
+      ownerEmail: { equals: normalizeEmail(ownerEmail), mode: "insensitive" },
+    },
+  });
+}
 
 // Event management for user
 export async function getUserEvents(email: string) {
+  const normalized = normalizeEmail(email);
   const events = await prisma.event.findMany({
     where: {
       OR: [
-        { ownerEmail: email },
+        { ownerEmail: normalized },
         {
           sharedWith: {
-            some: { email: email }
-          }
-        }
-      ]
+            some: { email: normalized },
+          },
+        },
+      ],
     },
     include: {
-      settings: true
-    }
+      settings: true,
+      sharedWith: {
+        select: { id: true, email: true, role: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
   });
 
   return events;
+}
+
+export async function shareEventWithEmail(
+  eventId: string,
+  collaboratorEmail: string,
+  ownerEmail: string
+) {
+  const email = normalizeEmail(collaboratorEmail);
+  const owner = normalizeEmail(ownerEmail);
+
+  if (!isValidEmail(email)) {
+    return { success: false, error: "Informe um e-mail válido." };
+  }
+  if (email === owner) {
+    return { success: false, error: "Você não pode compartilhar o evento com você mesmo." };
+  }
+
+  const event = await getOwnedEvent(eventId, owner);
+  if (!event) {
+    return { success: false, error: "Sem permissão para compartilhar este evento." };
+  }
+
+  try {
+    await prisma.eventShare.upsert({
+      where: { eventId_email: { eventId, email } },
+      create: { eventId, email, role: "EDITOR" },
+      update: {},
+    });
+    await prisma.event.update({
+      where: { id: eventId },
+      data: { shareable: true },
+    });
+    revalidatePath("/admin/events");
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Falha ao compartilhar evento." };
+  }
+}
+
+export async function removeEventShare(
+  eventId: string,
+  collaboratorEmail: string,
+  ownerEmail: string
+) {
+  const email = normalizeEmail(collaboratorEmail);
+  const event = await getOwnedEvent(eventId, ownerEmail);
+  if (!event) {
+    return { success: false, error: "Sem permissão." };
+  }
+
+  try {
+    await prisma.eventShare.delete({
+      where: { eventId_email: { eventId, email } },
+    });
+    const remaining = await prisma.eventShare.count({ where: { eventId } });
+    if (remaining === 0) {
+      await prisma.event.update({
+        where: { id: eventId },
+        data: { shareable: false },
+      });
+    }
+    revalidatePath("/admin/events");
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Falha ao remover compartilhamento." };
+  }
 }
 
 const defaultSettingsData = {
@@ -42,8 +132,12 @@ const defaultSettingsData = {
   babyGender: "NONE",
 } as const;
 
-export async function createDefaultEventForUser(email: string, shareable: boolean = false) {
-  const eventName = `Chá de Bebê - ${email.split("@")[0]}`;
+export async function createDefaultEventForUser(
+  email: string,
+  sharedEmails: string[] = []
+) {
+  const owner = normalizeEmail(email);
+  const eventName = `Chá de Bebê - ${owner.split("@")[0]}`;
   const baseSlug = await import("./actions").then((m) => m.generateSlug(eventName));
   let finalSlug = baseSlug;
 
@@ -53,12 +147,30 @@ export async function createDefaultEventForUser(email: string, shareable: boolea
     counter++;
   }
 
+  const collaborators = [
+    ...new Set(
+      sharedEmails
+        .map(normalizeEmail)
+        .filter((e) => isValidEmail(e) && e !== owner)
+    ),
+  ];
+
   const newEvent = await prisma.event.create({
     data: {
       name: eventName,
       slug: finalSlug,
-      ownerEmail: email,
-      shareable,
+      ownerEmail: owner,
+      shareable: collaborators.length > 0,
+      ...(collaborators.length > 0
+        ? {
+            sharedWith: {
+              create: collaborators.map((collaboratorEmail) => ({
+                email: collaboratorEmail,
+                role: "EDITOR",
+              })),
+            },
+          }
+        : {}),
     },
   });
 
