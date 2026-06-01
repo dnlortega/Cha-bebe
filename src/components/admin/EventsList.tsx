@@ -68,6 +68,7 @@ export function EventsList({
               variant={variant}
               onEnter={onEnter}
               onSharesUpdated={onSharesUpdated}
+              onDelete={onDelete}
             />
           ))}
         </ul>
@@ -82,12 +83,14 @@ function EventRow({
   variant,
   onEnter,
   onSharesUpdated,
+  onDelete,
 }: {
   event: EventListItem;
   currentUser: string;
   variant: "owned" | "shared";
   onEnter: (eventId: string) => void;
   onSharesUpdated: (eventId: string, shares: { id: string; email: string }[]) => void;
+  onDelete?: (eventId: string) => void;
 }) {
   const [removing, setRemoving] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
