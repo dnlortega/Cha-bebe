@@ -112,6 +112,8 @@ export default function VisualPage() {
       // Se desconectou a si mesmo, força deslogar
       if (token === currentSessionToken) {
         if (typeof window !== "undefined") {
+          const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
+          await clearActiveEventCookie();
           localStorage.removeItem("admin_session_token");
           localStorage.removeItem("admin_authorized");
           localStorage.removeItem("admin_username");

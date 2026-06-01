@@ -19,3 +19,28 @@ export async function checkActiveEventCookie() {
   const cookieStore = await cookies();
   return !!cookieStore.get("activeEventId");
 }
+
+export async function validateActiveEventAccess(email: string) {
+  const cookieStore = await cookies();
+  const eventId = cookieStore.get("activeEventId")?.value;
+  if (!eventId) return false;
+
+  const { PrismaClient } = require("@prisma/client");
+  const prisma = new PrismaClient();
+
+  const event = await prisma.event.findFirst({
+    where: {
+      id: eventId,
+      OR: [
+        { ownerEmail: email },
+        { sharedWith: { some: { email: email } } }
+      ]
+    }
+  });
+
+  if (!event) {
+    cookieStore.delete("activeEventId");
+    return false;
+  }
+  return true;
+}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { getRecentMessages, getSettings } from "@/app/actions";
+import { use, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Stars, Baby, MessageSquareQuote, Settings2, Clock } from "lucide-react";
+import { getMuralDataBySlug } from "@/app/eventActions";
 
-export default function MuralLivePage() {
+export default function MuralLivePage({ params }: { params: Promise<{ eventSlug: string }> }) {
+  const { eventSlug } = use(params);
   const [messages, setMessages] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -37,11 +38,11 @@ export default function MuralLivePage() {
   const displayedMessages = messages.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
   const fetchData = useCallback(async () => {
-    const [msgData, settsData] = await Promise.all([getRecentMessages(), getSettings()]);
-    setMessages(msgData.filter(m => m.mensagem && m.mensagem.length > 2));
+    const { messages: msgData, settings: settsData } = await getMuralDataBySlug(eventSlug);
+    setMessages(msgData.filter((m: any) => m.mensagem && m.mensagem.length > 2));
     setSettings(settsData);
     setLoading(false);
-  }, []);
+  }, [eventSlug]);
 
   useEffect(() => {
     setIsMounted(true);

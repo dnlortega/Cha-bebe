@@ -61,5 +61,29 @@ export async function createDefaultEventForUser(email: string, shareable: boolea
     }
   });
   
+  
   return newEvent;
+}
+
+export async function getMuralDataBySlug(slug: string) {
+  const event = await prisma.event.findUnique({
+    where: { slug }
+  });
+  if (!event) return { messages: [], settings: null };
+
+  const [settings, messages] = await Promise.all([
+    import("./actions").then(m => m.getSettings(event.id)),
+    import("./actions").then(m => m.getRecentMessages(false, event.id))
+  ]);
+
+  return { messages, settings };
+}
+
+export async function getActiveEventSlug() {
+  const { getActiveEventId } = await import("./actions");
+  const eventId = await getActiveEventId();
+  const event = await prisma.event.findUnique({
+    where: { id: eventId }
+  });
+  return event?.slug || "evento-principal";
 }

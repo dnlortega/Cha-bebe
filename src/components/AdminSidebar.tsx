@@ -82,7 +82,9 @@ export function AdminSidebar() {
     return parts.slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
+    await clearActiveEventCookie();
     sessionStorage.removeItem("admin_auth");
     localStorage.removeItem("admin_authorized");
     localStorage.removeItem("admin_username");

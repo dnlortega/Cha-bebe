@@ -322,8 +322,8 @@ export default function AdminLayout({
             setCurrentUser(googleUsername);
             toast.success("CONECTADO COM SUCESSO VIA GOOGLE!");
 
-            const { checkActiveEventCookie } = await import("@/app/eventCookieActions");
-            const hasActiveEvent = await checkActiveEventCookie();
+            const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
+            const hasActiveEvent = await validateActiveEventAccess(googleUsername);
 
             // Limpa os parâmetros da URL para evitar expor o token
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -352,14 +352,16 @@ export default function AdminLayout({
                 setAllowedScreens(details.allowedScreens);
               }
 
-              const { checkActiveEventCookie } = await import("@/app/eventCookieActions");
-              const hasActiveEvent = await checkActiveEventCookie();
+              const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
+              const hasActiveEvent = await validateActiveEventAccess(details.email || savedUser);
               if (!hasActiveEvent && pathname !== "/admin/events") {
                 window.location.href = "/admin/events";
                 return;
               }
             } else {
               // Sessao foi revogada! Desloga imediatamente
+              const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
+              await clearActiveEventCookie();
               localStorage.removeItem("admin_session_token");
               localStorage.removeItem("admin_authorized");
               localStorage.removeItem("admin_username");
@@ -370,6 +372,8 @@ export default function AdminLayout({
             }
           } else {
             // Sem token ativo no banco! Desloga imediatamente
+            const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
+            await clearActiveEventCookie();
             localStorage.removeItem("admin_session_token");
             localStorage.removeItem("admin_authorized");
             localStorage.removeItem("admin_username");
@@ -412,10 +416,14 @@ export default function AdminLayout({
         if (token) {
           const isValid = await verifyAdminSession(token);
           if (!isValid) {
-            // Sessão foi deletada/revogada no banco! Desconecta imediatamente
-            localStorage.removeItem("admin_session_token");
-            localStorage.removeItem("admin_authorized");
-            localStorage.removeItem("admin_username");
+            if (typeof window !== "undefined") {
+              const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
+              await clearActiveEventCookie();
+              localStorage.removeItem("admin_session_token");
+              localStorage.removeItem("admin_authorized");
+              localStorage.removeItem("admin_username");
+              window.location.reload();
+            }
             setAuthorized(false);
             setCurrentUser(null);
             toast.error("SUA SESSÃO FOI ENCERRADA REMOTAMENTE");

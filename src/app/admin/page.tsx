@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getGuests, getRecentMessages, toggleMessageVisibility } from "@/app/actions";
+import { getActiveEventSlug } from "@/app/eventActions";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [hasMuralAccess, setHasMuralAccess] = useState(false);
+  const [eventSlug, setEventSlug] = useState<string>("evento-principal");
 
   const guestsRef = useRef<any[]>([]);
   useEffect(() => {
@@ -65,8 +67,9 @@ export default function AdminDashboard() {
 
   const fetchData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
-    const [gData, mData] = await Promise.all([getGuests(), getRecentMessages(true)]);
+    const [gData, mData, slug] = await Promise.all([getGuests(), getRecentMessages(true), getActiveEventSlug()]);
     
+    setEventSlug(slug);
     const currentGuests = guestsRef.current;
     if (currentGuests.length > 0) {
       gData.forEach(newGuest => {
@@ -412,7 +415,7 @@ export default function AdminDashboard() {
                   <span className="text-xs font-bold tracking-[0.2em] uppercase text-stone-700 group-hover:text-primary transition-colors">Gerir Presentes</span>
                   <PackageCheck className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 </Link>
-                <Link href="/mural" target="_blank" className="group p-6 bg-primary text-primary-foreground rounded-2xl flex items-center justify-between shadow-xl hover:shadow-primary/30 hover:bg-primary/90 transition-all relative overflow-hidden">
+                <Link href={`/${eventSlug}/mural`} target="_blank" className="group p-6 bg-primary text-primary-foreground rounded-2xl flex items-center justify-between shadow-xl hover:shadow-primary/30 hover:bg-primary/90 transition-all relative overflow-hidden">
                   <div className="absolute -right-4 -top-4 w-20 h-20 bg-white/20 blur-xl rounded-full group-hover:scale-150 transition-transform duration-700" />
                   <span className="text-xs font-bold tracking-[0.2em] uppercase relative z-10 flex items-center gap-2">Mural Live <ArrowUpRight className="w-3 h-3 opacity-70" /></span>
                   <Stars className="h-5 w-5 relative z-10 group-hover:rotate-12 transition-transform" />
