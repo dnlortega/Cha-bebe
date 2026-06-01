@@ -177,7 +177,10 @@ export function AdminSidebar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align={showLabels ? "center" : "start"} side={showLabels ? "bottom" : "right"} className="w-56 z-[70] mb-2 ml-2 shadow-xl border-primary/10">
-            <div className="px-3 py-2 text-[10px] font-bold tracking-widest uppercase text-stone-400">Minha Conta</div>
+            <div className="px-3 py-2 flex flex-col gap-0.5">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-stone-400">Minha Conta</span>
+              {adminEmail && <span className="text-[11px] text-stone-600 truncate font-medium">{adminEmail}</span>}
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/admin/events" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
               <LayoutDashboard className="h-4 w-4 text-primary" />

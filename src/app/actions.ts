@@ -5,10 +5,20 @@ import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
 import { cookies } from "next/headers";
 
-export async function getActiveEventId(): Promise<string> {
+export async function getActiveEventId(): Promise<string | null> {
   const cookieStore = await cookies();
   const eventId = cookieStore.get("activeEventId")?.value;
-  return eventId || "default";
+  return eventId || null;
+}
+
+
+export async function generateSlug(name: string) {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, "")
+  return eventId || "";
 }
 
 
@@ -26,6 +36,24 @@ export async function generateSlug(name: string) {
 export async function getSettings(forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
   noStore();
+  
+  if (!eventId) {
+    return {
+      invitationUrl: "/convite.png", 
+      theme: "GOLD", 
+      sessionTimeout: 30,
+      rnQty: 0, pQty: 0, mQty: 0, gQty: 0, ggQty: 0,
+      systemFont: "Inter",
+      systemFontSize: 14,
+      inviteFont: "Playfair Display",
+      inviteFontSize: 18,
+      showInvitationImage: true,
+      babyName: "O Bebê",
+      babyGender: "NONE",
+      eventDate: null
+    };
+  }
+
   let settings = await prisma.settings.findUnique({ where: { eventId } });
 
   if (!settings) {
@@ -54,6 +82,7 @@ export async function getSettings(forceEventId?: string) {
 
 export async function updateSettings(data: any) {
   const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     await prisma.settings.upsert({
       where: { eventId },
@@ -77,9 +106,11 @@ export async function updateSettings(data: any) {
 // Guestbook / Mural Actions
 export async function getRecentMessages(forAdmin = false, forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
+  if (!eventId) return [];
   noStore();
   const messages = await prisma.guest.findMany({
-    where: { eventId, mensagem: { not: null }, 
+    where: {
+      eventId, mensagem: { not: null }, 
       status_confirmacao: "CONFIRMED",
       ...(forAdmin ? {} : { exibir_mensagem: true })
     },
@@ -113,6 +144,7 @@ export async function toggleMessageVisibility(id: string, exibir_mensagem: boole
 // Gift Actions
 export async function getGifts(forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
+  if (!eventId) return [];
   noStore();
   return prisma.gift.findMany({
     where: { eventId },
@@ -122,6 +154,8 @@ export async function getGifts(forceEventId?: string) {
 
 export async function addGift(name: string, category: string = "Geral") {
   const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
+  
   try {
     await prisma.gift.create({ data: { eventId, name, category } });
     revalidatePath("/admin/gifts");
@@ -143,6 +177,8 @@ export async function deleteGift(id: string) {
 
 export async function updateRSVP(slug: string, status: string, membrosConfirmados?: string, mensagem?: string, giftId?: string, forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
+
   try {
     const count = membrosConfirmados ? membrosConfirmados.split(",").filter(n => n.trim().length > 0).length : (status === "CONFIRMED" ? 1 : 0);
 
@@ -239,6 +275,7 @@ export async function deleteAllGuests() {
 
 export async function updateGuest(id: string, nome: string, tipo: string, membros?: string, qtdAdultos: number = 1, qtdCriancas: number = 0, fralda?: string, kitChurrasco: boolean = false) {
   const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     const slug = await generateSlug(nome);
     await prisma.guest.update({
@@ -260,6 +297,7 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
 
 export async function getGuests(forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
+  if (!eventId) return [];
   noStore();
   const guests = await prisma.guest.findMany({
     where: { eventId },
@@ -281,6 +319,7 @@ export async function getGuests(forceEventId?: string) {
 
 export async function addMultipleGuests(namesText: string) {
   const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     const lines = namesText.split("\n").map(n => n.trim()).filter(n => n.length > 0);
     const results = await Promise.all(lines.map(async (line) => {
@@ -376,6 +415,7 @@ export async function updateGoogleSessionDetails(token: string, deviceInfo: stri
 
 export async function distributeDiapers() {
   const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     const settings = await getSettings();
     const guests = await prisma.guest.findMany({ where: { eventId, fralda_tamanho: null }, orderBy: { createdAt: "asc" } });
@@ -396,29 +436,9 @@ export async function distributeDiapers() {
 
 export async function getHistoryLogs() {
   const eventId = await getActiveEventId();
+  if (!eventId) return [];
   noStore();
   const logs = await prisma.guestHistory.findMany({
-    where: { eventId },
-    orderBy: { data_resposta: "desc" }
-  });
-  return logs.map(l => ({
-    ...l,
-    data_resposta: l.data_resposta.toISOString()
-  }));
-}
-
-export async function registerAdminSession(token: string, deviceInfo: string, deviceName: string, location: string, gpsCoords: string | null, diagnostics: string, adminEmail?: string) {
-  try {
-    // Remove qualquer sessao antiga duplicada com o mesmo deviceInfo E deviceName juntas
-    const duplicateSessions = await prisma.adminSession.findMany({
-      where: { deviceInfo, deviceName }
-    });
-
-    for (const dup of duplicateSessions) {
-      await prisma.sessionHistoryLog.create({
-        data: {
-          deviceName: dup.deviceName,
-          deviceInfo: dup.deviceInfo,
           location: dup.location,
           action: "FINALIZADA"
         }
