@@ -42,15 +42,15 @@ export default function AdminDashboard() {
     setSelectedCategory(prev => prev === label ? null : label);
   };
 
-  const expandConfirmedPeople = () => {
-    const list: { id: string; nome: string; tipo: string; grupo?: string }[] = [];
-    guests.filter(g => g.status_confirmacao === "CONFIRMED").forEach(g => {
-      if (g.tipo === "FAMILIA" && g.membros_confirmados) {
-        g.membros_confirmados.split(",").map((n: string) => n.trim()).filter(Boolean).forEach((n: string, i: number) => {
-          list.push({ id: `${g.id}_${i}`, nome: n, tipo: "FAMILIA", grupo: g.nome });
+  const expandPeople = (filter: (g: any) => boolean, memberField: string) => {
+    const list: { id: string; nome: string; tipo: string; grupo?: string; status_confirmacao?: string | null }[] = [];
+    guests.filter(filter).forEach(g => {
+      if (g.tipo === "FAMILIA" && g[memberField]) {
+        g[memberField].split(",").map((n: string) => n.trim()).filter(Boolean).forEach((n: string, i: number) => {
+          list.push({ id: `${g.id}_${i}`, nome: n, tipo: "FAMILIA", grupo: g.nome, status_confirmacao: g.status_confirmacao });
         });
       } else {
-        list.push({ id: g.id, nome: g.nome, tipo: g.tipo || "INDIVIDUAL" });
+        list.push({ id: g.id, nome: g.nome, tipo: g.tipo || "INDIVIDUAL", status_confirmacao: g.status_confirmacao });
       }
     });
     return list;
@@ -60,17 +60,17 @@ export default function AdminDashboard() {
     if (!selectedCategory) return [];
     switch (selectedCategory) {
       case "CONFIRMADOS":
-        return expandConfirmedPeople();
+        return expandPeople(g => g.status_confirmacao === "CONFIRMED", "membros_confirmados");
       case "PENDENTES":
-        return guests.filter(g => !g.status_confirmacao);
+        return expandPeople(g => !g.status_confirmacao, "membros");
       case "RECUSADOS":
-        return guests.filter(g => g.status_confirmacao === "DECLINED");
+        return expandPeople(g => g.status_confirmacao === "DECLINED", "membros");
       case "ADULTOS":
         return guests.filter(g => g.status_confirmacao === "CONFIRMED" && g.qtd_adultos > 0);
       case "CRIANÇAS":
         return guests.filter(g => g.status_confirmacao === "CONFIRMED" && g.qtd_criancas > 0);
       case "TOTAL":
-        return guests;
+        return expandPeople(() => true, "membros");
       default:
         return [];
     }
@@ -171,8 +171,12 @@ export default function AdminDashboard() {
   const confirmed = guests.reduce((acc, g) =>
     g.status_confirmacao === "CONFIRMED" ? acc + countPeople(g, "membros_confirmados") : acc, 0
   );
-  const pending = guests.filter(g => !g.status_confirmacao).length;
-  const declined = guests.filter(g => g.status_confirmacao === "DECLINED").length;
+  const pending = guests.reduce((acc, g) =>
+    !g.status_confirmacao ? acc + countPeople(g, "membros") : acc, 0
+  );
+  const declined = guests.reduce((acc, g) =>
+    g.status_confirmacao === "DECLINED" ? acc + countPeople(g, "membros") : acc, 0
+  );
   const adults = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_adultos || 0) : acc, 0);
   const children = guests.reduce((acc, g) => g.status_confirmacao === "CONFIRMED" ? acc + (g.qtd_criancas || 0) : acc, 0);
   const totalInvites = guests.length;
