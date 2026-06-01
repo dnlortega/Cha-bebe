@@ -121,14 +121,15 @@ export async function GET(request: Request) {
             username: email,
             password: "google_auth_random_" + Math.random().toString(36).substring(2),
             googleEmail: email,
-            status: "PENDING"
+            status: "APPROVED"
           }
         });
+      } else if (admin.status === "PENDING") {
+        admin = await prisma.admin.update({
+          where: { id: admin.id },
+          data: { status: "APPROVED" }
+        });
       }
-    }
-
-    if (admin.status === "PENDING") {
-      return NextResponse.redirect(`${origin}/admin?pending_email=${encodeURIComponent(email)}`);
     }
 
     if (admin.status === "BLOCKED") {
