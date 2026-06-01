@@ -35,20 +35,20 @@ export default function GiftsAdminPage() {
   };
 
   return (
-    <div className="max-w-4xl space-y-12 animate-in fade-in duration-700">
+    <div className="max-w-7xl space-y-12 animate-in fade-in duration-700">
       <header className="space-y-2">
         <h1 className="text-4xl font-serif text-primary tracking-[0.2em] uppercase">Lista de Presentes</h1>
         <p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">Gerencie os itens da vitrine</p>
       </header>
 
-      <Card className="border-none shadow-2xl bg-white rounded-none p-8">
+      <Card className="border-none shadow-2xl bg-white rounded-none p-8 max-w-3xl">
         <div className="flex gap-4">
           <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="NOME DO PRESENTE (EX: MAMADEIRA, CUEIRO...)" className="h-14 rounded-none border-primary/10 tracking-widest uppercase text-[11px]" />
           <Button onClick={handleAdd} disabled={loading} className="h-14 px-8 rounded-none">{loading ? <Loader2 className="animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} ADICIONAR</Button>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {gifts.map(g => (
           <Card key={g.id} className={`rounded-none border-none shadow-lg overflow-hidden transition-all ${g.isReserved ? 'opacity-40' : 'hover:translate-y-[-4px]'}`}>
             <div className={`h-1 w-full ${g.isReserved ? 'bg-stone-300' : 'bg-primary'}`} />
