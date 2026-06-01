@@ -701,7 +701,7 @@ export default function AdminLayout({
         <div className="flex min-h-screen">
           <AdminSidebar />
           <main className="lg:pl-20 min-h-screen transition-all duration-300">
-            <div className="p-4 sm:p-8 lg:p-12 max-w-7xl mx-auto pt-20 lg:pt-12">
+            <div className="p-4 sm:p-8 lg:p-12 xl:px-16 max-w-7xl mx-auto pt-20 lg:pt-12">
               {children}
             </div>
           </main>

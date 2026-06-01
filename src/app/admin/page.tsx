@@ -187,8 +187,8 @@ export default function AdminDashboard() {
         </Button>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 relative z-10">
-        <motion.div variants={itemVariants} className="xl:col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 relative z-10">
+        <motion.div variants={itemVariants} className="md:col-span-1">
           <Card className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-8 shadow-2xl border border-stone-700 relative overflow-hidden h-full">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-stone-800 to-transparent opacity-10 mix-blend-overlay" />
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-primary/20 blur-3xl rounded-full" />
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
           </Card>
         </motion.div>
 
-        <div className="xl:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
+        <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {[
             { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
             { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20" },
@@ -325,12 +325,12 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-        <div className="space-y-10 lg:col-span-12">
+        <div className="space-y-10 lg:col-span-7 xl:col-span-8">
           <motion.section variants={itemVariants} className="space-y-6">
              <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
                <TrendingUp className="h-4 w-4" /> Ações Rápidas
              </h3>
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link href="/admin/add" className="group p-6 bg-stone-900 text-white rounded-2xl flex items-center justify-between shadow-xl hover:shadow-2xl hover:bg-stone-800 transition-all overflow-hidden relative">
                   <div className="absolute right-0 top-0 h-full w-2 bg-primary group-hover:w-full transition-all duration-500 opacity-20" />
                   <span className="text-xs font-bold tracking-[0.2em] uppercase relative z-10">Novo Convidado</span>
@@ -347,12 +347,14 @@ export default function AdminDashboard() {
                 </Link>
              </div>
           </motion.section>
+        </div>
 
+        <div className="space-y-10 lg:col-span-5 xl:col-span-4">
           <motion.section variants={itemVariants} className="space-y-6">
              <h3 className="text-xs font-bold tracking-[0.3em] uppercase text-primary/60 flex items-center gap-3 ml-2">
                <PackageCheck className="h-4 w-4" /> Monitoramento
              </h3>
-             <Card className="bg-gradient-to-br from-white to-stone-50/50 border border-stone-200 p-8 shadow-md rounded-[2rem] group hover:border-primary/30 transition-colors">
+             <Card className="bg-gradient-to-br from-white to-stone-50/50 border border-stone-200 p-8 shadow-md rounded-[2rem] group hover:border-primary/30 transition-colors h-full flex flex-col justify-center">
                 <div className="space-y-6">
                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
                       <PackageCheck className="h-6 w-6 text-primary" />
