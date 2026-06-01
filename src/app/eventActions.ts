@@ -45,13 +45,35 @@ export async function getUserEvents(email: string) {
         orderBy: { createdAt: "asc" },
       },
       _count: {
-        select: { guests: true, gifts: true },
+        select: { gifts: true },
       },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return events;
+  const eventIds = events.map((e) => e.id);
+  const allGuests = await prisma.guest.findMany({
+    where: { eventId: { in: eventIds } },
+    select: { eventId: true, tipo: true, membros: true, membros_confirmados: true },
+  });
+
+  const guestCountMap: Record<string, number> = {};
+  for (const g of allGuests) {
+    if (!guestCountMap[g.eventId]) guestCountMap[g.eventId] = 0;
+    if (g.tipo === "FAMILIA" && g.membros) {
+      guestCountMap[g.eventId] += g.membros.split(",").filter((s) => s.trim()).length;
+    } else {
+      guestCountMap[g.eventId] += 1;
+    }
+  }
+
+  return events.map((e) => ({
+    ...e,
+    _count: {
+      guests: guestCountMap[e.id] || 0,
+      gifts: e._count?.gifts ?? 0,
+    },
+  }));
 }
 
 export type RegisteredUserForShare = {
