@@ -19,7 +19,7 @@ const STEPS = [
     icon: CalendarPlus,
     title: "Crie seu primeiro evento",
     description:
-      "Opcionalmente adicione e-mails de quem vai ajudar a gerenciar o evento. Depois clique em «Criar meu primeiro evento» — convite, tema e configurações já vêm prontos para personalizar.",
+      "Use «Compartilhar» para dar acesso a quem já entrou no painel com Google. Depois clique em «Criar meu primeiro evento» — convite, tema e configurações já vêm prontos.",
   },
   {
     icon: Palette,

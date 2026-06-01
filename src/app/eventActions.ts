@@ -35,15 +35,101 @@ export async function getUserEvents(email: string) {
       ],
     },
     include: {
-      settings: true,
+      settings: {
+        select: { babyName: true, eventDate: true },
+      },
       sharedWith: {
         select: { id: true, email: true, role: true },
         orderBy: { createdAt: "asc" },
       },
+      _count: {
+        select: { guests: true, gifts: true },
+      },
     },
+    orderBy: { createdAt: "desc" },
   });
 
   return events;
+}
+
+export type RegisteredUserForShare = {
+  id: string;
+  email: string;
+  username: string;
+  avatarUrl: string | null;
+  alreadyShared: boolean;
+};
+
+/** Usuários com login Google aprovado, disponíveis para compartilhar evento */
+export async function getRegisteredUsersForSharing(
+  requesterEmail: string,
+  eventId?: string
+) {
+  const requester = normalizeEmail(requesterEmail);
+
+  const admins = await prisma.admin.findMany({
+    where: {
+      status: "APPROVED",
+      googleEmail: { not: null },
+      NOT: {
+        googleEmail: { equals: requester, mode: "insensitive" },
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+      googleEmail: true,
+      avatarUrl: true,
+    },
+    orderBy: { googleEmail: "asc" },
+  });
+
+  let sharedEmails = new Set<string>();
+  if (eventId) {
+    const shares = await prisma.eventShare.findMany({
+      where: { eventId },
+      select: { email: true },
+    });
+    sharedEmails = new Set(shares.map((s) => normalizeEmail(s.email)));
+  }
+
+  const users: RegisteredUserForShare[] = [];
+  for (const admin of admins) {
+    if (!admin.googleEmail) continue;
+    const email = normalizeEmail(admin.googleEmail);
+    users.push({
+      id: admin.id,
+      email,
+      username: admin.username,
+      avatarUrl: admin.avatarUrl,
+      alreadyShared: sharedEmails.has(email),
+    });
+  }
+
+  return users;
+}
+
+export async function shareEventWithRegisteredUser(
+  eventId: string,
+  adminId: string,
+  ownerEmail: string
+) {
+  const admin = await prisma.admin.findFirst({
+    where: {
+      id: adminId,
+      status: "APPROVED",
+      googleEmail: { not: null },
+    },
+  });
+
+  if (!admin?.googleEmail) {
+    return {
+      success: false,
+      error: "Usuário não encontrado ou ainda não aprovado no sistema.",
+    };
+  }
+
+  return shareEventWithEmail(eventId, admin.googleEmail, ownerEmail);
 }
 
 export async function shareEventWithEmail(
