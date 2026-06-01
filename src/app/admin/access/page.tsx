@@ -122,24 +122,24 @@ function ScreenPermissionPanel({
               disabled={isFixed}
               className={`flex items-center gap-2 p-2.5 border transition-all duration-200 text-left rounded-none group ${
                 isSelected
-                  ? "border-primary/30 bg-primary/5"
-                  : "border-stone-100 bg-stone-50/50 hover:border-stone-200"
+                  ? "border-primary/30 dark:border-primary/40 bg-primary/5 dark:bg-primary/10"
+                  : "border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30 hover:border-stone-200 dark:hover:border-stone-700"
               } ${isFixed ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:shadow-sm"}`}
             >
               {isSelected ? (
-                <CheckSquare className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                <CheckSquare className="h-3.5 w-3.5 text-primary dark:text-primary flex-shrink-0" />
               ) : (
-                <Square className="h-3.5 w-3.5 text-stone-300 flex-shrink-0 group-hover:text-stone-400" />
+                <Square className="h-3.5 w-3.5 text-stone-300 dark:text-stone-700 flex-shrink-0 group-hover:text-stone-400 dark:group-hover:text-stone-600" />
               )}
               <div className="min-w-0">
                 <p
                   className={`text-[9px] font-black tracking-wider uppercase truncate ${
-                    isSelected ? "text-primary" : "text-stone-500"
+                    isSelected ? "text-primary dark:text-primary" : "text-stone-500 dark:text-stone-400"
                   }`}
                 >
                   {screen.name}
                 </p>
-                <p className="text-[7.5px] text-stone-400 truncate">{screen.desc}</p>
+                <p className="text-[7.5px] text-stone-400 dark:text-stone-500 truncate">{screen.desc}</p>
               </div>
             </button>
           );
@@ -156,8 +156,8 @@ function ScreenPermissionPanel({
           disabled={saving || !hasChanges}
           className={`rounded-none text-[8.5px] font-bold tracking-[0.3em] uppercase h-8 px-4 gap-1.5 transition-all ${
             hasChanges
-              ? "bg-stone-900 text-white hover:bg-stone-800"
-              : "bg-stone-100 text-stone-400 cursor-not-allowed"
+              ? "bg-stone-900 dark:bg-white text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-100"
+              : "bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed"
           }`}
         >
           {saving ? (
@@ -265,7 +265,7 @@ export default function AccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center dark:bg-stone-950">
         <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
       </div>
     );
@@ -274,7 +274,7 @@ export default function AccessPage() {
   if (authorized === false) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] bg-white rounded-none overflow-hidden animate-in fade-in duration-700">
+        <Card className="w-full max-w-md border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] dark:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] bg-white dark:bg-stone-950 rounded-none overflow-hidden animate-in fade-in duration-700">
           <div className="h-2 w-full bg-red-600" />
           <CardContent className="pt-16 pb-16 px-12 text-center space-y-8">
             <div className="w-20 h-20 bg-stone-900 mx-auto flex items-center justify-center rotate-45 transition-all duration-700 shadow-2xl relative overflow-hidden group hover:rotate-0">

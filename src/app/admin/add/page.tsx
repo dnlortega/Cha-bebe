@@ -44,8 +44,8 @@ export default function AddGuestsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
         <div className="lg:col-span-3">
-           <Card className="border-none shadow-2xl bg-white rounded-none overflow-hidden">
-              <div className="bg-stone-900 p-10 text-white flex justify-between items-center border-b-4 border-primary">
+           <Card className="border-none shadow-2xl bg-white dark:bg-stone-950 rounded-none overflow-hidden">
+              <div className="bg-stone-900 dark:bg-stone-800 p-10 text-white flex justify-between items-center border-b-4 border-primary dark:border-primary">
                  <div className="space-y-1">
                     <h2 className="text-xl font-serif tracking-[0.2em] uppercase">LISTA DE CADASTRO</h2>
                     <p className="text-[9px] opacity-50 tracking-[0.4em] uppercase font-light">INSIRA OS DADOS ABAIXO</p>
@@ -66,7 +66,7 @@ export default function AddGuestsPage() {
               <CardContent className="p-0">
                   <Textarea 
                   placeholder="EXEMPLO:&#10;DANIEL LOPES | INDIVIDUAL | | RN | SIM&#10;FAMILIA SILVA | FAMILIA | JOÃO, MARIA | P | NÃO" 
-                  className="min-h-[450px] bg-stone-50/50 border-none rounded-none focus-visible:ring-0 text-[12px] tracking-widest p-10 leading-relaxed resize-none placeholder:opacity-20"
+                  className="min-h-[450px] bg-stone-50/50 dark:bg-stone-900/50 border-none rounded-none focus-visible:ring-0 text-[12px] tracking-widest p-10 leading-relaxed resize-none placeholder:opacity-20 dark:text-stone-200 dark:placeholder:opacity-30"
                   value={newGuestsText}
                   onChange={(e) => setNewGuestsText(e.target.value)}
                 />
@@ -75,7 +75,7 @@ export default function AddGuestsPage() {
         </div>
 
         <div className="lg:col-span-2 space-y-8">
-           <div className="space-y-6 bg-white p-10 border border-primary/5 shadow-lg">
+           <div className="space-y-6 bg-white dark:bg-stone-950 p-10 border border-primary/5 dark:border-primary/20 shadow-lg">
               <h3 className="text-xs font-serif tracking-[0.3em] text-primary flex items-center gap-3 uppercase">
                 <ClipboardList className="h-4 w-4" />
                 COMO CADASTRAR
@@ -87,7 +87,7 @@ export default function AddGuestsPage() {
                     <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">1</div>
                     <div className="space-y-2">
                        <p className="text-[10px] font-bold tracking-widest uppercase">INDIVIDUAL</p>
-                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70">NOME | INDIVIDUAL</code>
+                       <code className="text-[9px] block bg-stone-50 dark:bg-stone-900/50 p-3 border border-primary/5 dark:border-primary/20 tracking-widest text-primary/70 dark:text-primary/50">NOME | INDIVIDUAL</code>
                     </div>
                  </div>
 
@@ -95,7 +95,7 @@ export default function AddGuestsPage() {
                     <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">2</div>
                     <div className="space-y-2">
                        <p className="text-[10px] font-bold tracking-widest uppercase">FAMÍLIA</p>
-                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
+                       <code className="text-[9px] block bg-stone-50 dark:bg-stone-900/50 p-3 border border-primary/5 dark:border-primary/20 tracking-widest text-primary/70 dark:text-primary/50 leading-relaxed">
                           NOME | FAMILIA | MEMBRO 1, MEMBRO 2
                        </code>
                     </div>
@@ -105,7 +105,7 @@ export default function AddGuestsPage() {
                     <div className="w-6 h-6 rounded-none bg-primary/10 text-primary text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">3</div>
                     <div className="space-y-2">
                        <p className="text-[10px] font-bold tracking-widest uppercase">COM FRALDA E KIT</p>
-                       <code className="text-[9px] block bg-stone-50 p-3 border border-primary/5 tracking-widest text-primary/70 leading-relaxed">
+                       <code className="text-[9px] block bg-stone-50 dark:bg-stone-900/50 p-3 border border-primary/5 dark:border-primary/20 tracking-widest text-primary/70 dark:text-primary/50 leading-relaxed">
                           NOME | INDIVIDUAL | | P | SIM <br/>
                           NOME | FAMILIA | MEMBROS | M | NÃO
                        </code>
@@ -114,7 +114,7 @@ export default function AddGuestsPage() {
               </div>
            </div>
 
-           <div className="bg-primary/5 p-8 border border-primary/10">
+           <div className="bg-primary/5 dark:bg-primary/10 p-8 border border-primary/10 dark:border-primary/20">
               <div className="flex items-center gap-3 mb-4">
                   <HelpCircle className="h-4 w-4 text-primary opacity-40" />
                   <p className="text-[10px] font-bold tracking-widest uppercase">DICA</p>

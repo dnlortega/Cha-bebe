@@ -125,9 +125,22 @@ export function AdminSidebar() {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={cn("flex items-center border-b border-primary/5 py-5", showLabels ? "px-5 gap-3" : "hidden lg:flex justify-center px-3")}>
-        <div className="w-9 h-9 relative bg-stone-900 shadow-lg p-1.5 border border-white/5 flex-shrink-0">
-          <Image src="/icon.png" alt="Logo" fill className="object-cover" />
-        </div>
+        {avatarUrl && avatarUrl !== "null" ? (
+          <div className="w-9 h-9 relative rounded-full overflow-hidden shadow-lg border border-white/10 flex-shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => setAvatarUrl(null)}
+            />
+          </div>
+        ) : (
+          <div className="w-9 h-9 relative bg-stone-900 shadow-lg p-1.5 border border-white/5 flex-shrink-0">
+            <Image src="/icon.png" alt="Logo" fill className="object-cover" />
+          </div>
+        )}
         {showLabels && (
           <div>
             <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary">Admin</p>
@@ -148,7 +161,9 @@ export function AdminSidebar() {
               className={cn(
                 "flex items-center py-3 transition-all duration-200 group rounded-none",
                 showLabels ? "px-3 gap-3" : "justify-center px-3",
-                isActive ? "bg-primary text-white shadow-md shadow-primary/20" : "text-stone-500 hover:bg-stone-50 hover:text-primary"
+                isActive
+                  ? "bg-primary text-white shadow-md shadow-primary/20"
+                  : "text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-primary dark:text-stone-400 dark:hover:text-primary"
               )}
               title={item.title}
             >
@@ -174,7 +189,7 @@ export function AdminSidebar() {
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                "w-full flex items-center gap-2.5 px-2 py-2 hover:bg-stone-50 rounded-md transition-colors",
+                "w-full flex items-center gap-2.5 px-2 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md transition-colors",
                 !showLabels && "justify-center"
               )}
               title="Opções da conta"
@@ -271,7 +286,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500")}
+              className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500 hover:text-primary")}
               title={item.title}
             >
                 <item.icon className="h-6 w-6" />
@@ -279,7 +294,7 @@ export function AdminSidebar() {
           );
         })}
         {/* Avatar button (logout) */}
-        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1" title="Conta">
+        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 hover:text-primary transition-colors" title="Conta">
           {avatarUrl && avatarUrl !== "null" ? (
             <img 
               src={avatarUrl} 

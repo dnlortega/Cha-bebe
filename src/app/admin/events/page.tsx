@@ -149,9 +149,9 @@ export default function EventsPage() {
 
       {isNewUser ? (
         <div className="space-y-8">
-          <Card className="border border-primary/15 bg-stone-50/30">
+          <Card className="border border-primary/15 dark:border-primary/25 bg-stone-50/30 dark:bg-stone-900/30">
             <CardContent className="p-6 space-y-4">
-              <p className="text-xs text-stone-600 leading-relaxed">
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
                 Você ainda não tem eventos. Crie o primeiro e, se quiser, compartilhe com
                 alguém que já tenha entrado no painel com Google.
               </p>
@@ -169,20 +169,20 @@ export default function EventsPage() {
                     />
                   </div>
                   <div>
-                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500 dark:text-stone-400">
                       Endereço
                     </Label>
                     <Input
                       value={eventAddress}
                       onChange={(event) => setEventAddress(event.target.value)}
                       placeholder="Rua das Flores, 123, São Paulo"
-                      className="w-full"
+                      className="w-full dark:bg-stone-900 dark:text-stone-200 dark:border-stone-700"
                     />
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500 dark:text-stone-400">
                       Data e hora
                     </Label>
                     <Input
@@ -253,18 +253,18 @@ export default function EventsPage() {
                         value={eventName}
                         onChange={(event) => setEventName(event.target.value)}
                         placeholder="Chá de Bebê da Maria"
-                        className="w-full"
+                        className="w-full dark:bg-stone-900 dark:text-stone-200 dark:border-stone-700"
                       />
                     </div>
                     <div>
-                      <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500 dark:text-stone-400">
                         Endereço
                       </Label>
                       <Input
                         value={eventAddress}
                         onChange={(event) => setEventAddress(event.target.value)}
                         placeholder="Rua das Flores, 123"
-                        className="w-full"
+                        className="w-full dark:bg-stone-900 dark:text-stone-200 dark:border-stone-700"
                       />
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default function EventsPage() {
                         checked={includeCard}
                         onCheckedChange={(checked) => setIncludeCard(Boolean(checked))}
                       />
-                      <span className="text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      <span className="text-[10px] uppercase tracking-[0.32em] text-stone-500 dark:text-stone-400">
                         Incluir cartão de convite
                       </span>
                     </Label>

@@ -180,9 +180,9 @@ export default function AdminDashboard() {
           variant="outline" 
           onClick={() => fetchData()} 
           disabled={loading} 
-          className="border border-primary/20 bg-white/50 backdrop-blur-sm hover:bg-primary hover:text-white transition-all shadow-sm rounded-xl h-11 px-6 group"
+          className="border border-primary/20 dark:border-primary/30 bg-white/50 dark:bg-stone-900/50 backdrop-blur-sm hover:bg-primary dark:hover:bg-primary hover:text-white transition-all shadow-sm rounded-xl h-11 px-6 group"
         >
-          <RefreshCw className={cn("h-4 w-4 mr-2 text-primary group-hover:text-white transition-colors", loading && "animate-spin")} />
+          <RefreshCw className={cn("h-4 w-4 mr-2 text-primary dark:text-primary group-hover:text-white transition-colors", loading && "animate-spin")} />
           <span className="text-[10px] tracking-widest uppercase font-bold">Sincronizar</span>
         </Button>
       </header>

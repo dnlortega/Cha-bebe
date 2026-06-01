@@ -125,18 +125,18 @@ export default function GuestsPage() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 opacity-20" />
-            <Input placeholder="Buscar..." className="pl-9 bg-white border-primary/10 rounded-none h-10 text-[10px] tracking-widest uppercase" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <Input placeholder="Buscar..." className="pl-9 bg-white dark:bg-stone-900 border-primary/10 dark:border-primary/30 rounded-none h-10 text-[10px] tracking-widest uppercase dark:text-stone-200" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
           <Select value={statusFilter} onValueChange={v => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="rounded-none border-primary/10 h-10 bg-white text-[10px] tracking-widest w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="rounded-none border-primary/10 dark:border-primary/30 h-10 bg-white dark:bg-stone-900 text-[10px] tracking-widest w-32 dark:text-stone-200"><SelectValue /></SelectTrigger>
             <SelectContent className="rounded-none text-[10px] tracking-widest">
               <SelectItem value="ALL">TODOS</SelectItem>
               <SelectItem value="CONFIRMED">CONFIRMADOS</SelectItem>
               <SelectItem value="PENDING">PENDENTES</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={exportCSV} className="h-10 w-10 rounded-none border-primary/10 bg-white"><Download className="h-4 w-4 text-primary" /></Button>
-          <Button variant="outline" size="icon" onClick={fetchGuests} disabled={loading} className="h-10 w-10 rounded-none border-primary/10 bg-white"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
+          <Button variant="outline" size="icon" onClick={exportCSV} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><Download className="h-4 w-4 text-primary dark:text-primary" /></Button>
+          <Button variant="outline" size="icon" onClick={fetchGuests} disabled={loading} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
@@ -144,7 +144,7 @@ export default function GuestsPage() {
                 size="icon" 
                 onClick={handleDeleteAll} 
                 disabled={loading || guests.length === 0} 
-                className="h-10 w-10 rounded-none border-red-200 hover:bg-red-50 hover:border-red-300 bg-white text-red-500"
+                className="h-10 w-10 rounded-none border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-800 bg-white dark:bg-stone-900 text-red-500 dark:text-red-400"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -154,9 +154,9 @@ export default function GuestsPage() {
         </div>
       </header>
 
-      <div className="bg-white border border-primary/5 shadow-xl overflow-hidden rounded-none hidden md:block">
+      <div className="bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20 shadow-xl overflow-hidden rounded-none hidden md:block">
         <Table>
-          <TableHeader className="bg-stone-50/80">
+          <TableHeader className="bg-stone-50/80 dark:bg-stone-900/50">
             <TableRow>
               <TableHead className="h-14 pl-8 text-[9px] tracking-widest uppercase font-bold text-primary">Convidado</TableHead>
               <TableHead className="h-14 text-[9px] tracking-widest uppercase font-bold text-primary">Status</TableHead>
@@ -166,7 +166,7 @@ export default function GuestsPage() {
           </TableHeader>
           <TableBody>
             {filteredGuests.map(guest => (
-              <TableRow key={guest.id} className="hover:bg-stone-50/40 border-primary/5 group">
+              <TableRow key={guest.id} className="hover:bg-stone-50/40 dark:hover:bg-stone-900/40 border-primary/5 dark:border-primary/20 group">
                 <TableCell className="py-5 pl-8">
                   <div className="space-y-1">
                     <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
@@ -198,7 +198,7 @@ export default function GuestsPage() {
       {/* Lista em Cartões para Mobile (Ações sempre visíveis e sem rolagem lateral) */}
       <div className="md:hidden space-y-4">
         {filteredGuests.map(guest => (
-          <div key={guest.id} className="bg-white border border-primary/5 p-5 shadow-lg space-y-4 rounded-none">
+          <div key={guest.id} className="bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20 p-5 shadow-lg space-y-4 rounded-none">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
@@ -241,7 +241,7 @@ export default function GuestsPage() {
           </div>
         ))}
         {filteredGuests.length === 0 && (
-          <div className="text-center py-10 bg-white border border-primary/5">
+          <div className="text-center py-10 bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20">
             <p className="text-[10px] tracking-widest uppercase opacity-40">NENHUM CONVIDADO ENCONTRADO</p>
           </div>
         )}
@@ -253,13 +253,13 @@ export default function GuestsPage() {
             <DialogTitle className="text-xl font-serif tracking-[0.2em] uppercase">Editar</DialogTitle>
             <Button onClick={handleUpdate} disabled={isEditing} size="icon" className="bg-white text-primary h-14 w-14 rounded-none"><Save className="h-5 w-5" /></Button>
           </div>
-          <div className="p-8 space-y-4 bg-white">
-            <Input value={editName} onChange={e => setEditName(e.target.value)} className="rounded-none h-12 bg-stone-50 text-[11px] tracking-widest uppercase" placeholder="NOME" />
+          <div className="p-8 space-y-4 bg-white dark:bg-stone-950">
+            <Input value={editName} onChange={e => setEditName(e.target.value)} className="rounded-none h-12 bg-stone-50 dark:bg-stone-900 text-[11px] tracking-widest uppercase dark:text-stone-200" placeholder="NOME" />
             <div className="grid grid-cols-2 gap-4">
               <Select value={editType} onValueChange={(v) => v && setEditType(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="INDIVIDUAL">INDIVIDUAL</SelectItem><SelectItem value="FAMILIA">FAMÍLIA</SelectItem></SelectContent></Select>
               <Select value={editDiaper || "NONE"} onValueChange={(v) => setEditDiaper(v === "NONE" ? null : v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">FRALDA: NENHUMA</SelectItem>{["RN","P","M","G","GG"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
             </div>
-            {editType === "FAMILIA" && <Textarea value={editMembers} onChange={e => setEditMembers(e.target.value)} placeholder="MEMBROS (VÍRGULA)" className="h-24 rounded-none bg-stone-50" />}
+            {editType === "FAMILIA" && <Textarea value={editMembers} onChange={e => setEditMembers(e.target.value)} placeholder="MEMBROS (VÍRGULA)" className="h-24 rounded-none bg-stone-50 dark:bg-stone-900 dark:text-stone-200" />}
           </div>
         </DialogContent>
       </Dialog>
