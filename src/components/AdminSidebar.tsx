@@ -17,6 +17,7 @@ import {
   Package,
   History,
   ShieldAlert,
+  CalendarPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_COLLABORATOR_SCREEN_TITLES } from "@/lib/eventAccess";
@@ -32,14 +33,15 @@ import {
 const ALL_MENU_ITEMS = [
   // Existing items
 
-  { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-  { title: "Convites", icon: Users, href: "/admin/guests" },
-  { title: "Histórico", icon: History, href: "/admin/history" },
-  { title: "Cadastrar", icon: UserPlus, href: "/admin/add" },
-  { title: "Lista Final", icon: ClipboardList, href: "/admin/final-list" },
-  { title: "Presentes", icon: Package, href: "/admin/gifts" },
+  { title: "Eventos", icon: CalendarPlus, href: "/admin/events", requiresEvent: false, hideLabel: true },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/admin", requiresEvent: true },
+  { title: "Convites", icon: Users, href: "/admin/guests", requiresEvent: true },
+  { title: "Histórico", icon: History, href: "/admin/history", requiresEvent: true },
+  { title: "Cadastrar", icon: UserPlus, href: "/admin/add", requiresEvent: true },
+  { title: "Lista Final", icon: ClipboardList, href: "/admin/final-list", requiresEvent: true },
+  { title: "Presentes", icon: Package, href: "/admin/gifts", requiresEvent: true },
   // New access item (visible only to master admins)
-  { title: "Acessos", icon: ShieldAlert, href: "/admin/access" },
+  { title: "Acessos", icon: ShieldAlert, href: "/admin/access", requiresEvent: true },
 ];
 
 export function AdminSidebar() {
@@ -50,12 +52,22 @@ export function AdminSidebar() {
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
   const [isEventCollaborator, setIsEventCollaborator] = useState(false);
+  const [hasActiveEvent, setHasActiveEvent] = useState(false);
 
   useEffect(() => {
     setAvatarUrl(localStorage.getItem("admin_avatar") || null);
     setAdminEmail(localStorage.getItem("admin_username") || null);
     setAllowedScreens(localStorage.getItem("admin_allowed_screens") || "ALL");
     setIsEventCollaborator(localStorage.getItem("event_collaborator") === "true");
+
+    const checkEvent = async () => {
+      const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
+      const user = localStorage.getItem("admin_username") || "";
+      const active = await validateActiveEventAccess(user);
+      setHasActiveEvent(active);
+    };
+
+    checkEvent();
 
     const checkMaster = async () => {
       const token = localStorage.getItem("admin_session_token") || "";
@@ -72,14 +84,16 @@ export function AdminSidebar() {
   }, [pathname]);
 
   const visibleMenuItems = ALL_MENU_ITEMS.filter((item) => {
-    if (item.href === "/admin/access") return isMaster;
+    if (item.href === "/admin/access") return isMaster && hasActiveEvent;
+    if (item.requiresEvent && !hasActiveEvent) return false;
+    if (item.href === "/admin/events") return true;
     if (isEventCollaborator) {
       return (EVENT_COLLABORATOR_SCREEN_TITLES as readonly string[]).includes(
         item.title
       );
     }
     if (allowedScreens === "ALL") return true;
-    if (item.href === "/admin") return true;
+    if (item.href === "/admin") return hasActiveEvent;
     const allowedList = allowedScreens.split(",").map((s) => s.trim());
     return allowedList.includes(item.title);
   });
@@ -140,7 +154,7 @@ export function AdminSidebar() {
                   isActive ? "text-white" : "opacity-50 group-hover:opacity-100"
                 )}
               />
-              {showLabels && (
+              {showLabels && !item.hideLabel && (
                 <span className={cn("text-[10px] font-bold tracking-[0.2em] uppercase", isActive ? "text-white" : "group-hover:text-primary")}>
                   {item.title}
                 </span>
