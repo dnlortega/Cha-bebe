@@ -9,6 +9,9 @@ import { EventsList, type EventListItem } from "@/components/admin/EventsList";
 import { ShareEventDialog } from "@/components/admin/ShareEventDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CalendarPlus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +22,10 @@ export default function EventsPage() {
   const [creating, setCreating] = useState(false);
   const [shareEmails, setShareEmails] = useState<string[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [eventName, setEventName] = useState("");
+  const [eventAddress, setEventAddress] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [includeCard, setIncludeCard] = useState(true);
 
   const isNewUser = !loading && events.length === 0;
 
@@ -57,7 +64,12 @@ export default function EventsPage() {
     if (!currentUser) return;
     setCreating(true);
     try {
-      const newEvent = await createDefaultEventForUser(currentUser, shareEmails);
+      const newEvent = await createDefaultEventForUser(currentUser, shareEmails, {
+        name: eventName.trim() || undefined,
+        eventDate: eventDate || undefined,
+        eventAddress: eventAddress.trim() || undefined,
+        showInvitationImage: includeCard,
+      });
       toast.success(
         shareEmails.length > 0
           ? `Evento criado e compartilhado com ${shareEmails.length} usuário(s).`
@@ -138,6 +150,54 @@ export default function EventsPage() {
                 Você ainda não tem eventos. Crie o primeiro e, se quiser, compartilhe com
                 alguém que já tenha entrado no painel com Google.
               </p>
+              <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      Nome do evento
+                    </Label>
+                    <Input
+                      value={eventName}
+                      onChange={(event) => setEventName(event.target.value)}
+                      placeholder="Chá de Bebê da Maria"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      Endereço
+                    </Label>
+                    <Input
+                      value={eventAddress}
+                      onChange={(event) => setEventAddress(event.target.value)}
+                      placeholder="Rua das Flores, 123, São Paulo"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      Data e hora
+                    </Label>
+                    <Input
+                      type="datetime-local"
+                      value={eventDate}
+                      onChange={(event) => setEventDate(event.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <Label className="inline-flex items-center gap-2 text-sm mt-2">
+                    <Checkbox
+                      checked={includeCard}
+                      onCheckedChange={(checked) => setIncludeCard(Boolean(checked))}
+                    />
+                    <span className="text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                      Incluir cartão de convite
+                    </span>
+                  </Label>
+                </div>
+              </div>
               {shareEmails.length > 0 && (
                 <p className="text-[11px] text-primary">
                   Compartilhar ao criar: {shareEmails.join(", ")}
@@ -178,6 +238,54 @@ export default function EventsPage() {
                 <h2 className="text-sm font-serif tracking-widest text-primary uppercase">
                   Novo evento
                 </h2>
+                <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                        Nome do evento
+                      </Label>
+                      <Input
+                        value={eventName}
+                        onChange={(event) => setEventName(event.target.value)}
+                        placeholder="Chá de Bebê da Maria"
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                        Endereço
+                      </Label>
+                      <Input
+                        value={eventAddress}
+                        onChange={(event) => setEventAddress(event.target.value)}
+                        placeholder="Rua das Flores, 123"
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="mb-1 block text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                        Data e hora
+                      </Label>
+                      <Input
+                        type="datetime-local"
+                        value={eventDate}
+                        onChange={(event) => setEventDate(event.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <Label className="inline-flex items-center gap-2 text-sm mt-2">
+                      <Checkbox
+                        checked={includeCard}
+                        onCheckedChange={(checked) => setIncludeCard(Boolean(checked))}
+                      />
+                      <span className="text-[10px] uppercase tracking-[0.32em] text-stone-500">
+                        Incluir cartão de convite
+                      </span>
+                    </Label>
+                  </div>
+                </div>
                 {shareEmails.length > 0 && (
                   <p className="text-[11px] text-stone-500">
                     Colaboradores: {shareEmails.join(", ")}

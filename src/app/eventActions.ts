@@ -221,12 +221,20 @@ const defaultSettingsData = {
   babyGender: "NONE",
 } as const;
 
+export type CreateEventOptions = {
+  name?: string;
+  eventDate?: string;
+  eventAddress?: string;
+  showInvitationImage?: boolean;
+};
+
 export async function createDefaultEventForUser(
   email: string,
-  sharedEmails: string[] = []
+  sharedEmails: string[] = [],
+  options: CreateEventOptions = {}
 ) {
   const owner = normalizeEmail(email);
-  const eventName = `Chá de Bebê - ${owner.split("@")[0]}`;
+  const eventName = options.name?.trim() || `Chá de Bebê - ${owner.split("@")[0]}`;
   const baseSlug = await import("./actions").then((m) => m.generateSlug(eventName));
   let finalSlug = baseSlug;
 
@@ -269,6 +277,12 @@ export async function createDefaultEventForUser(
       id: newEvent.id,
       eventId: newEvent.id,
       ...defaultSettingsData,
+      eventDate: options.eventDate ? new Date(options.eventDate) : undefined,
+      eventAddress: options.eventAddress?.trim() || undefined,
+      showInvitationImage:
+        typeof options.showInvitationImage === "boolean"
+          ? options.showInvitationImage
+          : defaultSettingsData.showInvitationImage,
     },
   });
 
