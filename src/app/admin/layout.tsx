@@ -304,10 +304,11 @@ export default function AdminLayout({
             // Salva as credenciais no localStorage
             localStorage.setItem("admin_session_token", googleToken);
             localStorage.setItem("admin_authorized", "true");
-            localStorage.setItem("admin_username", googleUsername);
 
             const { getAdminSessionDetails } = await import("@/app/actions");
             const details = await getAdminSessionDetails(googleToken);
+            const loginEmail = details.success && details.email ? details.email : googleUsername;
+            localStorage.setItem("admin_username", loginEmail);
             if (details.success) {
               if (details.avatarUrl) {
                 localStorage.setItem("admin_avatar", details.avatarUrl);
@@ -319,11 +320,11 @@ export default function AdminLayout({
             }
 
             setAuthorized(true);
-            setCurrentUser(googleUsername);
+            setCurrentUser(loginEmail);
             toast.success("CONECTADO COM SUCESSO VIA GOOGLE!");
 
             const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
-            const hasActiveEvent = await validateActiveEventAccess(googleUsername);
+            const hasActiveEvent = await validateActiveEventAccess(loginEmail);
 
             // Limpa os parâmetros da URL para evitar expor o token
             window.history.replaceState({}, document.title, window.location.pathname);

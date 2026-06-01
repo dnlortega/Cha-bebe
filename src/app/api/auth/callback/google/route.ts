@@ -162,7 +162,8 @@ export async function GET(request: Request) {
     );
 
     // 6. Redireciona de volta para o painel com o token gerado
-    return NextResponse.redirect(`${proto}://${host}/admin?google_token=${token}&google_username=${encodeURIComponent(admin.username)}&google_avatar=${encodeURIComponent(admin.avatarUrl || "")}`);
+    const loginIdentity = admin.googleEmail || email;
+    return NextResponse.redirect(`${proto}://${host}/admin?google_token=${token}&google_username=${encodeURIComponent(loginIdentity)}&google_avatar=${encodeURIComponent(admin.avatarUrl || "")}`);
   } catch (error) {
     console.error("Erro interno no callback do Google Auth:", error);
     return NextResponse.redirect(`${proto}://${host}/admin?google_error=${encodeURIComponent("Erro interno no callback de autenticação.")}`);

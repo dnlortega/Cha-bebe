@@ -153,7 +153,8 @@ export async function GET(request: Request) {
     );
 
     // 6. Redirect back to the admin area with the token and username
-    return NextResponse.redirect(`${origin}/admin?google_token=${token}&google_username=${encodeURIComponent(admin.username)}`);
+    const loginIdentity = admin.googleEmail || email;
+    return NextResponse.redirect(`${origin}/admin?google_token=${token}&google_username=${encodeURIComponent(loginIdentity)}`);
   } catch (error) {
     console.error("Erro interno no callback do Google Auth:", error);
     return NextResponse.redirect(`${origin}/admin?google_error=${encodeURIComponent("Erro interno no callback de autenticação.")}`);
