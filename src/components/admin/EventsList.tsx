@@ -219,10 +219,11 @@ function EventRow({
         <Button
           type="button"
           onClick={() => onEnter(event.id)}
-          className="rounded-none h-9 text-[10px] tracking-widest uppercase"
+          className="rounded-none h-9 w-9 p-0 flex items-center justify-center"
+          title="Entrar"
+          aria-label="Entrar"
         >
-          <LogIn className="h-4 w-4 mr-1.5" />
-          Entrar
+          <LogIn className="h-4 w-4" />
         </Button>
       </div>
     </li>

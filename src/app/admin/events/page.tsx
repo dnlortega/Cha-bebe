@@ -138,10 +138,11 @@ export default function EventsPage() {
             type="button"
             onClick={() => setShowCreateForm((v) => !v)}
             variant="outline"
-            className="rounded-none h-11 text-[10px] tracking-widest uppercase"
+            className="rounded-none h-11 w-11 p-0 flex items-center justify-center"
+            title={showCreateForm ? "Fechar" : "Novo evento"}
+            aria-label={showCreateForm ? "Fechar" : "Novo evento"}
           >
-            <Plus className={`h-4 w-4 mr-2 transition-transform ${showCreateForm ? "rotate-45" : ""}`} />
-            {showCreateForm ? "Fechar" : "Novo evento"}
+            <Plus className={`h-5 w-5 transition-transform ${showCreateForm ? "rotate-45" : ""}`} />
           </Button>
         )}
       </header>
