@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { getGuests, deleteGuest, updateGuest, deleteAllGuests } from "@/app/actions";
+import { getActiveEventSlug } from "@/app/eventActions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +29,7 @@ export default function GuestsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [sortField, setSortField] = useState<SortField>("nome");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [eventSlug, setEventSlug] = useState("evento-principal");
 
   const [editingGuest, setEditingGuest] = useState<any>(null);
   const [editName, setEditName] = useState("");
@@ -47,8 +49,9 @@ export default function GuestsPage() {
 
   const fetchGuests = async () => {
     setLoading(true);
-    const data = await getGuests();
+    const [data, slug] = await Promise.all([getGuests(), getActiveEventSlug()]);
     setGuests(data);
+    setEventSlug(slug);
     setLoading(false);
   };
 
@@ -82,19 +85,19 @@ export default function GuestsPage() {
   };
 
   const copyToClipboard = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/${slug}`);
+    navigator.clipboard.writeText(`${window.location.origin}/${eventSlug}/${slug}`);
     toast.success("LINK COPIADO!");
   };
 
   const sendWhatsApp = (guest: any) => {
-    const link = `${window.location.origin}/${guest.slug}`;
+    const link = `${window.location.origin}/${eventSlug}/${guest.slug}`;
     const text = `Olá ${guest.nome}! Gostaríamos de te convidar para o nosso Chá de Bebê. Confirme sua presença aqui: ${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const exportCSV = () => {
     const headers = ["Nome", "Status", "Adultos", "Crianças", "Fralda", "Kit", "Mensagem", "Link"];
-    const rows = filteredGuests.map(g => [g.nome, g.status_confirmacao || "PENDENTE", g.qtd_adultos, g.qtd_criancas, g.fralda_tamanho || "", g.kit_churrasco ? "SIM" : "NÃO", (g.mensagem || "").replace(/;/g, ","), `${window.location.origin}/${g.slug}`]);
+    const rows = filteredGuests.map(g => [g.nome, g.status_confirmacao || "PENDENTE", g.qtd_adultos, g.qtd_criancas, g.fralda_tamanho || "", g.kit_churrasco ? "SIM" : "NÃO", (g.mensagem || "").replace(/;/g, ","), `${window.location.origin}/${eventSlug}/${g.slug}`]);
     const csv = [headers, ...rows].map(r => r.join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
