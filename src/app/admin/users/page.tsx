@@ -368,7 +368,7 @@ function UserCard({
                   }`}
                 >
                   <Laptop className="h-3 w-3" />
-                  {activeSessions.length} Sessão{activeSessions.length > 1 ? "ões" : ""}
+                  Última Sessão
                   <ChevronDown className={`h-3 w-3 transition-transform ${showSessions ? "rotate-180" : ""}`} />
                 </button>
               )}
@@ -411,23 +411,21 @@ function UserCard({
               </div>
             )}
 
-            {/* Sessions Panel */}
-            {showSessions && activeSessions.length > 0 && (
+            {/* Sessions Panel - only most recent */}
+            {showSessions && activeSessions[0] && (
               <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                 <p className="text-[8px] font-black tracking-[0.3em] uppercase text-stone-400 flex items-center gap-1.5">
-                  <Wifi className="h-3 w-3" /> Sessões Ativas
+                  <Wifi className="h-3 w-3" /> Última Sessão Ativa
                 </p>
-                {activeSessions.map((sess: any) => (
-                  <div key={sess.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-stone-50 border border-stone-100">
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="text-[10px] font-bold text-stone-700 truncate">{sess.deviceName}</p>
-                      <p className="text-[8px] text-stone-400 uppercase tracking-widest">{sess.deviceInfo} · {sess.location}</p>
-                    </div>
-                    <span className="text-[7px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-black uppercase tracking-widest flex-shrink-0">
-                      Ativo
-                    </span>
+                <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-stone-50 border border-stone-100">
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[10px] font-bold text-stone-700 truncate">{activeSessions[0].deviceName}</p>
+                    <p className="text-[8px] text-stone-400 uppercase tracking-widest">{activeSessions[0].deviceInfo} · {activeSessions[0].location}</p>
                   </div>
-                ))}
+                  <span className="text-[7px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full font-black uppercase tracking-widest flex-shrink-0">
+                    Ativo
+                  </span>
+                </div>
               </div>
             )}
           </>
