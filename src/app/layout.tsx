@@ -7,6 +7,7 @@ import { getSettings } from "@/app/actions";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getThemeById } from "@/lib/themes";
 import { unstable_noStore as noStore } from "next/cache";
+import { Analytics } from "@vercel/analytics/next";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -95,6 +96,7 @@ export default async function RootLayout({
             <Toaster position="top-center" richColors />
           </TooltipProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
