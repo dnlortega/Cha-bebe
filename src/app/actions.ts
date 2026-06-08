@@ -126,21 +126,6 @@ export async function getRecentMessages(forAdmin = false, forceEventId?: string)
   }));
 }
 
-export async function toggleMessageVisibility(id: string, exibir_mensagem: boolean) {
-  try {
-    await prisma.guest.update({
-      where: { id },
-      data: { exibir_mensagem }
-    });
-    revalidatePath("/admin");
-    revalidatePath("/mural");
-    return { success: true };
-  } catch (error) {
-    console.error("Error toggling message visibility:", error);
-    return { success: false, error: "Falha ao alterar a exibição da mensagem." };
-  }
-}
-
 // Gift Actions
 export async function getGifts(forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
@@ -175,7 +160,7 @@ export async function deleteGift(id: string) {
   }
 }
 
-export async function updateRSVP(slug: string, status: string, membrosConfirmados?: string, mensagem?: string, giftId?: string, forceEventId?: string) {
+export async function updateRSVP(slug: string, status: string, membrosConfirmados?: string, mensagem?: string, giftId?: string, forceEventId?: string, customGiftName?: string) {
   const eventId = forceEventId || await getActiveEventId();
   if (!eventId) return { success: false, error: "Nenhum evento ativo." };
 
@@ -193,12 +178,17 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
       }
     }
 
-    // Se escolheu um presente novo, marca como reservado
-    if (giftId && status === "CONFIRMED") {
-      await prisma.gift.update({
-        where: { id: giftId },
-        data: { isReserved: true }
-      });
+    let resolvedGiftId = giftId;
+
+    if (status === "CONFIRMED") {
+      if (giftId) {
+        await prisma.gift.update({ where: { id: giftId }, data: { isReserved: true } });
+      } else if (customGiftName?.trim()) {
+        const newGift = await prisma.gift.create({
+          data: { eventId, name: customGiftName.trim(), category: "Personalizado", isReserved: true }
+        });
+        resolvedGiftId = newGift.id;
+      }
     }
 
     const updatedGuest = await prisma.guest.update({ where: { eventId_slug: { eventId, slug } },
@@ -209,7 +199,7 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
         qtd_adultos: count,
         data_resposta: new Date(),
         mensagem: mensagem || null,
-        giftId: status === "CONFIRMED" ? (giftId || null) : null
+        giftId: status === "CONFIRMED" ? (resolvedGiftId || null) : null
       },
     });
 
@@ -351,11 +341,6 @@ export async function addMultipleGuests(namesText: string) {
   }
 }
 
-export async function verifyAdmin(username: string, password: string) {
-  const admin = await prisma.admin.findUnique({ where: { username } });
-  return admin?.password === password;
-}
-
 export async function getAdminCredentials() {
   noStore();
   try {
@@ -420,28 +405,6 @@ export async function updateGoogleSessionDetails(token: string, deviceInfo: stri
   } catch (error) {
     console.error("Erro ao enriquecer detalhes da sessão Google:", error);
     return { success: false };
-  }
-}
-
-export async function distributeDiapers() {
-  const eventId = await getActiveEventId();
-  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
-  try {
-    const settings = await getSettings();
-    const guests = await prisma.guest.findMany({ where: { eventId, fralda_tamanho: null }, orderBy: { createdAt: "asc" } });
-    let stocks = { RN: settings.rnQty, P: settings.pQty, M: settings.mQty, G: settings.gQty, GG: settings.ggQty };
-    if (Object.values(stocks).reduce((a, b) => a + b, 0) === 0) return { success: false, error: "ESTOQUE ZERADO." };
-
-    for (const guest of guests) {
-      let size = (stocks.RN-- > 0) ? "RN" : (stocks.P-- > 0) ? "P" : (stocks.M-- > 0) ? "M" : (stocks.G-- > 0) ? "G" : (stocks.GG-- > 0) ? "GG" : null;
-      if (size) await prisma.guest.update({ where: { id: guest.id }, data: { fralda_tamanho: size } });
-      else break;
-    }
-    revalidatePath("/admin");
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao distribuir fraldas:", error);
-    return { success: false, error: "Erro ao distribuir fraldas" };
   }
 }
 

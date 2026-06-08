@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Users, User, Heart, MessageSquare, Baby, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,11 +36,24 @@ export default function RSVPForm({ guest, gifts, fontFamily, eventId }: RSVPForm
       : []
   );
   const [mensagem, setMensagem] = useState("");
-  const [selectedGift, setSelectedGift] = useState<string>("");
+  const [giftSearch, setGiftSearch] = useState<string>("");
+  const [selectedGiftId, setSelectedGiftId] = useState<string>("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [submitted, setSubmitted] = useState(!!guest.status_confirmacao);
 
   const familyMembers = guest.membros ? guest.membros.split(",").map((s: string) => s.trim()) : [];
+
+  const availableGifts = gifts.filter((g) => !g.isReserved);
+  const filteredGifts = giftSearch.trim()
+    ? availableGifts.filter((g) => g.name.toLowerCase().includes(giftSearch.toLowerCase()))
+    : availableGifts;
+
+  const handleGiftSelect = (gift: any) => {
+    setGiftSearch(gift.name);
+    setSelectedGiftId(gift.id);
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +63,8 @@ export default function RSVPForm({ guest, gifts, fontFamily, eventId }: RSVPForm
       guest.tipo === "FAMILIA" && selectedMembers.length === 0 && status === "CONFIRMED"
         ? "DECLINED"
         : status;
-    const result = await updateRSVP(guest.slug, finalStatus, confirmadosString, mensagem, selectedGift, eventId);
+    const customGiftName = !selectedGiftId && giftSearch.trim() ? giftSearch.trim() : undefined;
+    const result = await updateRSVP(guest.slug, finalStatus, confirmadosString, mensagem, selectedGiftId || undefined, eventId, customGiftName);
     if (result.success) {
       if (finalStatus === "CONFIRMED") confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
       toast.success("RESPOSTA ENVIADA!");
@@ -169,30 +182,51 @@ export default function RSVPForm({ guest, gifts, fontFamily, eventId }: RSVPForm
             </div>
           )}
 
-          {/* Available Gifts */}
-          {gifts.filter((g) => !g.isReserved).length > 0 && (
-            <div className="space-y-3">
-              <p className="text-[9px] tracking-[0.3em] uppercase opacity-40 text-center font-bold flex items-center justify-center gap-2">
-                <Gift className="h-3 w-3" /> Escolha um Presente
-              </p>
-              <Select value={selectedGift} onValueChange={(v) => v && setSelectedGift(v)}>
-                <SelectTrigger className="rounded-none h-12 border-primary/10 bg-white/40 text-[10px] tracking-widest uppercase">
-                  <SelectValue placeholder="LISTA DE PRESENTES">
-                    {selectedGift ? gifts.find((g) => g.id === selectedGift)?.name : "LISTA DE PRESENTES"}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="rounded-none text-[10px] tracking-widest uppercase">
-                  {gifts
-                    .filter((g) => !g.isReserved)
-                    .map((g: any) => (
-                      <SelectItem key={g.id} value={g.id}>
-                        {g.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+          {/* Gift Search */}
+          <div className="space-y-3">
+            <p className="text-[9px] tracking-[0.3em] uppercase opacity-40 text-center font-bold flex items-center justify-center gap-2">
+              <Gift className="h-3 w-3" /> Presente
+            </p>
+            <div className="relative">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={giftSearch}
+                  onChange={(e) => {
+                    setGiftSearch(e.target.value);
+                    setSelectedGiftId("");
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  placeholder="ESCREVA O PRESENTE..."
+                  className="w-full h-12 px-4 pr-8 border border-primary/10 bg-white/40 text-[10px] tracking-widest uppercase placeholder:text-primary/20 focus:outline-none focus:border-primary/30 transition-colors"
+                />
+                {selectedGiftId && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-3 w-3 text-primary/50" />
+                )}
+              </div>
+              {showSuggestions && filteredGifts.length > 0 && (
+                <div className="absolute z-10 w-full border border-primary/10 border-t-0 bg-white shadow-sm max-h-48 overflow-y-auto">
+                  {filteredGifts.map((g: any) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onMouseDown={() => handleGiftSelect(g)}
+                      className="w-full text-left px-4 py-3 text-[9px] tracking-widest uppercase hover:bg-primary/5 transition-colors border-b border-primary/5 last:border-0 cursor-pointer"
+                    >
+                      {g.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {giftSearch.trim() && (
+                <p className="text-[8px] tracking-[0.25em] uppercase opacity-40 mt-1.5 text-center">
+                  {selectedGiftId ? "DA LISTA DE PRESENTES" : "PRESENTE PERSONALIZADO"}
+                </p>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Diaper Suggestion / Kit */}
           {(guest.fralda_tamanho || guest.kit_churrasco) && (

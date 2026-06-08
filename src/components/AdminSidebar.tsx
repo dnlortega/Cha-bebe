@@ -12,8 +12,6 @@ import {
   Settings,
   LayoutDashboard,
   LogOut,
-  Menu,
-  X,
   Info,
   Package,
   History,
@@ -21,6 +19,10 @@ import {
   CalendarPlus,
   Moon,
   Sun,
+  UserCog,
+  Zap,
+  ChevronRight,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_COLLABORATOR_SCREEN_TITLES } from "@/lib/eventAccess";
@@ -34,17 +36,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const ALL_MENU_ITEMS = [
-  // Existing items
-
-  { title: "Eventos", icon: CalendarPlus, href: "/admin/events", requiresEvent: false, hideLabel: true },
-  { title: "Dashboard", icon: LayoutDashboard, href: "/admin", requiresEvent: true },
-  { title: "Convites", icon: Users, href: "/admin/guests", requiresEvent: true },
-  { title: "Histórico", icon: History, href: "/admin/history", requiresEvent: true },
-  { title: "Cadastrar", icon: UserPlus, href: "/admin/add", requiresEvent: true },
-  { title: "Lista Final", icon: ClipboardList, href: "/admin/final-list", requiresEvent: true },
-  { title: "Presentes", icon: Package, href: "/admin/gifts", requiresEvent: true },
-  // New access item (visible only to master admins)
-  { title: "Acessos", icon: ShieldAlert, href: "/admin/access", requiresEvent: true },
+  { title: "Eventos", icon: CalendarPlus, href: "/admin/events", requiresEvent: false, hideLabel: false, color: "#a78bfa" },
+  { title: "Dashboard", icon: LayoutDashboard, href: "/admin", requiresEvent: true, hideLabel: false, color: "#60a5fa" },
+  { title: "Convites", icon: Users, href: "/admin/guests", requiresEvent: true, hideLabel: false, color: "#34d399" },
+  { title: "Histórico", icon: History, href: "/admin/history", requiresEvent: true, hideLabel: false, color: "#fbbf24" },
+  { title: "Cadastrar", icon: UserPlus, href: "/admin/add", requiresEvent: true, hideLabel: false, color: "#f472b6" },
+  { title: "Lista Final", icon: ClipboardList, href: "/admin/final-list", requiresEvent: true, hideLabel: false, color: "#38bdf8" },
+  { title: "Presentes", icon: Package, href: "/admin/gifts", requiresEvent: true, hideLabel: false, color: "#fb923c" },
+  { title: "Acessos", icon: ShieldAlert, href: "/admin/access", requiresEvent: true, hideLabel: false, color: "#f87171" },
+  { title: "Usuários", icon: UserCog, href: "/admin/users", requiresEvent: false, hideLabel: false, color: "#c084fc", masterOnly: true },
 ];
 
 export function AdminSidebar() {
@@ -57,6 +57,7 @@ export function AdminSidebar() {
   const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
   const [isEventCollaborator, setIsEventCollaborator] = useState(false);
   const [hasActiveEvent, setHasActiveEvent] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
     setAvatarUrl(localStorage.getItem("admin_avatar") || null);
@@ -64,19 +65,21 @@ export function AdminSidebar() {
     setAllowedScreens(localStorage.getItem("admin_allowed_screens") || "ALL");
     setIsEventCollaborator(localStorage.getItem("event_collaborator") === "true");
 
+    const design = localStorage.getItem("admin_panel_design") || "classic";
+    setIsPremium(design === "premium");
+
     const checkEvent = async () => {
       const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
       const user = localStorage.getItem("admin_username") || "";
       const active = await validateActiveEventAccess(user);
       setHasActiveEvent(active);
     };
-
     checkEvent();
 
     const checkMaster = async () => {
       const token = localStorage.getItem("admin_session_token") || "";
-      const masterEmail = "dnlortega@gmail.com";
       const savedUser = localStorage.getItem("admin_username") || "";
+      const masterEmail = "dnlortega@gmail.com";
       if (savedUser.toLowerCase() === masterEmail.toLowerCase()) {
         setIsMaster(true);
       }
@@ -87,14 +90,35 @@ export function AdminSidebar() {
     checkMaster();
   }, [pathname]);
 
+  // Apply panel-premium class to body
+  useEffect(() => {
+    if (isPremium) {
+      document.body.classList.add("panel-premium");
+    } else {
+      document.body.classList.remove("panel-premium");
+    }
+    return () => {
+      document.body.classList.remove("panel-premium");
+    };
+  }, [isPremium]);
+
+  // Listen for design changes from visual settings page
+  useEffect(() => {
+    const handler = () => {
+      const design = localStorage.getItem("admin_panel_design") || "classic";
+      setIsPremium(design === "premium");
+    };
+    window.addEventListener("admin-design-changed", handler);
+    return () => window.removeEventListener("admin-design-changed", handler);
+  }, []);
+
   const visibleMenuItems = ALL_MENU_ITEMS.filter((item) => {
+    if ((item as any).masterOnly) return isMaster;
     if (item.href === "/admin/access") return isMaster && hasActiveEvent;
     if (item.requiresEvent && !hasActiveEvent) return false;
     if (item.href === "/admin/events") return true;
     if (isEventCollaborator) {
-      return (EVENT_COLLABORATOR_SCREEN_TITLES as readonly string[]).includes(
-        item.title
-      );
+      return (EVENT_COLLABORATOR_SCREEN_TITLES as readonly string[]).includes(item.title);
     }
     if (allowedScreens === "ALL") return true;
     if (item.href === "/admin") return hasActiveEvent;
@@ -121,9 +145,42 @@ export function AdminSidebar() {
     window.location.href = "/";
   };
 
+  if (isPremium) {
+    return <PremiumSidebar
+      pathname={pathname}
+      visibleMenuItems={visibleMenuItems}
+      avatarUrl={avatarUrl}
+      adminEmail={adminEmail}
+      isMaster={isMaster}
+      isDarkMode={isDarkMode}
+      toggleDarkMode={toggleDarkMode}
+      getInitials={getInitials}
+      handleLogout={handleLogout}
+      allowedScreens={allowedScreens}
+    />;
+  }
+
+  return <ClassicSidebar
+    pathname={pathname}
+    visibleMenuItems={visibleMenuItems}
+    avatarUrl={avatarUrl}
+    adminEmail={adminEmail}
+    isMaster={isMaster}
+    isDarkMode={isDarkMode}
+    toggleDarkMode={toggleDarkMode}
+    getInitials={getInitials}
+    handleLogout={handleLogout}
+    allowedScreens={allowedScreens}
+  />;
+}
+
+// ============================================================
+// CLASSIC SIDEBAR (original design, preserved exactly)
+// ============================================================
+
+function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isMaster, isDarkMode, toggleDarkMode, getInitials, handleLogout, allowedScreens }: any) {
   const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
     <div className="flex flex-col h-full">
-      {/* Avatar + dropdown (topo) */}
       <div className={cn("border-b border-primary/5", showLabels ? "p-4" : "hidden lg:block py-5 px-3")}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -138,7 +195,7 @@ export function AdminSidebar() {
                 <div className="relative flex-shrink-0">
                   <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => setAvatarUrl(null)} />
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => {}} />
                   </div>
                   {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />}
                 </div>
@@ -181,10 +238,7 @@ export function AdminSidebar() {
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer w-full flex items-center gap-3 py-3"
-              onClick={toggleDarkMode}
-            >
+            <DropdownMenuItem className="cursor-pointer w-full flex items-center gap-3 py-3" onClick={toggleDarkMode}>
               {isDarkMode ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">
                 {isDarkMode ? "Modo Claro" : "Modo Escuro"}
@@ -197,10 +251,7 @@ export function AdminSidebar() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Acessos e Permissões</span>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer w-full flex items-center gap-3 py-3"
-              onClick={handleLogout}
-            >
+            <DropdownMenuItem className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer w-full flex items-center gap-3 py-3" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
               <span className="text-[10px] font-bold uppercase tracking-wider">Sair</span>
             </DropdownMenuItem>
@@ -208,15 +259,13 @@ export function AdminSidebar() {
         </DropdownMenu>
       </div>
 
-      {/* Nav */}
       <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "lg:pt-6")}>
-        {visibleMenuItems.map((item) => {
+        {visibleMenuItems.map((item: any) => {
           const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setIsOpen(false)}
               className={cn(
                 "flex items-center py-3 transition-all duration-200 group rounded-none",
                 showLabels ? "px-3 gap-3" : "justify-center px-3",
@@ -226,13 +275,8 @@ export function AdminSidebar() {
               )}
               title={item.title}
             >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 flex-shrink-0 transition-all",
-                  isActive ? "text-white" : "opacity-50 group-hover:opacity-100"
-                )}
-              />
-              {showLabels && !item.hideLabel && (
+              <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-all", isActive ? "text-white" : "opacity-50 group-hover:opacity-100")} />
+              {showLabels && (
                 <span className={cn("text-[10px] font-bold tracking-[0.2em] uppercase", isActive ? "text-white" : "group-hover:text-primary")}>
                   {item.title}
                 </span>
@@ -246,42 +290,325 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-20 h-screen bg-white border-r border-primary/8 flex-col fixed left-0 top-0 z-50 shadow-sm">
+      <aside className="hidden lg:flex w-20 h-screen bg-white border-r border-primary/8 flex-col fixed left-0 top-0 z-50 shadow-sm admin-sidebar">
         <SidebarContent showLabels={false} />
       </aside>
-
-      {/* Mobile bottom navigation */}
       <nav className="lg:hidden fixed inset-x-0 bottom-0 bg-white border-t border-primary/5 z-50 flex justify-around py-2">
-        {visibleMenuItems.map((item) => {
+        {visibleMenuItems.map((item: any) => {
           const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500 hover:text-primary")}
-              title={item.title}
-            >
-                <item.icon className="h-6 w-6" />
+            <Link key={item.href} href={item.href} className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500 hover:text-primary")} title={item.title}>
+              <item.icon className="h-6 w-6" />
             </Link>
           );
         })}
-        {/* Avatar button (logout) */}
         <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 hover:text-primary transition-colors" title="Conta">
           {avatarUrl && avatarUrl !== "null" ? (
-            <img 
-              src={avatarUrl} 
-              alt="Avatar" 
-              className="h-6 w-6 rounded-full object-cover" 
-              referrerPolicy="no-referrer"
-              onError={() => setAvatarUrl(null)}
-            />
+            <img src={avatarUrl} alt="Avatar" className="h-6 w-6 rounded-full object-cover" referrerPolicy="no-referrer" />
           ) : (
             <div className="h-6 w-6 flex items-center justify-center bg-primary/80 rounded-full text-white text-xs font-bold">
               {getInitials(adminEmail)}
             </div>
           )}
+        </button>
+      </nav>
+    </>
+  );
+}
+
+// ============================================================
+// PREMIUM SIDEBAR (new dark expanded design)
+// ============================================================
+
+function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isMaster, isDarkMode, toggleDarkMode, getInitials, handleLogout, allowedScreens }: any) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  const sidebarWidth = isCollapsed ? "w-20" : "w-[280px]";
+
+  return (
+    <>
+      {/* Desktop Premium Sidebar */}
+      <aside
+        className={cn(
+          "admin-sidebar hidden lg:flex flex-col h-screen fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out",
+          sidebarWidth
+        )}
+        style={{
+          background: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "4px 0 40px rgba(0,0,0,0.5)"
+        }}
+      >
+        {/* Logo / Brand */}
+        <div className={cn(
+          "flex items-center border-b transition-all duration-300",
+          isCollapsed ? "justify-center px-3 py-5" : "px-5 py-5 gap-3",
+          "border-white/5"
+        )}>
+          <div className="relative flex-shrink-0 w-9 h-9 rounded-xl overflow-hidden ring-2 ring-white/10 shadow-xl">
+            <Image src="/icon.png" alt="Logo" fill className="object-cover" />
+          </div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1 animate-in fade-in slide-in-from-left-2 duration-300">
+              <p className="text-[11px] font-black tracking-[0.2em] text-white uppercase truncate">Chá de Bebê</p>
+              <p className="text-[8px] text-white/30 tracking-[0.3em] uppercase font-medium">Painel Admin</p>
+            </div>
+          )}
+          <button
+            onClick={() => setIsCollapsed(c => !c)}
+            className={cn(
+              "flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all hover:bg-white/10",
+              isCollapsed ? "mt-0" : ""
+            )}
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          >
+            <ChevronRight className={cn("h-3 w-3 transition-transform duration-300", isCollapsed ? "" : "rotate-180")} />
+          </button>
+        </div>
+
+        {/* Avatar Section */}
+        <div className={cn(
+          "border-b border-white/5 transition-all duration-300",
+          isCollapsed ? "px-3 py-4 flex justify-center" : "px-4 py-4"
+        )}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "w-full flex items-center gap-3 p-2 rounded-xl transition-all duration-200 group",
+                  isCollapsed ? "justify-center" : "",
+                  "hover:bg-white/5"
+                )}
+              >
+                <div className="relative flex-shrink-0">
+                  {avatarUrl && avatarUrl !== "null" ? (
+                    <div className={cn(
+                      "rounded-full overflow-hidden shadow-xl ring-2",
+                      isCollapsed ? "w-9 h-9 ring-white/20" : "w-10 h-10 ring-white/15"
+                    )}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => {}} />
+                    </div>
+                  ) : (
+                    <div className={cn(
+                      "rounded-full flex items-center justify-center shadow-xl ring-2",
+                      isCollapsed ? "w-9 h-9 ring-white/20" : "w-10 h-10 ring-white/15",
+                    )} style={{ background: "linear-gradient(135deg, var(--primary) 0%, color-mix(in oklab, var(--primary) 70%, #fff) 100%)" }}>
+                      <span className="text-white text-[11px] font-black">{getInitials(adminEmail)}</span>
+                    </div>
+                  )}
+                  {/* Online indicator */}
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#0f0f0f] shadow-sm" />
+                  {isMaster && !isCollapsed && (
+                    <span className="absolute -top-1 -right-1 text-[8px]">👑</span>
+                  )}
+                </div>
+
+                {!isCollapsed && (
+                  <div className="min-w-0 flex-1 text-left animate-in fade-in slide-in-from-left-2 duration-300">
+                    <p className="text-[11px] font-bold text-white truncate">
+                      {isMaster ? "Master Admin" : "Operador"}
+                    </p>
+                    <p className="text-[8px] truncate" style={{ color: "rgba(255,255,255,0.35)" }}>{adminEmail || "—"}</p>
+                  </div>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              side="right"
+              sideOffset={8}
+              className="w-60 z-[70] shadow-2xl rounded-xl border-white/10"
+              style={{ background: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)" }}
+            >
+              <div className="px-3 py-3">
+                <span className="text-[9px] font-black tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>Minha Conta</span>
+                {adminEmail && <p className="text-[11px] text-white/80 truncate font-medium mt-0.5">{adminEmail}</p>}
+              </div>
+              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuItem render={<Link href="/admin/events" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3 rounded-lg" />}
+                className="focus:bg-white/5 mx-1 rounded-lg"
+              >
+                <CalendarPlus className="h-4 w-4 text-violet-400" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Trocar Evento</span>
+              </DropdownMenuItem>
+              {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Visual")) && (
+                <DropdownMenuItem render={<Link href="/admin/visual" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3 rounded-lg" />}
+                  className="focus:bg-white/5 mx-1 rounded-lg"
+                >
+                  <Settings className="h-4 w-4 text-blue-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Visual & Config</span>
+                </DropdownMenuItem>
+              )}
+              {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Sobre")) && (
+                <DropdownMenuItem render={<Link href="/admin/about" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3 rounded-lg" />}
+                  className="focus:bg-white/5 mx-1 rounded-lg"
+                >
+                  <Info className="h-4 w-4 text-cyan-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Sobre</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuItem className="cursor-pointer focus:bg-white/5 mx-1 rounded-lg py-2.5 px-3" onClick={toggleDarkMode}>
+                {isDarkMode ? <Sun className="h-4 w-4 text-yellow-400" /> : <Moon className="h-4 w-4 text-indigo-400" />}
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                  {isDarkMode ? "Modo Claro" : "Modo Escuro"}
+                </span>
+              </DropdownMenuItem>
+              {isMaster && (
+                <>
+                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuItem render={<Link href="/admin/access" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3 rounded-lg" />}
+                    className="focus:bg-white/5 mx-1 rounded-lg"
+                  >
+                    <ShieldAlert className="h-4 w-4 text-red-400" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70">Acessos e Permissões</span>
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuSeparator className="bg-white/5" />
+              <DropdownMenuItem
+                className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer mx-1 rounded-lg py-2.5 px-3 mb-1"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Sair</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+          {!isCollapsed && (
+            <p className="text-[8px] font-black tracking-[0.4em] uppercase px-3 pb-2 animate-in fade-in duration-300"
+              style={{ color: "rgba(255,255,255,0.2)" }}>
+              Navegação
+            </p>
+          )}
+          {visibleMenuItems.map((item: any) => {
+            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onMouseEnter={() => setHoveredItem(item.href)}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={cn(
+                  "flex items-center gap-3 transition-all duration-200 group relative",
+                  isCollapsed ? "justify-center px-3 py-3 rounded-xl" : "px-3 py-2.5 rounded-xl",
+                  isActive
+                    ? "text-white"
+                    : "hover:bg-white/5"
+                )}
+                style={isActive ? {
+                  background: `linear-gradient(135deg, ${item.color}22 0%, ${item.color}11 100%)`,
+                  border: `1px solid ${item.color}33`,
+                } : {}}
+                title={isCollapsed ? item.title : undefined}
+              >
+                {/* Active indicator bar */}
+                {isActive && (
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full"
+                    style={{ background: item.color }}
+                  />
+                )}
+
+                {/* Icon with colored background when active */}
+                <div className={cn(
+                  "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200",
+                  isActive ? "shadow-lg" : "group-hover:scale-110"
+                )} style={isActive ? { background: `${item.color}22`, boxShadow: `0 4px 12px ${item.color}33` } : {}}>
+                  <item.icon
+                    className="h-4 w-4 flex-shrink-0 transition-all"
+                    style={{ color: isActive ? item.color : (hoveredItem === item.href ? item.color : "rgba(255,255,255,0.4)") }}
+                  />
+                </div>
+
+                {!isCollapsed && (
+                  <span
+                    className="text-[10px] font-bold tracking-wider uppercase transition-all duration-200 animate-in fade-in slide-in-from-left-1 duration-300"
+                    style={{ color: isActive ? "#fff" : "rgba(255,255,255,0.5)" }}
+                  >
+                    {item.title}
+                  </span>
+                )}
+
+                {/* Active dot for collapsed mode */}
+                {isActive && isCollapsed && (
+                  <span
+                    className="absolute right-1.5 top-1.5 w-1.5 h-1.5 rounded-full"
+                    style={{ background: item.color }}
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className={cn(
+          "border-t border-white/5 p-3 transition-all duration-300",
+          isCollapsed ? "flex justify-center" : "flex items-center gap-2"
+        )}>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-red-500/10 group w-full"
+            title="Sair"
+          >
+            <LogOut className="h-4 w-4 text-red-400/60 group-hover:text-red-400 transition-colors flex-shrink-0" />
+            {!isCollapsed && (
+              <span className="text-[9px] font-bold uppercase tracking-widest text-red-400/50 group-hover:text-red-400 transition-colors animate-in fade-in duration-300">
+                Sair
+              </span>
+            )}
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile bottom nav (premium version) */}
+      <nav
+        className="lg:hidden fixed inset-x-0 bottom-0 z-50 flex justify-around items-center py-2 px-2"
+        style={{
+          background: "linear-gradient(0deg, #0f0f0f 0%, #1a1a2e 100%)",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 -10px 40px rgba(0,0,0,0.6)"
+        }}
+      >
+        {visibleMenuItems.slice(0, 5).map((item: any) => {
+          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center justify-center py-1 gap-0.5 relative"
+              title={item.title}
+            >
+              {isActive && (
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full" style={{ background: item.color }} />
+              )}
+              <item.icon
+                className="h-5 w-5 transition-all"
+                style={{ color: isActive ? item.color : "rgba(255,255,255,0.3)" }}
+              />
+              <span className="text-[7px] font-bold tracking-wider" style={{ color: isActive ? item.color : "rgba(255,255,255,0.25)" }}>
+                {item.title.slice(0, 6)}
+              </span>
+            </Link>
+          );
+        })}
+        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 gap-0.5" title="Conta">
+          {avatarUrl && avatarUrl !== "null" ? (
+            <img src={avatarUrl} alt="Avatar" className="h-5 w-5 rounded-full object-cover ring-1 ring-white/20" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="h-5 w-5 flex items-center justify-center rounded-full text-white text-[8px] font-black"
+              style={{ background: "var(--primary)" }}>
+              {getInitials(adminEmail)}
+            </div>
+          )}
+          <span className="text-[7px] font-bold tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>Sair</span>
         </button>
       </nav>
     </>

@@ -17,16 +17,6 @@ export async function clearActiveEventCookie() {
   revalidatePath("/", "layout");
 }
 
-export async function checkActiveEventCookie() {
-  const cookieStore = await cookies();
-  return !!cookieStore.get("activeEventId");
-}
-
-export async function getActiveEventIdFromCookie(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get("activeEventId")?.value ?? null;
-}
-
 export type ActiveEventAccess =
   | { active: false }
   | {

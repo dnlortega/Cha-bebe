@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { THEMES } from "@/lib/themes";
-import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Calendar, Lock } from "lucide-react";
+import { THEMES, PANEL_DESIGNS, type PanelDesignId } from "@/lib/themes";
+import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2 } from "lucide-react";
 
 export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
@@ -33,6 +33,9 @@ export default function VisualPage() {
   const [googleEmail, setGoogleEmail] = useState("");
   const [updatingAdmin, setUpdatingAdmin] = useState(false);
 
+  // Panel design
+  const [panelDesign, setPanelDesign] = useState<PanelDesignId>("classic");
+
   // Estados de controle de sessões ativas e histórico
   const [sessions, setSessions] = useState<any[]>([]);
   const [currentSessionToken, setCurrentSessionToken] = useState("");
@@ -51,8 +54,20 @@ export default function VisualPage() {
     fetchCredentials();
     if (typeof window !== "undefined") {
       setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
+      const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId || "classic";
+      setPanelDesign(savedDesign);
     }
   }, []);
+
+  const handlePanelDesignChange = (designId: PanelDesignId) => {
+    setPanelDesign(designId);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin_panel_design", designId);
+      // Notify AdminSidebar to update immediately
+      window.dispatchEvent(new Event("admin-design-changed"));
+      toast.success(designId === "premium" ? "✨ Design Premium ativado!" : "◻ Design Clássico ativado!");
+    }
+  };
 
   const fetchCredentials = async () => {
     const data = await getAdminCredentials();
@@ -174,6 +189,124 @@ export default function VisualPage() {
           {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
         </Button>
       </header>
+
+      {/* ========== PANEL DESIGN SELECTOR ========== */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Layers className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black tracking-[0.2em] uppercase text-stone-800">Design do Painel</h2>
+            <p className="text-[9px] text-stone-400 tracking-widest uppercase font-medium mt-0.5">Escolha o layout da interface administrativa</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {PANEL_DESIGNS.map((design) => {
+            const isSelected = panelDesign === design.id;
+            return (
+              <button
+                key={design.id}
+                onClick={() => handlePanelDesignChange(design.id as PanelDesignId)}
+                className={`relative text-left rounded-2xl overflow-hidden transition-all duration-300 group ${
+                  isSelected
+                    ? "ring-2 ring-primary shadow-xl shadow-primary/10"
+                    : "ring-1 ring-stone-200 hover:ring-primary/40 hover:shadow-lg"
+                }`}
+              >
+                {/* Preview */}
+                {design.id === "classic" ? (
+                  <div className="h-32 bg-gradient-to-br from-stone-50 to-white flex">
+                    {/* Classic sidebar preview */}
+                    <div className="w-12 h-full bg-white border-r border-stone-100 flex flex-col items-center gap-3 py-4">
+                      <div className="w-5 h-5 rounded-full bg-stone-800" />
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className={`w-6 h-6 rounded flex items-center justify-center ${
+                          i === 0 ? "bg-primary/80" : "bg-transparent"
+                        }`}>
+                          <div className={`w-3 h-3 rounded-sm ${
+                            i === 0 ? "bg-white" : "bg-stone-300"
+                          }`} />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Content area preview */}
+                    <div className="flex-1 p-4 space-y-2">
+                      <div className="w-24 h-3 bg-stone-200 rounded" />
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-8 bg-white rounded-xl border border-stone-100 shadow-sm" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-32 flex" style={{ background: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)" }}>
+                    {/* Premium sidebar preview */}
+                    <div className="w-20 h-full border-r flex flex-col gap-2 py-3 px-2" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                      <div className="flex items-center gap-1.5 px-1">
+                        <div className="w-4 h-4 rounded-md bg-white/20" />
+                        <div className="w-8 h-2 bg-white/20 rounded" />
+                      </div>
+                      {["#a78bfa", "#60a5fa", "#34d399", "#fbbf24"].map((color, i) => (
+                        <div key={i} className={`flex items-center gap-1.5 px-1 py-1 rounded-lg ${
+                          i === 1 ? "bg-white/10" : ""
+                        }`}>
+                          <div className="w-3.5 h-3.5 rounded flex items-center justify-center" style={{ background: `${color}22` }}>
+                            <div className="w-1.5 h-1.5 rounded-sm" style={{ background: color }} />
+                          </div>
+                          {i === 1 && <div className="w-8 h-1.5 rounded" style={{ background: "rgba(255,255,255,0.4)" }} />}
+                          {i !== 1 && <div className="w-6 h-1.5 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Content area preview */}
+                    <div className="flex-1 p-3 space-y-2">
+                      <div className="w-16 h-2 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />
+                      <div className="grid grid-cols-2 gap-1.5 mt-1">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="h-6 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Info */}
+                <div className={`p-4 flex items-start justify-between gap-3 ${
+                  design.id === "premium"
+                    ? "bg-stone-950 text-white"
+                    : "bg-white"
+                }`}>
+                  <div>
+                    <p className={`text-[11px] font-black tracking-widest uppercase ${
+                      design.id === "premium" ? "text-white" : "text-stone-800"
+                    }`}>{design.name}</p>
+                    <p className={`text-[9px] mt-0.5 ${
+                      design.id === "premium" ? "text-white/40" : "text-stone-400"
+                    }`}>{design.description}</p>
+                  </div>
+                  {isSelected && (
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  )}
+                </div>
+
+                {isSelected && (
+                  <div className="absolute top-3 right-3 bg-primary text-white text-[7px] font-black tracking-widest uppercase px-2 py-1 rounded-full">
+                    ATIVO
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[9px] text-stone-400 tracking-wider">
+          💡 A mudança de design é imediata e salva apenas neste dispositivo.
+        </p>
+      </section>
+
+      <div className="border-t border-primary/5" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">

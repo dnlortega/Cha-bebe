@@ -3,6 +3,7 @@
 import { Gift, Users, LogIn, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareEventDialog } from "@/components/admin/ShareEventDialog";
+import { EditEventDialog } from "@/components/admin/EditEventDialog";
 import { removeEventShare, removeEvent } from "@/app/eventActions";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -15,7 +16,7 @@ export type EventListItem = {
   ownerEmail: string;
   createdAt?: string | Date;
   sharedWith?: { id: string; email: string; role: string }[];
-  settings?: { babyName: string | null; eventDate: Date | string | null } | null;
+  settings?: { babyName: string | null; eventDate: Date | string | null; eventAddress?: string | null } | null;
   _count?: { guests: number; gifts: number };
 };
 
@@ -95,6 +96,8 @@ function EventRow({
 }) {
   const [removing, setRemoving] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [localName, setLocalName] = useState(event.name);
+  const [localSettings, setLocalSettings] = useState(event.settings);
   const isOwner = variant === "owned";
   const shares = event.sharedWith || [];
 
@@ -136,7 +139,7 @@ function EventRow({
     }
   };
 
-  const babyName = event.settings?.babyName;
+  const babyName = localSettings?.babyName;
   const guestCount = event._count?.guests ?? 0;
   const giftCount = event._count?.gifts ?? 0;
 
@@ -144,7 +147,7 @@ function EventRow({
     <li className="p-5 sm:grid sm:grid-cols-[1fr_auto_auto] sm:gap-4 sm:items-center space-y-4 sm:space-y-0">
       <div className="space-y-1 min-w-0">
         <h3 className="text-base font-serif tracking-widest text-primary uppercase truncate">
-          {event.name}
+          {localName}
         </h3>
         <p className="text-[10px] text-stone-400 tracking-wider">
           /{event.slug}
@@ -193,6 +196,19 @@ function EventRow({
       <div className="flex flex-wrap gap-2 sm:justify-end sm:w-52">
         {isOwner && (
           <>
+            <EditEventDialog
+              ownerEmail={currentUser}
+              event={{ id: event.id, name: localName, settings: localSettings }}
+              onUpdated={(updated) => {
+                setLocalName(updated.name);
+                setLocalSettings((prev) => ({
+                  ...prev,
+                  babyName: updated.babyName,
+                  eventDate: updated.eventDate,
+                  eventAddress: updated.eventAddress,
+                }));
+              }}
+            />
             <ShareEventDialog
               ownerEmail={currentUser}
               eventId={event.id}

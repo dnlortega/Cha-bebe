@@ -38,7 +38,7 @@ export async function getUserEvents(email: string) {
     },
     include: {
       settings: {
-        select: { babyName: true, eventDate: true },
+        select: { babyName: true, eventDate: true, eventAddress: true },
       },
       sharedWith: {
         select: { id: true, email: true, role: true },
@@ -222,6 +222,40 @@ export async function removeEventShare(
   } catch (e) {
     console.error(e);
     return { success: false, error: "Falha ao remover compartilhamento." };
+  }
+}
+
+export async function updateEventDetails(
+  eventId: string,
+  ownerEmail: string,
+  data: {
+    name?: string;
+    babyName?: string | null;
+    eventDate?: string | null;
+    eventAddress?: string | null;
+  }
+) {
+  const event = await getOwnedEvent(eventId, ownerEmail);
+  if (!event) return { success: false, error: "Evento não encontrado ou sem permissão." };
+
+  try {
+    if (data.name?.trim()) {
+      await prisma.event.update({ where: { id: eventId }, data: { name: data.name.trim() } });
+    }
+    await prisma.settings.update({
+      where: { eventId },
+      data: {
+        ...(data.babyName !== undefined ? { babyName: data.babyName || null } : {}),
+        ...(data.eventDate !== undefined ? { eventDate: data.eventDate ? new Date(data.eventDate) : null } : {}),
+        ...(data.eventAddress !== undefined ? { eventAddress: data.eventAddress || null } : {}),
+      },
+    });
+    revalidatePath("/admin/events");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: "Erro ao atualizar evento." };
   }
 }
 

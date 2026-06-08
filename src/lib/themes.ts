@@ -22,3 +22,38 @@ export const THEMES: ThemeConfig[] = [
 ];
 
 export const getThemeById = (id: string) => THEMES.find(t => t.id === id) || THEMES[0];
+
+// ============================================
+// PANEL DESIGN SYSTEM
+// ============================================
+
+export type PanelDesignId = "classic" | "premium";
+
+export type PanelDesignConfig = {
+  id: PanelDesignId;
+  name: string;
+  description: string;
+  icon: string;
+  className: string;
+};
+
+export const PANEL_DESIGNS: PanelDesignConfig[] = [
+  {
+    id: "classic",
+    name: "Clássico",
+    description: "Sidebar compacta com ícones, minimalista e rápido",
+    icon: "◻",
+    className: "",
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    description: "Sidebar expandida escura com labels, gradiente elegante e micro-animações",
+    icon: "◈",
+    className: "panel-premium",
+  },
+];
+
+export const getPanelDesignById = (id: string): PanelDesignConfig =>
+  PANEL_DESIGNS.find(d => d.id === id) || PANEL_DESIGNS[0];
+
