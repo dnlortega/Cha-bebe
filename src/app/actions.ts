@@ -491,7 +491,21 @@ export async function verifyAdminSession(token: string): Promise<boolean> {
     });
     if (!session) return false;
 
-    // Atualiza o lastActive para manter a sessão viva
+    const SESSION_MAX_MS = 24 * 60 * 60 * 1000; // 24 horas
+    const age = Date.now() - session.createdAt.getTime();
+    if (age > SESSION_MAX_MS) {
+      await prisma.sessionHistoryLog.create({
+        data: {
+          deviceName: session.deviceName,
+          deviceInfo: session.deviceInfo,
+          location: session.location,
+          action: "FINALIZADA"
+        }
+      });
+      await prisma.adminSession.delete({ where: { token } });
+      return false;
+    }
+
     await prisma.adminSession.update({
       where: { token },
       data: { lastActive: new Date() }
