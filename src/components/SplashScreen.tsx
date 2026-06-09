@@ -78,7 +78,7 @@ export default function SplashScreen({ babyName, genderColor, fontFamily, guestN
             >
               <p className="text-[9px] tracking-[0.45em] uppercase opacity-25 font-light">Para</p>
               <p
-                className={`text-2xl sm:text-3xl font-serif tracking-[0.08em] ${genderColor} opacity-85`}
+                className={`text-2xl sm:text-3xl font-serif tracking-[0.08em] ${genderColor} opacity-85 break-words`}
                 style={{ fontFamily }}
               >
                 {guestName}
@@ -98,8 +98,8 @@ export default function SplashScreen({ babyName, genderColor, fontFamily, guestN
                 <span className={`block h-px w-10 border-t ${borderColor} opacity-30`} />
               </div>
               <h1
-                className={`font-serif tracking-[0.15em] uppercase leading-tight ${genderColor}`}
-                style={{ fontFamily, fontSize: "clamp(2.4rem, 10vw, 3.5rem)" }}
+                className={`font-serif tracking-[0.15em] uppercase leading-tight ${genderColor} break-words`}
+                style={{ fontFamily, fontSize: "clamp(1.9rem, 9vw, 3.5rem)" }}
               >
                 {babyName}
               </h1>
