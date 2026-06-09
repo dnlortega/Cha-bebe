@@ -50,7 +50,8 @@ export async function getSettings(forceEventId?: string) {
       eventAddress: null,
       eventMapsUrl: null,
       enableAnimations: true,
-      whatsappTemplate: null
+      whatsappTemplate: null,
+      inviteDesign: "editorial"
     };
   }
 

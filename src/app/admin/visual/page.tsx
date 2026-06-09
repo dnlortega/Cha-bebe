@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { THEMES, PANEL_DESIGNS, type PanelDesignId } from "@/lib/themes";
-import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2 } from "lucide-react";
+import { THEMES, PANEL_DESIGNS, INVITE_DESIGNS, type PanelDesignId, type InviteDesignId } from "@/lib/themes";
+import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2, Mail } from "lucide-react";
 
 export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
@@ -35,6 +35,8 @@ export default function VisualPage() {
 
   // Panel design
   const [panelDesign, setPanelDesign] = useState<PanelDesignId>("classic");
+  // Invite design
+  const [inviteDesign, setInviteDesign] = useState<InviteDesignId>("editorial");
 
   // Estados de controle de sessões ativas e histórico
   const [sessions, setSessions] = useState<any[]>([]);
@@ -94,6 +96,7 @@ export default function VisualPage() {
       setEventMapsUrl(data.eventMapsUrl || "");
       setEnableAnimations(data.enableAnimations ?? true);
       setWhatsappTemplate(data.whatsappTemplate || "");
+      setInviteDesign((data.inviteDesign as InviteDesignId) || "editorial");
     }
   };
 
@@ -146,7 +149,7 @@ export default function VisualPage() {
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate });
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -293,6 +296,120 @@ export default function VisualPage() {
         </div>
         <p className="text-[9px] text-stone-400 tracking-wider">
           💡 A mudança de design é imediata e salva apenas neste dispositivo.
+        </p>
+      </section>
+
+      <div className="border-t border-primary/5" />
+
+      {/* ========== INVITE DESIGN SELECTOR ========== */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Mail className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black tracking-[0.2em] uppercase text-stone-800">Design do Convite</h2>
+            <p className="text-[9px] text-stone-400 tracking-widest uppercase font-medium mt-0.5">Escolha o visual da página de convite do convidado</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {INVITE_DESIGNS.map((design) => {
+            const isSelected = inviteDesign === design.id;
+            const INVITE_PREVIEWS: Record<string, React.ReactNode> = {
+              editorial: (
+                <div className="h-28 bg-gradient-to-b from-sky-50 via-white to-white flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-px bg-current opacity-10" />
+                  <p className="text-[6px] tracking-[0.5em] uppercase opacity-20">Para</p>
+                  <p className="text-[9px] tracking-[0.3em] uppercase opacity-50 font-serif">Convidado</p>
+                  <p className="text-[6px] opacity-20">✦</p>
+                  <p className="text-base font-serif tracking-[0.2em] uppercase opacity-60">Sofia</p>
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-px bg-current opacity-10" />
+                </div>
+              ),
+              floral: (
+                <div className="h-28 bg-white flex flex-col items-center justify-center gap-1.5 relative overflow-hidden">
+                  <div className="absolute top-1 left-2 text-base opacity-30">🌸</div>
+                  <div className="absolute top-1 right-2 text-base opacity-30">🌿</div>
+                  <div className="absolute bottom-1 left-2 text-base opacity-30">🌷</div>
+                  <div className="absolute bottom-1 right-2 text-base opacity-30">🌸</div>
+                  <p className="text-[7px] tracking-[0.4em] uppercase opacity-30">Para</p>
+                  <p className="text-[10px] tracking-[0.2em] uppercase opacity-60 font-serif">Convidado</p>
+                  <p className="text-[7px] opacity-30">❀</p>
+                  <p className="text-base font-serif tracking-[0.15em] uppercase opacity-60">Sofia</p>
+                </div>
+              ),
+              luxury: (
+                <div className="h-28 flex flex-col items-center justify-center gap-2 relative overflow-hidden" style={{ background: "#faf8f3" }}>
+                  <div className="absolute inset-3 border opacity-20" style={{ borderColor: "#b8972a" }} />
+                  <div className="absolute inset-1.5 border opacity-10" style={{ borderColor: "#b8972a" }} />
+                  <p className="text-[6px] tracking-[0.5em] uppercase opacity-30">Para</p>
+                  <p className="text-[9px] tracking-[0.3em] uppercase opacity-50 font-serif">Convidado</p>
+                  <p className="text-[7px] opacity-40" style={{ color: "#b8972a" }}>◈</p>
+                  <p className="text-base font-serif tracking-[0.25em] uppercase opacity-70">Sofia</p>
+                </div>
+              ),
+              modern: (
+                <div className="h-28 bg-white flex flex-col justify-center gap-2 relative overflow-hidden px-4">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500 opacity-70" />
+                  <p className="text-[6px] tracking-[0.4em] uppercase opacity-25 font-black ml-4">Para</p>
+                  <p className="text-[9px] uppercase opacity-50 font-bold ml-4">Convidado</p>
+                  <p className="text-[22px] font-black uppercase leading-none opacity-75 ml-4">Sofia</p>
+                </div>
+              ),
+              romantic: (
+                <div className="h-28 bg-gradient-to-b from-rose-50 via-white to-rose-50/30 flex flex-col items-center justify-center gap-1.5">
+                  <div className="flex items-center gap-1 opacity-30">
+                    <span className="text-xs text-rose-300">♡</span>
+                    <span className="block w-8 h-px bg-rose-200" />
+                    <span className="text-xs text-rose-300">♡</span>
+                  </div>
+                  <p className="text-[7px] tracking-[0.4em] uppercase opacity-30 italic">Para</p>
+                  <p className="text-[9px] tracking-[0.2em] uppercase opacity-55 font-serif italic">Convidado</p>
+                  <p className="text-base font-serif tracking-[0.15em] uppercase opacity-65">Sofia</p>
+                  <div className="flex items-center gap-1 opacity-20">
+                    <span className="text-xs text-rose-300">♡</span>
+                    <span className="text-[8px] text-rose-300">♡</span>
+                    <span className="text-xs text-rose-300">♡</span>
+                  </div>
+                </div>
+              ),
+            };
+            return (
+              <button
+                key={design.id}
+                onClick={() => setInviteDesign(design.id as InviteDesignId)}
+                className={`relative text-left rounded-2xl overflow-hidden transition-all duration-300 group ${
+                  isSelected
+                    ? "ring-2 ring-primary shadow-xl shadow-primary/10"
+                    : "ring-1 ring-stone-200 hover:ring-primary/40 hover:shadow-lg"
+                }`}
+              >
+                {/* Preview */}
+                {INVITE_PREVIEWS[design.id]}
+
+                {/* Info */}
+                <div className="bg-white p-3 flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[11px] font-black tracking-widest uppercase text-stone-800 flex items-center gap-1.5">
+                      <span>{design.icon}</span> {design.name}
+                    </p>
+                    <p className="text-[9px] mt-0.5 text-stone-400 leading-snug">{design.description}</p>
+                  </div>
+                  {isSelected && <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />}
+                </div>
+
+                {isSelected && (
+                  <div className="absolute top-2 right-2 bg-primary text-white text-[7px] font-black tracking-widest uppercase px-2 py-1 rounded-full">
+                    ATIVO
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[9px] text-stone-400 tracking-wider">
+          💡 Salve as configurações para aplicar o design a todos os convidados.
         </p>
       </section>
 

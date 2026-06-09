@@ -86,6 +86,7 @@ model Settings {
   enableAnimations Boolean @default(true) // Toggle para ligar/desligar animações no sistema
   whatsappTemplate String? // Template personalizado para mensagem do WhatsApp
   backgroundStyle  String? @default("NONE") // BT21 background pattern for guest page
+  inviteDesign     String? @default("editorial") // Guest invitation page design style
 }
 
 model Gift {

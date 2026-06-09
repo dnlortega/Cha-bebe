@@ -84,3 +84,28 @@ export const PANEL_DESIGNS: PanelDesignConfig[] = [
 export const getPanelDesignById = (id: string): PanelDesignConfig =>
   PANEL_DESIGNS.find(d => d.id === id) || PANEL_DESIGNS[0];
 
+
+// ============================================
+// INVITE DESIGN SYSTEM
+// ============================================
+
+export type InviteDesignId = "editorial" | "floral" | "luxury" | "modern" | "romantic";
+
+export type InviteDesignConfig = {
+  id: InviteDesignId;
+  name: string;
+  description: string;
+  icon: string;
+};
+
+export const INVITE_DESIGNS: InviteDesignConfig[] = [
+  { id: "editorial", name: "Editorial",  description: "Minimalista, tipográfico, linhas finas e elegantes",       icon: "◼" },
+  { id: "floral",    name: "Floral",     description: "Botânico e arejado, cantos florais e cards suaves",        icon: "🌸" },
+  { id: "luxury",    name: "Luxo",       description: "Fundo creme, bordas douradas, mat duplo na foto",           icon: "✦" },
+  { id: "modern",    name: "Moderno",    description: "Geométrico, alto contraste, alinhamento à esquerda",        icon: "◧" },
+  { id: "romantic",  name: "Romântico",  description: "Gradiente suave, corações, foto polaroid inclinada",        icon: "♡" },
+];
+
+export const getInviteDesignById = (id: string): InviteDesignConfig =>
+  INVITE_DESIGNS.find(d => d.id === id) || INVITE_DESIGNS[0];
+
