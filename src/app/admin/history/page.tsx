@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getHistoryLogs } from "@/app/actions";
+import { getHistoryLogs, clearAllHistory } from "@/app/actions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  History, 
-  Calendar, 
-  CheckCircle2, 
-  XCircle, 
-  RefreshCw, 
+import {
+  History,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
   MessageSquare,
   Baby,
-  Clock
+  Clock,
+  Trash2
 } from "lucide-react";
 
 interface GroupedGuestLog {
@@ -29,6 +30,7 @@ export default function HistoryPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const logsRef = useRef<any[]>([]);
 
   // Mantém logsRef.current sincronizado com o estado mais recente de logs
@@ -171,6 +173,19 @@ export default function HistoryPage() {
     return new Date(b.latestLog.data_resposta).getTime() - new Date(a.latestLog.data_resposta).getTime();
   });
 
+  const handleClearHistory = async () => {
+    if (!confirm("EXCLUIR TODO O HISTÓRICO? Esta ação não pode ser desfeita.")) return;
+    setIsClearing(true);
+    const result = await clearAllHistory();
+    if (result.success) {
+      setLogs([]);
+      toast.success("HISTÓRICO LIMPO!");
+    } else {
+      toast.error("Erro ao limpar histórico.");
+    }
+    setIsClearing(false);
+  };
+
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       {/* Cabeçalho */}
@@ -183,15 +198,29 @@ export default function HistoryPage() {
             Linha do tempo de respostas e alterações
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => fetchHistory()} 
-          disabled={loading || isSyncing}
-          className="border border-primary/10 h-11 w-11 rounded-none bg-white hover:bg-stone-50"
-        >
-          <RefreshCw className={(loading || isSyncing) ? "animate-spin h-4 w-4" : "h-4 w-4"} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => fetchHistory()}
+            disabled={loading || isSyncing}
+            className="border border-primary/10 h-11 w-11 rounded-none bg-white hover:bg-stone-50"
+          >
+            <RefreshCw className={(loading || isSyncing) ? "animate-spin h-4 w-4" : "h-4 w-4"} />
+          </Button>
+          {logs.length > 0 && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleClearHistory}
+              disabled={isClearing}
+              className="border border-red-200 h-11 w-11 rounded-none bg-white hover:bg-red-50 text-red-400 hover:text-red-600"
+              title="Limpar histórico"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* Conteúdo Principal */}

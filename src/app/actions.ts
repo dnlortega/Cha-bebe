@@ -430,6 +430,18 @@ export async function getHistoryLogs() {
   }
 }
 
+export async function clearAllHistory() {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false };
+  try {
+    await prisma.guestHistory.deleteMany({ where: { eventId } });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao limpar histórico:", error);
+    return { success: false };
+  }
+}
+
 export async function getAdminSessions() {
   noStore();
   try {
