@@ -9,10 +9,18 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck, 
+import {
+  Loader2, RefreshCw, Users, CheckCircle2, Clock, UserPlus, TrendingUp, Baby, UserCheck,
   ChevronRight, PackageCheck, XCircle, Stars, ArrowUpRight
 } from "lucide-react";
+import AdminTour, { type TourStep } from "@/components/AdminTour";
+
+const DASHBOARD_TOUR: TourStep[] = [
+  { selector: null,                icon: "📊", title: "Dashboard — Status",       body: "Esta é a tela principal. Aqui você acompanha em tempo real quantos convidados confirmaram, quantos estão pendentes e todos os detalhes do seu evento." },
+  { selector: "#tour-dash-rate",   icon: "🎯", title: "Taxa de Confirmação",      body: "O anel circular mostra o percentual de convidados que já confirmaram presença. Ele atualiza automaticamente a cada 15 segundos." },
+  { selector: "#tour-dash-cards",  icon: "📋", title: "Cards de Status",          body: "Cada card exibe um número importante: confirmados, pendentes, recusados, adultos e crianças confirmados. Clique em qualquer card para ver a lista detalhada." },
+  { selector: "#tour-dash-sync",   icon: "🔄", title: "Sincronizar",              body: "Use este botão para forçar uma atualização imediata dos dados. Normalmente a tela já atualiza sozinha a cada 15 segundos." },
+];
 
 function CircularProgress({ value, max, size = 120, strokeWidth = 8, color = "var(--primary)" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string; }) {
   const radius = (size - strokeWidth) / 2;
@@ -193,6 +201,8 @@ export default function AdminDashboard() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-12 pb-20 relative">
+      <AdminTour steps={DASHBOARD_TOUR} storageKey="tour_dashboard_v1" />
+
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
@@ -204,10 +214,11 @@ export default function AdminDashboard() {
           </div>
 
         </div>
-        <Button 
-          variant="outline" 
-          onClick={() => fetchData()} 
-          disabled={loading} 
+        <Button
+          id="tour-dash-sync"
+          variant="outline"
+          onClick={() => fetchData()}
+          disabled={loading}
           className="border border-primary/20 dark:border-primary/30 bg-white/50 dark:bg-stone-900/50 backdrop-blur-sm hover:bg-primary dark:hover:bg-primary hover:text-white transition-all shadow-sm rounded-xl h-11 px-6 group"
         >
           <RefreshCw className={cn("h-4 w-4 mr-2 text-primary dark:text-primary group-hover:text-white transition-colors", loading && "animate-spin")} />
@@ -217,7 +228,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 relative z-10">
         <motion.div variants={itemVariants} className="md:col-span-1">
-          <Card className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-8 shadow-2xl border border-stone-700 relative overflow-hidden h-full">
+          <Card id="tour-dash-rate" className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-8 shadow-2xl border border-stone-700 relative overflow-hidden h-full">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-stone-800 to-transparent opacity-10 mix-blend-overlay" />
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-primary/20 blur-3xl rounded-full" />
             
@@ -235,7 +246,7 @@ export default function AdminDashboard() {
           </Card>
         </motion.div>
 
-        <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+        <div id="tour-dash-cards" className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {[
             { label: "CONFIRMADOS", value: confirmed, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
             { label: "PENDENTES", value: pending, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20" },

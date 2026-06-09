@@ -14,6 +14,15 @@ import {
   Copy, ExternalLink, Search, RefreshCw, Save, PackageCheck,
   Download, SortAsc, SortDesc, MessageCircle, QrCode
 } from "lucide-react";
+import AdminTour, { type TourStep } from "@/components/AdminTour";
+
+const GUESTS_TOUR: TourStep[] = [
+  { selector: null,                   icon: "👥", title: "Convidados",               body: "Nesta página você gerencia todos os convidados do evento. Cada convidado recebe um link único do convite, e aqui você acompanha as respostas em tempo real." },
+  { selector: "#tour-guest-search",   icon: "🔍", title: "Busca & Filtro",           body: "Pesquise convidados pelo nome. O campo à direita filtra por status: todos, confirmados, pendentes ou recusados. A lista atualiza instantaneamente." },
+  { selector: "#tour-guest-export",   icon: "📥", title: "Exportar CSV",             body: "Baixa a lista completa de convidados em formato CSV, compatível com Excel. Inclui nome, status, link do convite, adultos, crianças e mensagem." },
+  { selector: "#tour-guest-table",    icon: "📋", title: "Lista de Convidados",       body: "Cada linha é um convidado. Você pode ver o status (confirmado ✓, pendente ⏳, recusado ✗), copiar o link, enviar via WhatsApp e editar os dados." },
+  { selector: null,                    icon: "➕", title: "Adicionar Convidado",       body: "Para adicionar novos convidados, clique em 'Cadastrar' no menu lateral. Você pode cadastrar convidados individuais ou famílias inteiras, com nomes dos membros e sugestão de fralda." },
+];
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -148,12 +157,14 @@ export default function GuestsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+      <AdminTour steps={GUESTS_TOUR} storageKey="tour_guests_v1" />
+
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-primary/5 pb-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-serif text-primary tracking-[0.2em]">CONVITES</h1>
           <p className="text-[10px] opacity-40 tracking-[0.4em] uppercase font-light">{filteredGuests.length} Convidados Filtrados</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div id="tour-guest-search" className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 opacity-20" />
             <Input placeholder="Buscar..." className="pl-9 bg-white dark:bg-stone-900 border-primary/10 dark:border-primary/30 rounded-none h-10 text-[10px] tracking-widest uppercase dark:text-stone-200" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -166,7 +177,7 @@ export default function GuestsPage() {
               <SelectItem value="PENDING">PENDENTES</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={exportCSV} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><Download className="h-4 w-4 text-primary dark:text-primary" /></Button>
+          <Button id="tour-guest-export" variant="outline" size="icon" onClick={exportCSV} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><Download className="h-4 w-4 text-primary dark:text-primary" /></Button>
           <Button variant="outline" size="icon" onClick={fetchGuests} disabled={loading} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -185,7 +196,7 @@ export default function GuestsPage() {
         </div>
       </header>
 
-      <div className="bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20 shadow-xl overflow-hidden rounded-none hidden md:block">
+      <div id="tour-guest-table" className="bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20 shadow-xl overflow-hidden rounded-none hidden md:block">
         <Table>
           <TableHeader className="bg-stone-50/80 dark:bg-stone-900/50">
             <TableRow>

@@ -10,6 +10,22 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { THEMES, PANEL_DESIGNS, INVITE_DESIGNS, type PanelDesignId, type InviteDesignId } from "@/lib/themes";
 import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2, Mail } from "lucide-react";
+import AdminTour, { type TourStep } from "@/components/AdminTour";
+
+const VISUAL_TOUR: TourStep[] = [
+  { selector: null,                   icon: "🎨", title: "Visual & Info",             body: "Nesta página você configura toda a aparência e as informações do evento — desde o design do convite até data, local e acesso administrativo." },
+  { selector: "#tour-panel-design",   icon: "🖥️", title: "Design do Painel",          body: "Escolha o visual da interface administrativa. As opções escuras (Premium, Neon, Ocean, Rose) mudam cores de todo o painel. A mudança é imediata e salva só neste dispositivo." },
+  { selector: "#tour-invite-design",  icon: "✉️", title: "Design do Convite",         body: "Define o estilo visual da página que os convidados veem ao abrir o link. Cada design tem uma estética diferente: editorial, floral, luxo, moderno ou romântico." },
+  { selector: "#tour-invite-url",     icon: "🖼️", title: "URL do Convite",            body: "Cole aqui o link direto da imagem do seu convite. Use o Imgur, Google Drive (link público) ou qualquer hospedagem de imagens. A imagem aparece moldada no convite do convidado." },
+  { selector: "#tour-theme",          icon: "🎨", title: "Tema Visual",               body: "Escolha a paleta de cores do sistema. O tema afeta a cor primária de botões, ícones e destaques em todo o painel administrativo." },
+  { selector: "#tour-fonts",          icon: "🔤", title: "Fonte do Convite",          body: "Selecione a tipografia que aparece nos títulos da página de convite (nome do bebê, seções, etc.). O tamanho ao lado controla o quanto ela é exibida." },
+  { selector: "#tour-baby",           icon: "👶", title: "Nome & Sexo do Bebê",       body: "O nome aparece em destaque no convite e na splash screen. O sexo (menino/menina) define as cores do convite — azul celeste ou rosa suave." },
+  { selector: "#tour-show-image",     icon: "👁️", title: "Exibir Imagem",             body: "Controla se a imagem do convite será exibida ou não na página do convidado. Desative se preferir um convite somente com texto." },
+  { selector: "#tour-event-date",     icon: "📅", title: "Data & Local",              body: "Defina a data, o endereço e o link do Google Maps do evento. Essas informações aparecem no card 'O Evento' dentro do convite de cada convidado." },
+  { selector: "#tour-whatsapp",       icon: "💬", title: "Template WhatsApp",         body: "Personalize a mensagem enviada via WhatsApp para cada convidado. Use as variáveis {nome}, {data}, {endereco}, {link} e {bebe} para personalizar automaticamente." },
+  { selector: "#tour-admin-access",   icon: "🔐", title: "Acesso Administrativo",     body: "Altere seu usuário e senha de acesso ao painel. Você também pode configurar o e-mail do Google para fazer login via Google. Deixe a senha em branco para não alterá-la." },
+  { selector: "#tour-sessions",       icon: "📱", title: "Sessões & Histórico",       body: "Veja todos os dispositivos que estão logados no painel. Você pode desconectar qualquer dispositivo remotamente — útil se suspeitar de acesso indevido." },
+];
 
 export default function VisualPage() {
   const [invitationUrl, setInvitationUrl] = useState("");
@@ -193,8 +209,11 @@ export default function VisualPage() {
         </Button>
       </header>
 
+      {/* Tour */}
+      <AdminTour steps={VISUAL_TOUR} storageKey="tour_visual_v1" />
+
       {/* ========== PANEL DESIGN SELECTOR ========== */}
-      <section className="space-y-6">
+      <section id="tour-panel-design" className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <Layers className="h-4 w-4 text-primary" />
@@ -302,7 +321,7 @@ export default function VisualPage() {
       <div className="border-t border-primary/5" />
 
       {/* ========== INVITE DESIGN SELECTOR ========== */}
-      <section className="space-y-6">
+      <section id="tour-invite-design" className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <Mail className="h-4 w-4 text-primary" />
@@ -419,9 +438,9 @@ export default function VisualPage() {
         <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
           <div className="flex items-center gap-3 text-primary"><SettingsIcon className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Convite & Tema</h3></div>
           <div className="space-y-4">
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">URL do Convite</label><Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
-            <div className="grid grid-cols-2 gap-4">
+            <div id="tour-invite-url" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">URL do Convite</label><Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
+            <div id="tour-theme" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
+            <div id="tour-fonts" className="grid grid-cols-2 gap-4">
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Convite</label><Select value={inviteFont} onValueChange={(v) => v && setInviteFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Playfair Display">Playfair Display</SelectItem><SelectItem value="Cormorant Garamond">Cormorant Garamond</SelectItem><SelectItem value="Dancing Script">Dancing Script</SelectItem><SelectItem value="Great Vibes">Great Vibes</SelectItem><SelectItem value="Lora">Lora</SelectItem><SelectItem value="Cinzel">Cinzel</SelectItem></SelectContent></Select></div>
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tamanho da Fonte (Convite)</label><Input type="number" value={inviteFontSize} onChange={e => setInviteFontSize(Number(e.target.value))} className="rounded-none h-12 bg-stone-50" /></div>
             </div>
@@ -429,11 +448,13 @@ export default function VisualPage() {
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Sistema (Painel)</label><Select value={systemFont} onValueChange={(v) => v && setSystemFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Inter">Inter</SelectItem><SelectItem value="Outfit">Outfit</SelectItem><SelectItem value="DM Sans">DM Sans</SelectItem><SelectItem value="Plus Jakarta Sans">Plus Jakarta Sans</SelectItem></SelectContent></Select></div>
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tamanho da Fonte (Painel)</label><Input type="number" value={systemFontSize} onChange={e => setSystemFontSize(Number(e.target.value))} className="rounded-none h-12 bg-stone-50" /></div>
             </div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nome do Bebê</label><Input value={babyName} onChange={e => setBabyName(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Ex: Arthur ou Helena" /></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Sexo do Bebê</label><Select value={babyGender} onValueChange={(v) => v && setBabyGender(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">NÃO DEFINIDO</SelectItem><SelectItem value="BOY">MENINO (AZUL)</SelectItem><SelectItem value="GIRL">MENINA (ROSA)</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Exibir Imagem do Convite</label><Select value={showInvitationImage ? "SIM" : "NAO"} onValueChange={(v) => setShowInvitationImage(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">SIM</SelectItem><SelectItem value="NAO">NÃO</SelectItem></SelectContent></Select></div>
+            <div id="tour-baby" className="grid grid-cols-2 gap-4">
+              <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Nome do Bebê</label><Input value={babyName} onChange={e => setBabyName(e.target.value)} className="rounded-none h-12 bg-stone-50" placeholder="Ex: Arthur ou Helena" /></div>
+              <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Sexo do Bebê</label><Select value={babyGender} onValueChange={(v) => v && setBabyGender(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">NÃO DEFINIDO</SelectItem><SelectItem value="BOY">MENINO (AZUL)</SelectItem><SelectItem value="GIRL">MENINA (ROSA)</SelectItem></SelectContent></Select></div>
+            </div>
+            <div id="tour-show-image" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Exibir Imagem do Convite</label><Select value={showInvitationImage ? "SIM" : "NAO"} onValueChange={(v) => setShowInvitationImage(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">SIM</SelectItem><SelectItem value="NAO">NÃO</SelectItem></SelectContent></Select></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Animações do Sistema</label><Select value={enableAnimations ? "SIM" : "NAO"} onValueChange={(v) => setEnableAnimations(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">LIGADAS</SelectItem><SelectItem value="NAO">DESLIGADAS</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1">
+            <div id="tour-whatsapp" className="space-y-1">
               <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Template WhatsApp</label>
               <textarea
                 value={whatsappTemplate}
@@ -447,7 +468,7 @@ export default function VisualPage() {
         </Card>
 
         <div className="space-y-8">
-          <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
+          <Card id="tour-event-date" className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
             <div className="flex items-center gap-3 text-primary"><Calendar className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Data & Local</h3></div>
             <div className="space-y-4">
               <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Data do Evento</label><Input type="datetime-local" value={eventDate} onChange={e => setEventDate(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
@@ -459,7 +480,7 @@ export default function VisualPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <Card className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
+        <Card id="tour-admin-access" className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
           <div className="flex items-center gap-3 mb-8"><Lock className="h-4 w-4 text-primary" /><h3 className="text-xs font-bold tracking-widest uppercase">Acesso Administrativo</h3></div>
           <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
             <div className="space-y-1">
@@ -502,7 +523,7 @@ export default function VisualPage() {
         </Card>
 
         {/* Sessões e Auditoria de Acessos */}
-        <Card className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
+        <Card id="tour-sessions" className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
             <div className="flex items-center gap-4">
               <Button
