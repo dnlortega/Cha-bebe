@@ -47,6 +47,45 @@ const ALL_MENU_ITEMS = [
   { title: "Usuários", icon: UserCog, href: "/admin/users", requiresEvent: false, hideLabel: false, color: "#c084fc", masterOnly: true },
 ];
 
+type DarkScheme = {
+  sidebarBg: string;
+  border: string;
+  shadow: string;
+  accent: string;
+  navLabel: string;
+  itemText: string;
+  itemHover: string;
+  dropdownBg: string;
+  dropdownBorder: string;
+};
+
+const DARK_SCHEMES: Record<string, DarkScheme> = {
+  premium: {
+    sidebarBg: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)",
+    border: "rgba(255,255,255,0.06)", shadow: "4px 0 40px rgba(0,0,0,0.5)",
+    accent: "#818cf8", navLabel: "rgba(255,255,255,0.2)", itemText: "rgba(255,255,255,0.5)",
+    itemHover: "rgba(255,255,255,0.05)", dropdownBg: "#1a1a2e", dropdownBorder: "rgba(255,255,255,0.08)",
+  },
+  neon: {
+    sidebarBg: "linear-gradient(165deg, #020802 0%, #061606 60%, #031003 100%)",
+    border: "rgba(0,220,100,0.1)", shadow: "4px 0 40px rgba(0,80,30,0.3)",
+    accent: "#00dc64", navLabel: "rgba(0,220,100,0.35)", itemText: "rgba(255,255,255,0.45)",
+    itemHover: "rgba(0,220,100,0.06)", dropdownBg: "#020802", dropdownBorder: "rgba(0,220,100,0.12)",
+  },
+  ocean: {
+    sidebarBg: "linear-gradient(165deg, #071828 0%, #0d2740 55%, #071e35 100%)",
+    border: "rgba(56,189,248,0.1)", shadow: "4px 0 40px rgba(0,80,150,0.3)",
+    accent: "#38bdf8", navLabel: "rgba(56,189,248,0.35)", itemText: "rgba(255,255,255,0.45)",
+    itemHover: "rgba(56,189,248,0.06)", dropdownBg: "#071828", dropdownBorder: "rgba(56,189,248,0.12)",
+  },
+  rose: {
+    sidebarBg: "linear-gradient(165deg, #1a0a14 0%, #2e1222 55%, #1a0a14 100%)",
+    border: "rgba(244,114,182,0.1)", shadow: "4px 0 40px rgba(150,30,80,0.25)",
+    accent: "#f472b6", navLabel: "rgba(244,114,182,0.35)", itemText: "rgba(255,255,255,0.45)",
+    itemHover: "rgba(244,114,182,0.06)", dropdownBg: "#1a0a14", dropdownBorder: "rgba(244,114,182,0.12)",
+  },
+};
+
 export function AdminSidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +96,7 @@ export function AdminSidebar() {
   const [allowedScreens, setAllowedScreens] = useState<string>("ALL");
   const [isEventCollaborator, setIsEventCollaborator] = useState(false);
   const [hasActiveEvent, setHasActiveEvent] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
+  const [panelDesign, setPanelDesign] = useState("classic");
 
   useEffect(() => {
     setAvatarUrl(localStorage.getItem("admin_avatar") || null);
@@ -66,7 +105,7 @@ export function AdminSidebar() {
     setIsEventCollaborator(localStorage.getItem("event_collaborator") === "true");
 
     const design = localStorage.getItem("admin_panel_design") || "classic";
-    setIsPremium(design === "premium");
+    setPanelDesign(design);
 
     const checkEvent = async () => {
       const { validateActiveEventAccess } = await import("@/app/eventCookieActions");
@@ -90,23 +129,21 @@ export function AdminSidebar() {
     checkMaster();
   }, [pathname]);
 
-  // Apply panel-premium class to body
+  // Apply panel class to body based on active design
   useEffect(() => {
-    if (isPremium) {
-      document.body.classList.add("panel-premium");
-    } else {
-      document.body.classList.remove("panel-premium");
+    const allClasses = ["panel-premium", "panel-neon", "panel-ocean", "panel-rose"];
+    allClasses.forEach(c => document.body.classList.remove(c));
+    if (panelDesign !== "classic") {
+      document.body.classList.add(`panel-${panelDesign}`);
     }
-    return () => {
-      document.body.classList.remove("panel-premium");
-    };
-  }, [isPremium]);
+    return () => allClasses.forEach(c => document.body.classList.remove(c));
+  }, [panelDesign]);
 
   // Listen for design changes from visual settings page
   useEffect(() => {
     const handler = () => {
       const design = localStorage.getItem("admin_panel_design") || "classic";
-      setIsPremium(design === "premium");
+      setPanelDesign(design);
     };
     window.addEventListener("admin-design-changed", handler);
     return () => window.removeEventListener("admin-design-changed", handler);
@@ -145,8 +182,12 @@ export function AdminSidebar() {
     window.location.href = "/";
   };
 
-  if (isPremium) {
-    return <PremiumSidebar
+  const isDark = panelDesign !== "classic";
+  const scheme = DARK_SCHEMES[panelDesign] ?? DARK_SCHEMES.premium;
+
+  if (isDark) {
+    return <DarkSidebar
+      scheme={scheme}
       pathname={pathname}
       visibleMenuItems={visibleMenuItems}
       avatarUrl={avatarUrl}
@@ -317,27 +358,37 @@ function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
 }
 
 // ============================================================
-// PREMIUM SIDEBAR (new dark expanded design)
+// DARK SIDEBAR (Premium / Neon / Ocean / Rose)
 // ============================================================
 
-function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isMaster, isDarkMode, toggleDarkMode, getInitials, handleLogout, allowedScreens }: any) {
+function DarkSidebar({ scheme, pathname, visibleMenuItems, avatarUrl, adminEmail, isMaster, isDarkMode, toggleDarkMode, getInitials, handleLogout, allowedScreens }: any) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  // Sync collapse state with body class so CSS can adjust content padding
+  useEffect(() => {
+    if (isCollapsed) {
+      document.body.classList.add("panel-collapsed");
+    } else {
+      document.body.classList.remove("panel-collapsed");
+    }
+    return () => document.body.classList.remove("panel-collapsed");
+  }, [isCollapsed]);
 
   const sidebarWidth = isCollapsed ? "w-20" : "w-[280px]";
 
   return (
     <>
-      {/* Desktop Premium Sidebar */}
+      {/* Desktop Dark Sidebar */}
       <aside
         className={cn(
           "admin-sidebar hidden lg:flex flex-col h-screen fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out",
           sidebarWidth
         )}
         style={{
-          background: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "4px 0 40px rgba(0,0,0,0.5)"
+          background: scheme.sidebarBg,
+          borderRight: `1px solid ${scheme.border}`,
+          boxShadow: scheme.shadow,
         }}
       >
         {/* Logo / Brand */}
@@ -420,7 +471,7 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
               side="right"
               sideOffset={8}
               className="w-60 z-[70] shadow-2xl rounded-xl border-white/10"
-              style={{ background: "#1a1a2e", borderColor: "rgba(255,255,255,0.08)" }}
+              style={{ background: scheme.dropdownBg, borderColor: scheme.dropdownBorder }}
             >
               <div className="px-3 py-3">
                 <span className="text-[9px] font-black tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>Minha Conta</span>
@@ -483,7 +534,7 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
         <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
           {!isCollapsed && (
             <p className="text-[8px] font-black tracking-[0.4em] uppercase px-3 pb-2 animate-in fade-in duration-300"
-              style={{ color: "rgba(255,255,255,0.2)" }}>
+              style={{ color: scheme.navLabel }}>
               Navegação
             </p>
           )}
@@ -500,12 +551,12 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
                   isCollapsed ? "justify-center px-3 py-3 rounded-xl" : "px-3 py-2.5 rounded-xl",
                   isActive
                     ? "text-white"
-                    : "hover:bg-white/5"
+                    : ""
                 )}
                 style={isActive ? {
                   background: `linear-gradient(135deg, ${item.color}22 0%, ${item.color}11 100%)`,
                   border: `1px solid ${item.color}33`,
-                } : {}}
+                } : hoveredItem === item.href ? { background: scheme.itemHover } : {}}
                 title={isCollapsed ? item.title : undefined}
               >
                 {/* Active indicator bar */}
@@ -523,14 +574,14 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
                 )} style={isActive ? { background: `${item.color}22`, boxShadow: `0 4px 12px ${item.color}33` } : {}}>
                   <item.icon
                     className="h-4 w-4 flex-shrink-0 transition-all"
-                    style={{ color: isActive ? item.color : (hoveredItem === item.href ? item.color : "rgba(255,255,255,0.4)") }}
+                    style={{ color: isActive ? item.color : (hoveredItem === item.href ? item.color : scheme.itemText) }}
                   />
                 </div>
 
                 {!isCollapsed && (
                   <span
                     className="text-[10px] font-bold tracking-wider uppercase transition-all duration-200 animate-in fade-in slide-in-from-left-1 duration-300"
-                    style={{ color: isActive ? "#fff" : "rgba(255,255,255,0.5)" }}
+                    style={{ color: isActive ? "#fff" : scheme.itemText }}
                   >
                     {item.title}
                   </span>
@@ -572,9 +623,9 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
       <nav
         className="lg:hidden fixed inset-x-0 bottom-0 z-50 flex justify-around items-center py-2 px-2"
         style={{
-          background: "linear-gradient(0deg, #0f0f0f 0%, #1a1a2e 100%)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 -10px 40px rgba(0,0,0,0.6)"
+          background: scheme.sidebarBg,
+          borderTop: `1px solid ${scheme.border}`,
+          boxShadow: scheme.shadow
         }}
       >
         {visibleMenuItems.slice(0, 5).map((item: any) => {
@@ -591,9 +642,9 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
               )}
               <item.icon
                 className="h-5 w-5 transition-all"
-                style={{ color: isActive ? item.color : "rgba(255,255,255,0.3)" }}
+                style={{ color: isActive ? item.color : scheme.itemText }}
               />
-              <span className="text-[7px] font-bold tracking-wider" style={{ color: isActive ? item.color : "rgba(255,255,255,0.25)" }}>
+              <span className="text-[7px] font-bold tracking-wider" style={{ color: isActive ? item.color : scheme.itemText }}>
                 {item.title.slice(0, 6)}
               </span>
             </Link>
@@ -608,7 +659,7 @@ function PremiumSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
               {getInitials(adminEmail)}
             </div>
           )}
-          <span className="text-[7px] font-bold tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>Sair</span>
+          <span className="text-[7px] font-bold tracking-wider" style={{ color: scheme.itemText }}>Sair</span>
         </button>
       </nav>
     </>

@@ -27,7 +27,7 @@ export const getThemeById = (id: string) => THEMES.find(t => t.id === id) || THE
 // PANEL DESIGN SYSTEM
 // ============================================
 
-export type PanelDesignId = "classic" | "premium";
+export type PanelDesignId = "classic" | "premium" | "neon" | "ocean" | "rose";
 
 export type PanelDesignConfig = {
   id: PanelDesignId;
@@ -35,6 +35,7 @@ export type PanelDesignConfig = {
   description: string;
   icon: string;
   className: string;
+  dark?: boolean;
 };
 
 export const PANEL_DESIGNS: PanelDesignConfig[] = [
@@ -44,13 +45,39 @@ export const PANEL_DESIGNS: PanelDesignConfig[] = [
     description: "Sidebar compacta com ícones, minimalista e rápido",
     icon: "◻",
     className: "",
+    dark: false,
   },
   {
     id: "premium",
     name: "Premium",
-    description: "Sidebar expandida escura com labels, gradiente elegante e micro-animações",
+    description: "Sidebar escura com gradiente azul profundo e micro-animações",
     icon: "◈",
     className: "panel-premium",
+    dark: true,
+  },
+  {
+    id: "neon",
+    name: "Neon",
+    description: "Dark futurista com acentos neon verde",
+    icon: "⚡",
+    className: "panel-neon",
+    dark: true,
+  },
+  {
+    id: "ocean",
+    name: "Ocean",
+    description: "Gradiente azul-oceano, limpo e sereno",
+    icon: "🌊",
+    className: "panel-ocean",
+    dark: true,
+  },
+  {
+    id: "rose",
+    name: "Rose",
+    description: "Dark elegante em tons rose e vinho",
+    icon: "🌹",
+    className: "panel-rose",
+    dark: true,
   },
 ];
 

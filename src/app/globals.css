@@ -33,39 +33,85 @@ html, body { overflow-x: hidden; }
   --panel-avatar-size: 2.25rem;
 }
 
-/* --- Premium Panel (dark expanded sidebar) --- */
-.panel-premium {
-  --panel-sidebar-width: 17.5rem; /* 280px */
-  --panel-sidebar-bg: linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
-  --panel-sidebar-border: rgba(255,255,255,0.06);
+/* --- Dark Panels shared layout --- */
+.panel-premium,
+.panel-neon,
+.panel-ocean,
+.panel-rose {
+  --panel-sidebar-width: 17.5rem;
   --panel-sidebar-text: rgba(255,255,255,0.55);
   --panel-sidebar-text-active: #ffffff;
-  --panel-sidebar-active-bg: rgba(255,255,255,0.12);
   --panel-sidebar-hover-bg: rgba(255,255,255,0.06);
   --panel-content-pl: 17.5rem;
   --panel-nav-item-radius: 0.75rem;
   --panel-avatar-size: 3rem;
 }
 
-/* Premium panel sidebar base */
-.panel-premium .admin-sidebar {
-  width: var(--panel-sidebar-width);
-  background: var(--panel-sidebar-bg);
-  border-right: 1px solid var(--panel-sidebar-border);
-  box-shadow: 4px 0 40px rgba(0,0,0,0.4);
+/* Collapsed state — sidebar collapses to icon-only (80px) */
+.panel-premium.panel-collapsed,
+.panel-neon.panel-collapsed,
+.panel-ocean.panel-collapsed,
+.panel-rose.panel-collapsed {
+  --panel-sidebar-width: 5rem;
+  --panel-content-pl: 5rem;
 }
 
-/* Offset main content for premium sidebar width */
+/* --- Premium: blue-midnight gradient --- */
+.panel-premium { --panel-sidebar-bg: linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%); --panel-sidebar-border: rgba(255,255,255,0.06); --panel-accent: #818cf8; }
+
+/* --- Neon: pitch-black + neon green --- */
+.panel-neon { --panel-sidebar-bg: linear-gradient(165deg, #020802 0%, #061606 60%, #031003 100%); --panel-sidebar-border: rgba(0,220,100,0.1); --panel-accent: #00dc64; }
+
+/* --- Ocean: deep navy + cyan --- */
+.panel-ocean { --panel-sidebar-bg: linear-gradient(165deg, #071828 0%, #0d2740 55%, #071e35 100%); --panel-sidebar-border: rgba(56,189,248,0.1); --panel-accent: #38bdf8; }
+
+/* --- Rose: dark plum + rose --- */
+.panel-rose { --panel-sidebar-bg: linear-gradient(165deg, #1a0a14 0%, #2e1222 55%, #1a0a14 100%); --panel-sidebar-border: rgba(244,114,182,0.1); --panel-accent: #f472b6; }
+
+/* Dark panel sidebar shell */
+.panel-premium .admin-sidebar,
+.panel-neon .admin-sidebar,
+.panel-ocean .admin-sidebar,
+.panel-rose .admin-sidebar {
+  background: var(--panel-sidebar-bg);
+  border-right: 1px solid var(--panel-sidebar-border);
+  box-shadow: 4px 0 40px rgba(0,0,0,0.5);
+}
+
+/* Offset main content — expanded (280px) */
 @media (min-width: 1024px) {
-  .panel-premium #admin-main-content {
-    padding-left: 17.5rem !important; /* 280px */
+  .panel-premium #admin-main-content,
+  .panel-neon #admin-main-content,
+  .panel-ocean #admin-main-content,
+  .panel-rose #admin-main-content {
+    padding-left: 17.5rem !important;
+    transition: padding-left 0.3s ease;
   }
 }
 
-/* Premium scrollbar */
-.panel-premium .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.panel-premium .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.panel-premium .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+/* Offset main content — collapsed (80px) */
+@media (min-width: 1024px) {
+  .panel-premium.panel-collapsed #admin-main-content,
+  .panel-neon.panel-collapsed #admin-main-content,
+  .panel-ocean.panel-collapsed #admin-main-content,
+  .panel-rose.panel-collapsed #admin-main-content {
+    padding-left: 5rem !important;
+  }
+}
+
+/* Dark panel scrollbar */
+.panel-premium .custom-scrollbar::-webkit-scrollbar,
+.panel-neon .custom-scrollbar::-webkit-scrollbar,
+.panel-ocean .custom-scrollbar::-webkit-scrollbar,
+.panel-rose .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.panel-premium .custom-scrollbar::-webkit-scrollbar-track,
+.panel-neon .custom-scrollbar::-webkit-scrollbar-track,
+.panel-ocean .custom-scrollbar::-webkit-scrollbar-track,
+.panel-rose .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.panel-premium .custom-scrollbar::-webkit-scrollbar-thumb,
+.panel-neon .custom-scrollbar::-webkit-scrollbar-thumb,
+.panel-ocean .custom-scrollbar::-webkit-scrollbar-thumb,
+.panel-rose .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
 
 /* Glow utilities */
 .glow-primary {

@@ -85,6 +85,7 @@ model Settings {
   babyGender    String?   // "BOY", "GIRL", or "NONE"
   enableAnimations Boolean @default(true) // Toggle para ligar/desligar animações no sistema
   whatsappTemplate String? // Template personalizado para mensagem do WhatsApp
+  backgroundStyle  String? @default("NONE") // BT21 background pattern for guest page
 }
 
 model Gift {

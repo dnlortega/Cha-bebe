@@ -63,9 +63,9 @@ export default function VisualPage() {
     setPanelDesign(designId);
     if (typeof window !== "undefined") {
       localStorage.setItem("admin_panel_design", designId);
-      // Notify AdminSidebar to update immediately
       window.dispatchEvent(new Event("admin-design-changed"));
-      toast.success(designId === "premium" ? "✨ Design Premium ativado!" : "◻ Design Clássico ativado!");
+      const found = PANEL_DESIGNS.find(d => d.id === designId);
+      toast.success(`${found?.icon ?? ""} Design ${found?.name ?? designId} ativado!`);
     }
   };
 
@@ -218,20 +218,14 @@ export default function VisualPage() {
                 {/* Preview */}
                 {design.id === "classic" ? (
                   <div className="h-32 bg-gradient-to-br from-stone-50 to-white flex">
-                    {/* Classic sidebar preview */}
                     <div className="w-12 h-full bg-white border-r border-stone-100 flex flex-col items-center gap-3 py-4">
                       <div className="w-5 h-5 rounded-full bg-stone-800" />
                       {[...Array(4)].map((_, i) => (
-                        <div key={i} className={`w-6 h-6 rounded flex items-center justify-center ${
-                          i === 0 ? "bg-primary/80" : "bg-transparent"
-                        }`}>
-                          <div className={`w-3 h-3 rounded-sm ${
-                            i === 0 ? "bg-white" : "bg-stone-300"
-                          }`} />
+                        <div key={i} className={`w-6 h-6 rounded flex items-center justify-center ${i === 0 ? "bg-primary/80" : "bg-transparent"}`}>
+                          <div className={`w-3 h-3 rounded-sm ${i === 0 ? "bg-white" : "bg-stone-300"}`} />
                         </div>
                       ))}
                     </div>
-                    {/* Content area preview */}
                     <div className="flex-1 p-4 space-y-2">
                       <div className="w-24 h-3 bg-stone-200 rounded" />
                       <div className="grid grid-cols-3 gap-2 mt-2">
@@ -241,51 +235,47 @@ export default function VisualPage() {
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="h-32 flex" style={{ background: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)" }}>
-                    {/* Premium sidebar preview */}
-                    <div className="w-20 h-full border-r flex flex-col gap-2 py-3 px-2" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                      <div className="flex items-center gap-1.5 px-1">
-                        <div className="w-4 h-4 rounded-md bg-white/20" />
-                        <div className="w-8 h-2 bg-white/20 rounded" />
-                      </div>
-                      {["#a78bfa", "#60a5fa", "#34d399", "#fbbf24"].map((color, i) => (
-                        <div key={i} className={`flex items-center gap-1.5 px-1 py-1 rounded-lg ${
-                          i === 1 ? "bg-white/10" : ""
-                        }`}>
-                          <div className="w-3.5 h-3.5 rounded flex items-center justify-center" style={{ background: `${color}22` }}>
-                            <div className="w-1.5 h-1.5 rounded-sm" style={{ background: color }} />
-                          </div>
-                          {i === 1 && <div className="w-8 h-1.5 rounded" style={{ background: "rgba(255,255,255,0.4)" }} />}
-                          {i !== 1 && <div className="w-6 h-1.5 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />}
+                ) : (() => {
+                  const PREVIEW_SCHEMES: Record<string, { bg: string; accent: string; border: string }> = {
+                    premium: { bg: "linear-gradient(165deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)", accent: "#818cf8", border: "rgba(255,255,255,0.06)" },
+                    neon:    { bg: "linear-gradient(165deg, #020802 0%, #061606 60%, #031003 100%)", accent: "#00dc64", border: "rgba(0,220,100,0.12)" },
+                    ocean:   { bg: "linear-gradient(165deg, #071828 0%, #0d2740 55%, #071e35 100%)", accent: "#38bdf8", border: "rgba(56,189,248,0.12)" },
+                    rose:    { bg: "linear-gradient(165deg, #1a0a14 0%, #2e1222 55%, #1a0a14 100%)", accent: "#f472b6", border: "rgba(244,114,182,0.12)" },
+                  };
+                  const ps = PREVIEW_SCHEMES[design.id] ?? PREVIEW_SCHEMES.premium;
+                  return (
+                    <div className="h-32 flex" style={{ background: ps.bg }}>
+                      <div className="w-20 h-full border-r flex flex-col gap-2 py-3 px-2" style={{ borderColor: ps.border }}>
+                        <div className="flex items-center gap-1.5 px-1">
+                          <div className="w-4 h-4 rounded-md" style={{ background: `${ps.accent}33` }} />
+                          <div className="w-8 h-2 rounded" style={{ background: "rgba(255,255,255,0.2)" }} />
                         </div>
-                      ))}
-                    </div>
-                    {/* Content area preview */}
-                    <div className="flex-1 p-3 space-y-2">
-                      <div className="w-16 h-2 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />
-                      <div className="grid grid-cols-2 gap-1.5 mt-1">
-                        {[...Array(4)].map((_, i) => (
-                          <div key={i} className="h-6 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }} />
+                        {["#a78bfa", "#60a5fa", "#34d399", "#fbbf24"].map((_, i) => (
+                          <div key={i} className="flex items-center gap-1.5 px-1 py-1 rounded-lg" style={i === 1 ? { background: `${ps.accent}18` } : {}}>
+                            <div className="w-3.5 h-3.5 rounded flex items-center justify-center" style={{ background: `${ps.accent}22` }}>
+                              <div className="w-1.5 h-1.5 rounded-sm" style={{ background: i === 1 ? ps.accent : "rgba(255,255,255,0.3)" }} />
+                            </div>
+                            <div className="h-1.5 rounded" style={{ width: i === 1 ? 32 : 24, background: i === 1 ? `${ps.accent}99` : "rgba(255,255,255,0.15)" }} />
+                          </div>
                         ))}
                       </div>
+                      <div className="flex-1 p-3 space-y-2">
+                        <div className="w-16 h-2 rounded" style={{ background: "rgba(255,255,255,0.15)" }} />
+                        <div className="grid grid-cols-2 gap-1.5 mt-1">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-6 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${ps.border}` }} />
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Info */}
-                <div className={`p-4 flex items-start justify-between gap-3 ${
-                  design.id === "premium"
-                    ? "bg-stone-950 text-white"
-                    : "bg-white"
-                }`}>
+                <div className={`p-4 flex items-start justify-between gap-3 ${design.dark ? "bg-stone-950 text-white" : "bg-white"}`}>
                   <div>
-                    <p className={`text-[11px] font-black tracking-widest uppercase ${
-                      design.id === "premium" ? "text-white" : "text-stone-800"
-                    }`}>{design.name}</p>
-                    <p className={`text-[9px] mt-0.5 ${
-                      design.id === "premium" ? "text-white/40" : "text-stone-400"
-                    }`}>{design.description}</p>
+                    <p className={`text-[11px] font-black tracking-widest uppercase ${design.dark ? "text-white" : "text-stone-800"}`}>{design.name}</p>
+                    <p className={`text-[9px] mt-0.5 ${design.dark ? "text-white/40" : "text-stone-400"}`}>{design.description}</p>
                   </div>
                   {isSelected && (
                     <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
