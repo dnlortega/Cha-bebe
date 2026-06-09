@@ -497,3 +497,171 @@ html, body { overflow-x: hidden; }
 .dark .focus\:bg-stone-50 {
   @apply focus:bg-stone-800;
 }
+
+/* ============================================================
+   DARK PANEL — CONTENT AREA FULL THEMING
+   ============================================================
+   When Premium / Neon / Ocean / Rose is active, the entire
+   content area (cards, text, inputs, borders) matches the dark theme.
+   ============================================================ */
+
+/* Per-design content variables */
+.panel-premium {
+  --dp-bg:       #080818;
+  --dp-card:     #10112b;
+  --dp-card2:    #16183a;
+  --dp-border-c: rgba(255,255,255,0.07);
+  --dp-text:     rgba(255,255,255,0.88);
+  --dp-muted:    rgba(255,255,255,0.45);
+  --dp-faint:    rgba(255,255,255,0.22);
+  --dp-input-bg: rgba(255,255,255,0.05);
+}
+.panel-neon {
+  --dp-bg:       #030b05;
+  --dp-card:     #081509;
+  --dp-card2:    #0d1f0f;
+  --dp-border-c: rgba(0,220,100,0.1);
+  --dp-text:     rgba(255,255,255,0.88);
+  --dp-muted:    rgba(255,255,255,0.45);
+  --dp-faint:    rgba(255,255,255,0.22);
+  --dp-input-bg: rgba(0,220,100,0.05);
+}
+.panel-ocean {
+  --dp-bg:       #041220;
+  --dp-card:     #091d31;
+  --dp-card2:    #0f2844;
+  --dp-border-c: rgba(56,189,248,0.1);
+  --dp-text:     rgba(255,255,255,0.88);
+  --dp-muted:    rgba(255,255,255,0.45);
+  --dp-faint:    rgba(255,255,255,0.22);
+  --dp-input-bg: rgba(56,189,248,0.05);
+}
+.panel-rose {
+  --dp-bg:       #0e0510;
+  --dp-card:     #1b0b16;
+  --dp-card2:    #251020;
+  --dp-border-c: rgba(244,114,182,0.1);
+  --dp-text:     rgba(255,255,255,0.88);
+  --dp-muted:    rgba(255,255,255,0.45);
+  --dp-faint:    rgba(255,255,255,0.22);
+  --dp-input-bg: rgba(244,114,182,0.05);
+}
+
+/* Override shadcn semantic CSS variables so Card, Select, Dropdown, etc. go dark automatically */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) {
+  --background:           var(--dp-bg);
+  --foreground:           var(--dp-text);
+  --card:                 var(--dp-card);
+  --card-foreground:      var(--dp-text);
+  --popover:              var(--dp-card);
+  --popover-foreground:   var(--dp-text);
+  --muted:                var(--dp-input-bg);
+  --muted-foreground:     var(--dp-muted);
+  --border:               var(--dp-border-c);
+  --input:                var(--dp-border-c);
+  --secondary:            var(--dp-card2);
+  --secondary-foreground: var(--dp-text);
+  --accent:               var(--dp-card2);
+  --accent-foreground:    var(--dp-text);
+}
+
+/* Content area background & base text */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content {
+  background: var(--dp-bg);
+  color: var(--dp-text);
+}
+
+/* White surfaces → dark cards */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="bg-white"] {
+  background: var(--dp-card) !important;
+}
+
+/* Light gray surfaces → dark input bg */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="bg-stone-50"] {
+  background: var(--dp-input-bg) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="bg-stone-100"] {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Stone text → light */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-900"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-800"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-700"] {
+  color: var(--dp-text) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-600"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-500"] {
+  color: var(--dp-muted) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-400"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="text-stone-300"] {
+  color: var(--dp-faint) !important;
+}
+
+/* Stone borders → translucent accent */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="border-stone-200"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="border-stone-100"] {
+  border-color: var(--dp-border-c) !important;
+}
+
+/* Section separators */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="border-primary\/5"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="border-primary\/8"] {
+  border-color: var(--dp-border-c) !important;
+}
+
+/* Dividers */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="divide-stone-100"] > * + *,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="divide-stone-200"] > * + * {
+  border-color: var(--dp-border-c) !important;
+}
+
+/* Stone badges → dark surface */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="bg-stone-100"][class~="text-stone-500"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="bg-stone-100"][class~="text-stone-400"] {
+  background: rgba(255,255,255,0.07) !important;
+  color: var(--dp-muted) !important;
+}
+
+/* Hover states */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="hover:bg-stone-50"]:hover,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="hover:bg-stone-100"]:hover {
+  background: rgba(255,255,255,0.05) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="hover:text-stone-600"]:hover,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="hover:text-stone-850"]:hover {
+  color: var(--dp-text) !important;
+}
+
+/* Form elements */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content input:not([type="checkbox"]):not([type="radio"]),
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content textarea {
+  background: var(--dp-input-bg) !important;
+  border-color: var(--dp-border-c) !important;
+  color: var(--dp-text) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content input::placeholder,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content textarea::placeholder {
+  color: var(--dp-faint) !important;
+}
+
+/* Shadows: softer on dark backgrounds */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="shadow-2xl"] {
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5), 0 1px 0 var(--dp-border-c) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content [class~="shadow-xl"] {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45) !important;
+}
+
+/* Content area scrollbar */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content ::-webkit-scrollbar { width: 4px; height: 4px; }
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content ::-webkit-scrollbar-track { background: transparent; }
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) #admin-main-content ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* Popovers / Select / Dropdown portaled outside #admin-main-content — also dark */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [data-radix-popper-content-wrapper] > * {
+  background: var(--dp-card) !important;
+  border-color: var(--dp-border-c) !important;
+  color: var(--dp-text) !important;
+}
