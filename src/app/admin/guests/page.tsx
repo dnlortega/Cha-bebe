@@ -211,8 +211,11 @@ export default function GuestsPage() {
               <TableRow key={guest.id} className="hover:bg-stone-50/40 dark:hover:bg-stone-900/40 border-primary/5 dark:border-primary/20 group">
                 <TableCell className="py-5 pl-8">
                   <div className="space-y-1">
-                    <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
-                    <p className="text-[9px] opacity-30 font-mono lowercase">/{guest.slug}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
+                      {!guest.slug && <span className="text-[7px] tracking-widest uppercase bg-red-100 text-red-500 px-1.5 py-0.5 font-bold">SEM LINK</span>}
+                    </div>
+                    <p className="text-[9px] opacity-30 font-mono lowercase">{guest.slug ? `/${guest.slug}` : "—"}</p>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -224,7 +227,7 @@ export default function GuestsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right pr-8">
-                  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <div className={`flex justify-end gap-1 transition-all ${guest.slug ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}><MessageCircle className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">WhatsApp</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => copyToClipboard(guest)}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Copiar Texto</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setQrGuest(guest)}><QrCode className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">QR Code</TooltipContent></Tooltip>
@@ -244,8 +247,11 @@ export default function GuestsPage() {
           <div key={guest.id} className="bg-white dark:bg-stone-950 border border-primary/5 dark:border-primary/20 p-5 shadow-lg space-y-4 rounded-none">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
-                <p className="text-[9px] opacity-35 font-mono lowercase">/{guest.slug}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[11px] font-bold tracking-widest text-primary uppercase">{guest.nome}</p>
+                  {!guest.slug && <span className="text-[7px] tracking-widest uppercase bg-red-100 text-red-500 px-1.5 py-0.5 font-bold">SEM LINK</span>}
+                </div>
+                <p className="text-[9px] opacity-35 font-mono lowercase">{guest.slug ? `/${guest.slug}` : "—"}</p>
               </div>
               <div>
                 {guest.status_confirmacao === "CONFIRMED" ? (

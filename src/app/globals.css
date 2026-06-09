@@ -665,3 +665,43 @@ html, body { overflow-x: hidden; }
   border-color: var(--dp-border-c) !important;
   color: var(--dp-text) !important;
 }
+
+/* Dialogs (Radix portals) in dark panel mode — fix invisible white-on-white text */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] {
+  background: var(--dp-card) !important;
+  color: var(--dp-text) !important;
+  border-color: var(--dp-border-c) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [class*="bg-white"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [class*="bg-stone-50"] {
+  background: var(--dp-card2, color-mix(in srgb, var(--dp-card) 80%, black)) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] input,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] textarea,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] select {
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--dp-text) !important;
+  border-color: var(--dp-border-c) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] input::placeholder,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] textarea::placeholder {
+  color: rgba(255,255,255,0.35) !important;
+}
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] label,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] p,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] h2,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] h3,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] span {
+  color: var(--dp-text) !important;
+}
+/* Muted/secondary text inside dialog */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [class*="text-stone-5"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [class*="text-stone-4"],
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [class*="text-muted"] {
+  color: rgba(255,255,255,0.55) !important;
+}
+/* Separator line inside dialog */
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] hr,
+:is(.panel-premium, .panel-neon, .panel-ocean, .panel-rose) [role="dialog"] [role="separator"] {
+  border-color: var(--dp-border-c) !important;
+}
