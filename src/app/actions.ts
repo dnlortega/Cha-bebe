@@ -240,6 +240,7 @@ export async function deleteGuest(id: string) {
         data: { isReserved: false }
       });
     }
+    await prisma.guestHistory.deleteMany({ where: { guestId: id } });
     await prisma.guest.delete({ where: { id } });
     revalidatePath("/admin");
     return { success: true };
@@ -251,6 +252,7 @@ export async function deleteGuest(id: string) {
 export async function deleteAllGuests() {
   try {
     await prisma.$transaction([
+      prisma.guestHistory.deleteMany(),
       prisma.guest.deleteMany(),
       prisma.gift.updateMany({
         data: { isReserved: false }
