@@ -67,7 +67,7 @@ const AVAILABLE_SCREENS = [
   { name: "Sobre",       icon: Info,             color: "#6ee7b7", desc: "Informações do evento" },
 ];
 
-const MASTER_EMAIL = process.env.NEXT_PUBLIC_MASTER_EMAIL || "dnlortega@gmail.com";
+const MASTER_EMAIL = process.env.NEXT_PUBLIC_MASTER_EMAIL || "";
 
 // ============================================================
 // SUB-COMPONENTS

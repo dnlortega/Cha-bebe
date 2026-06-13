@@ -123,18 +123,15 @@ export async function GET(request: Request) {
             username: email,
             password: "google_auth_random_" + Math.random().toString(36).substring(2),
             googleEmail: email,
-            status: "APPROVED",
+            status: "PENDING",
             avatarUrl: picture
           }
         });
       } else {
-        // Atualiza o avatar do admin existente e aprova se estiver PENDING
+        // Atualiza apenas o avatar — status só pode ser alterado pelo master admin
         admin = await prisma.admin.update({
           where: { id: admin.id },
-          data: { 
-            avatarUrl: picture,
-            ...(admin.status === "PENDING" ? { status: "APPROVED" } : {})
-          }
+          data: { avatarUrl: picture }
         });
       }
     }

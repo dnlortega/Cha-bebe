@@ -10,6 +10,8 @@ export default function PWAInstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    const PWA_SEEN_KEY = "pwa_prompt_seen";
+
     // 1. Registrar o Service Worker da PWA
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -17,6 +19,9 @@ export default function PWAInstallPrompt() {
         .then(() => console.log("PWA: SW registrado com sucesso!"))
         .catch((err) => console.log("PWA: SW falhou ao registrar:", err));
     }
+
+    // Se já foi exibido antes, não mostrar novamente
+    if (localStorage.getItem(PWA_SEEN_KEY)) return;
 
     // 2. Função interna para tratar o evento e mostrar o prompt de instalação
     const handlePrompt = (e: any) => {
@@ -52,10 +57,10 @@ export default function PWAInstallPrompt() {
     const isIPad = !!ua.match(/iPad/i);
     const isIPhone = !!ua.match(/iPhone/i);
     const isIOSDevice = isIPad || isIPhone;
-    
+
     // Verifica se já não está rodando em modo aplicativo standalone
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    
+
     if (isIOSDevice && !isStandalone) {
       setIsIOS(true);
       setShowPrompt(true);
@@ -91,6 +96,7 @@ export default function PWAInstallPrompt() {
         if (typeof window !== "undefined") {
           (window as any).deferredPrompt = null;
         }
+        localStorage.setItem("pwa_prompt_seen", "1");
         setDeferredPrompt(null);
         setShowPrompt(false);
       }
@@ -115,7 +121,7 @@ export default function PWAInstallPrompt() {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => setShowPrompt(false)} 
+          onClick={() => { localStorage.setItem("pwa_prompt_seen", "1"); setShowPrompt(false); }}
           className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-none shrink-0"
         >
           <X className="h-4 w-4" />

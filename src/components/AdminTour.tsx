@@ -54,10 +54,10 @@ export default function AdminTour({ steps, storageKey }: AdminTourProps) {
   const [settling, setSettling] = useState(false);
   const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Auto-show on first visit
+  // Auto-show only on first login (once across all pages)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!localStorage.getItem(storageKey)) {
+    if (!localStorage.getItem(storageKey) && !localStorage.getItem("admin_tour_done")) {
       const t = setTimeout(() => setOpen(true), 1100);
       return () => clearTimeout(t);
     }
@@ -110,6 +110,7 @@ export default function AdminTour({ steps, storageKey }: AdminTourProps) {
 
   const close = () => {
     localStorage.setItem(storageKey, "1");
+    localStorage.setItem("admin_tour_done", "1");
     setOpen(false);
   };
 

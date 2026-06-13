@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSettings, updateSettings, updateAdminCredentials, getAdminSessions, revokeAdminSession, getSessionHistoryLogs, getAdminCredentials } from "@/app/actions";
+import { getSettings, updateSettings, getAdminSessions, revokeAdminSession, getSessionHistoryLogs } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,6 @@ export default function VisualPage() {
   const [whatsappTemplate, setWhatsappTemplate] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const [newUsername, setNewUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [googleEmail, setGoogleEmail] = useState("");
-  const [updatingAdmin, setUpdatingAdmin] = useState(false);
 
   // Panel design
   const [panelDesign, setPanelDesign] = useState<PanelDesignId>("classic");
@@ -69,7 +65,7 @@ export default function VisualPage() {
     fetchSettings();
     fetchSessions();
     fetchHistory();
-    fetchCredentials();
+
     if (typeof window !== "undefined") {
       setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
       const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId || "classic";
@@ -87,13 +83,6 @@ export default function VisualPage() {
     }
   };
 
-  const fetchCredentials = async () => {
-    const data = await getAdminCredentials();
-    if (data) {
-      setNewUsername(data.username || "");
-      setGoogleEmail(data.googleEmail || "");
-    }
-  };
 
   const fetchSettings = async () => {
     const data = await getSettings();
@@ -174,28 +163,7 @@ export default function VisualPage() {
     setLoading(false);
   };
 
-  const handleUpdateAdmin = async (e: any) => {
-    e.preventDefault();
-    setUpdatingAdmin(true);
-    
-    let currentUsername = "admin";
-    if (typeof window !== "undefined") {
-      currentUsername = localStorage.getItem("admin_username") || "admin";
-    }
 
-    const result = await updateAdminCredentials(currentUsername, newUsername, newPassword, googleEmail);
-    if (result.success) {
-      toast.success("ACESSO ATUALIZADO COM SUCESSO!");
-      if (typeof window !== "undefined" && newUsername) {
-        localStorage.setItem("admin_username", newUsername);
-      }
-      setNewPassword(""); // Limpa o campo de senha após salvar
-      fetchCredentials(); // Recarrega os dados do banco
-    } else {
-      toast.error(result.error || "Erro ao atualizar credenciais.");
-    }
-    setUpdatingAdmin(false);
-  };
 
   return (
     <div className="w-full space-y-12 animate-in fade-in duration-1000 pb-20">
@@ -480,48 +448,6 @@ export default function VisualPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <Card id="tour-admin-access" className="border-none shadow-2xl bg-stone-900 text-white rounded-none p-10">
-          <div className="flex items-center gap-3 mb-8"><Lock className="h-4 w-4 text-primary" /><h3 className="text-xs font-bold tracking-widest uppercase">Acesso Administrativo</h3></div>
-          <form onSubmit={handleUpdateAdmin} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">Usuário</label>
-              <Input 
-                value={newUsername} 
-                onChange={e => setNewUsername(e.target.value)} 
-                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
-                placeholder="admin" 
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">Nova Senha (deixe em branco)</label>
-              <Input 
-                type="password" 
-                value={newPassword} 
-                onChange={e => setNewPassword(e.target.value)} 
-                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
-                placeholder="••••••••" 
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest text-stone-400">E-mail do Google (login)</label>
-              <Input 
-                type="email" 
-                value={googleEmail} 
-                onChange={e => setGoogleEmail(e.target.value)} 
-                className="rounded-none h-12 bg-white/5 border-white/10 text-white placeholder:opacity-20" 
-                placeholder="seu-email@gmail.com" 
-              />
-            </div>
-            <Button 
-              type="submit" 
-              disabled={updatingAdmin} 
-              className="h-12 rounded-none bg-primary text-primary-foreground hover:bg-primary/95 font-bold tracking-widest text-[10px] uppercase transition-all"
-            >
-              {updatingAdmin ? <Loader2 className="animate-spin" /> : "ATUALIZAR ACESSO"}
-            </Button>
-          </form>
-        </Card>
-
         {/* Sessões e Auditoria de Acessos */}
         <Card id="tour-sessions" className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">

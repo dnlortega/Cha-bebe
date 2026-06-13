@@ -152,8 +152,10 @@ export async function addGift(name: string, category: string = "Geral") {
 }
 
 export async function deleteGift(id: string) {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
-    await prisma.gift.delete({ where: { id } });
+    await prisma.gift.deleteMany({ where: { id, eventId } });
     revalidatePath("/admin/gifts");
     return { success: true };
   } catch (error) {
@@ -183,7 +185,7 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
 
     if (status === "CONFIRMED") {
       if (giftId) {
-        await prisma.gift.update({ where: { id: giftId }, data: { isReserved: true } });
+        await prisma.gift.updateMany({ where: { id: giftId, eventId }, data: { isReserved: true } });
       } else if (customGiftName?.trim()) {
         const newGift = await prisma.gift.create({
           data: { eventId, name: customGiftName.trim(), category: "Personalizado", isReserved: true }
@@ -232,13 +234,13 @@ export async function updateRSVP(slug: string, status: string, membrosConfirmado
 
 // Restantes das funções mantidas e adaptadas...
 export async function deleteGuest(id: string) {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
-    const guest = await prisma.guest.findUnique({ where: { id } });
-    if (guest?.giftId) {
-      await prisma.gift.update({
-        where: { id: guest.giftId },
-        data: { isReserved: false }
-      });
+    const guest = await prisma.guest.findFirst({ where: { id, eventId } });
+    if (!guest) return { success: false, error: "Convidado não encontrado." };
+    if (guest.giftId) {
+      await prisma.gift.update({ where: { id: guest.giftId }, data: { isReserved: false } });
     }
     await prisma.guestHistory.deleteMany({ where: { guestId: id } });
     await prisma.guest.delete({ where: { id } });
@@ -250,13 +252,13 @@ export async function deleteGuest(id: string) {
 }
 
 export async function deleteAllGuests() {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
     await prisma.$transaction([
-      prisma.guestHistory.deleteMany(),
-      prisma.guest.deleteMany(),
-      prisma.gift.updateMany({
-        data: { isReserved: false }
-      })
+      prisma.guestHistory.deleteMany({ where: { eventId } }),
+      prisma.guest.deleteMany({ where: { eventId } }),
+      prisma.gift.updateMany({ where: { eventId }, data: { isReserved: false } })
     ]);
     revalidatePath("/admin");
     return { success: true };
@@ -270,10 +272,12 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
   const eventId = await getActiveEventId();
   if (!eventId) return { success: false, error: "Nenhum evento ativo." };
   try {
+    const existing = await prisma.guest.findFirst({ where: { id, eventId } });
+    if (!existing) return { success: false, error: "Convidado não encontrado." };
     const slug = await generateSlug(nome);
     await prisma.guest.update({
       where: { id },
-      data: { 
+      data: {
         nome, slug, tipo, membros,
         qtd_adultos: qtdAdultos,
         qtd_criancas: qtdCriancas,
@@ -327,10 +331,11 @@ export async function addMultipleGuests(namesText: string) {
       const fralda = parts[3]?.toUpperCase() || null;
       const kitChurrasco = parts[4]?.toUpperCase() === "SIM" || parts[4]?.toUpperCase() === "KIT";
 
-      let slug = await generateSlug(nome);
+      const baseSlug = await generateSlug(nome);
+      let slug = baseSlug;
       let counter = 1;
       while (usedSlugs.has(slug)) {
-        slug = `${await generateSlug(nome)}-${counter}`;
+        slug = `${baseSlug}-${counter}`;
         counter++;
       }
       usedSlugs.add(slug);
@@ -580,7 +585,7 @@ export async function getSessionHistoryLogs() {
 export async function getAdminAccounts(sessionToken: string) {
   noStore();
   try {
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const session = await prisma.adminSession.findUnique({
       where: { token: sessionToken }
     });
@@ -611,7 +616,7 @@ export async function getAdminAccounts(sessionToken: string) {
 
 export async function updateAdminAccountStatus(sessionToken: string, adminId: string, status: string) {
   try {
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const session = await prisma.adminSession.findUnique({
       where: { token: sessionToken }
     });
@@ -652,7 +657,7 @@ export async function updateAdminAccountStatus(sessionToken: string, adminId: st
 
 export async function deleteAdminAccount(sessionToken: string, adminId: string) {
   try {
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const session = await prisma.adminSession.findUnique({
       where: { token: sessionToken }
     });
@@ -692,7 +697,7 @@ export async function deleteAdminAccount(sessionToken: string, adminId: string) 
 export async function isMasterAdmin(sessionToken: string) {
   noStore();
   try {
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const session = await prisma.adminSession.findUnique({
       where: { token: sessionToken }
     });
@@ -710,7 +715,7 @@ export async function getAdminSessionDetails(token: string) {
     });
     if (!session) return { success: false };
 
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const isMaster = session.adminEmail?.toLowerCase() === masterEmail.toLowerCase();
 
     if (session.adminEmail) {
@@ -754,7 +759,7 @@ export async function getAdminSessionDetails(token: string) {
 
 export async function updateAdminAllowedScreens(sessionToken: string, adminId: string, allowedScreens: string) {
   try {
-    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "dnlortega@gmail.com";
+    const masterEmail = process.env.ALLOWED_GOOGLE_ADMIN_EMAIL || "";
     const session = await prisma.adminSession.findUnique({
       where: { token: sessionToken }
     });
