@@ -41,3 +41,14 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# AI tool instructions (local only)
+CLAUDE.md
+AGENTS.md
+
+# Analysis and scratch docs (local only)
+ANALISE_RESPONSIVA.md
+CORRECOES_DARK_MODE.md
+DARK_MODE_COMPLETO.md
+RESUMO_PROBLEMAS_RESPONSIVOS.md
+SOLUCOES_CODIGO.md
