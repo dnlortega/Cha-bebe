@@ -3,13 +3,13 @@
 import { motion, Variants } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Cpu, 
-  Globe, 
-  Database, 
-  Layers, 
-  Zap, 
-  ShieldCheck, 
+import {
+  Cpu,
+  Globe,
+  Database,
+  Layers,
+  Zap,
+  ShieldCheck,
   Palette,
   Code2,
   CheckCircle2,
@@ -17,7 +17,6 @@ import {
   Server,
   Fingerprint,
   Sparkles,
-  MapPin,
   MonitorSmartphone,
   BarChart3,
   ExternalLink,
@@ -29,40 +28,47 @@ import {
   Gift,
   MessageSquare,
   Eye,
-  Smartphone
+  Smartphone,
+  CalendarDays,
+  Layout,
+  Share2,
+  Map
 } from "lucide-react";
 
 const techStack = [
-  { name: "Next.js", version: "16.2", icon: Globe, description: "App Router, Server Actions, Turbopack e renderização híbrida SSR/SSG" },
-  { name: "React", version: "19.2", icon: Code2, description: "Componentes concorrentes, hooks modernos e Suspense nativo" },
-  { name: "Tailwind CSS", version: "4.0", icon: Palette, description: "Motor de estilização JIT ultra-rápido com variáveis CSS nativas" },
-  { name: "Prisma ORM", version: "6.4", icon: Database, description: "Type-safe queries, migrations e client gerado automaticamente" },
+  { name: "Next.js", version: "16.2.6", icon: Globe, description: "App Router, Server Actions, Turbopack e renderização híbrida SSR/SSG" },
+  { name: "React", version: "19.2.4", icon: Code2, description: "Componentes concorrentes, hooks modernos e Suspense nativo" },
+  { name: "Tailwind CSS", version: "4.x JIT", icon: Palette, description: "Motor de estilização JIT ultra-rápido com variáveis CSS nativas" },
+  { name: "Prisma ORM", version: "6.4.1", icon: Database, description: "Type-safe queries, migrations e client gerado automaticamente" },
   { name: "PostgreSQL", version: "Neon Serverless", icon: Server, description: "Banco de dados serverless com escalonamento automático e branching" },
-  { name: "Shadcn/UI + Base UI", version: "v4+", icon: Layers, description: "Componentes headless com acessibilidade WAI-ARIA completa" },
-  { name: "Framer Motion", version: "12.38", icon: Sparkles, description: "Animações baseadas em spring physics, gestures e layout animations" },
+  { name: "Shadcn/UI + Base UI", version: "4.7.0", icon: Layers, description: "Componentes headless com acessibilidade WAI-ARIA completa" },
+  { name: "Framer Motion", version: "12.38.0", icon: Sparkles, description: "Animações baseadas em spring physics, gestures e layout animations" },
   { name: "Google OAuth 2.0", version: "OAuth 2.0", icon: ShieldCheck, description: "Autenticação segura com validação de e-mail e controle de sessão" },
   { name: "Vercel Platform", version: "Edge", icon: Rocket, description: "Deploy contínuo, Edge Functions e CDN global de alta performance" },
 ];
 
 const features = [
-  { text: "Dashboard Real-time com polling inteligente a cada 15s", icon: BarChart3 },
-  { text: "Autenticação Google OAuth + Geofencing por GPS (raio 50km)", icon: Lock },
+  { text: "Dashboard real-time com polling inteligente a cada 15 segundos", icon: BarChart3 },
+  { text: "Autenticação Google OAuth + Geofencing por GPS (raio 50 km)", icon: Lock },
   { text: "Notificações sonoras e push ao receber novas confirmações", icon: Bell },
   { text: "Telemetria de dispositivo: GPU, RAM, bateria, resolução e rede", icon: MonitorSmartphone },
   { text: "Gestão granular de permissões por tela para cada operador", icon: Users },
-  { text: "Mural Live para Telões com rotação automática de mensagens", icon: MessageSquare },
-  { text: "13 temas visuais dinâmicos (Gold, BT21, BTS, Toy Story e mais)", icon: Palette },
+  { text: "Mural Live para telões com rotação automática de mensagens", icon: MessageSquare },
+  { text: "13 temas visuais dinâmicos (Dourado, BT21, BTS, Toy Story e mais)", icon: Palette },
+  { text: "5 designs de painel administrativo + 5 designs de convite", icon: Layout },
   { text: "Sistema de RSVP inteligente com suporte a famílias e individuais", icon: CheckCircle2 },
   { text: "Lista de presentes com reserva automática e sugestão de fraldas", icon: Gift },
-  { text: "Histórico completo de respostas e auditoria de sessões", icon: History },
+  { text: "Sistema multi-evento: criação, edição e compartilhamento por e-mail", icon: Share2 },
+  { text: "Histórico completo de respostas e auditoria de sessões por dispositivo", icon: History },
   { text: "Controle de visibilidade de recados no mural público", icon: Eye },
-  { text: "PWA instalável com manifest e suporte offline parcial", icon: Smartphone },
+  { text: "Tour guiado interativo passo a passo para novos operadores", icon: Map },
+  { text: "PWA instalável com manifest, ícones e suporte offline parcial", icon: Smartphone },
 ];
 
 const stats = [
-  { label: "Server Actions", value: "30+", description: "Operações server-side type-safe" },
-  { label: "Componentes", value: "15+", description: "React components reutilizáveis" },
-  { label: "Modelos Prisma", value: "7", description: "Guest, Gift, Admin, Settings e mais" },
+  { label: "Server Actions", value: "44", description: "Operações server-side type-safe" },
+  { label: "Componentes", value: "25+", description: "React components reutilizáveis" },
+  { label: "Modelos Prisma", value: "9", description: "Event, Guest, Gift, Admin e mais" },
   { label: "Temas Visuais", value: "13", description: "Paletas dinâmicas via banco de dados" },
 ];
 
@@ -79,7 +85,7 @@ export default function AboutPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
@@ -90,16 +96,16 @@ export default function AboutPage() {
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
           <div className="flex items-center gap-4 relative z-10">
              <div className="h-px w-16 bg-primary" />
-             <p className="text-xs text-primary font-medium tracking-[0.4em] uppercase">System Architecture v2.0</p>
+             <p className="text-xs text-primary font-medium tracking-[0.4em] uppercase">System Architecture v3.0</p>
           </div>
           <div className="relative z-10">
             <h1 className="text-5xl md:text-6xl font-serif text-stone-900 tracking-tight leading-tight">
               Sobre o <br/><span className="text-primary italic">Sistema</span>
             </h1>
             <p className="mt-6 text-sm text-stone-500 tracking-[0.2em] font-light uppercase max-w-2xl leading-relaxed">
-              Plataforma full-stack de gestão de eventos desenvolvida com Next.js 16 e React 19. 
-              Combina design premium Glassmorphism com arquitetura real-time, segurança por geolocalização 
-              e um painel administrativo completo com controle de sessões e permissões granulares.
+              Plataforma full-stack de gestão de eventos desenvolvida com Next.js 16 e React 19.
+              Suporte a múltiplos eventos simultâneos, colaboração entre administradores,
+              13 temas visuais, 5 designs de painel, 5 designs de convite e segurança por geolocalização.
             </p>
           </div>
         </motion.header>
@@ -107,7 +113,7 @@ export default function AboutPage() {
         {/* Stats Strip */}
         <motion.section variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
           {stats.map((stat) => (
-            <motion.div 
+            <motion.div
               key={stat.label}
               whileHover={{ y: -3 }}
               className="bg-white/70 backdrop-blur-md border border-white/80 p-6 rounded-2xl shadow-sm text-center group hover:shadow-lg hover:border-primary/20 transition-all"
@@ -133,16 +139,20 @@ export default function AboutPage() {
                 </h2>
                 <div className="space-y-6 text-sm md:text-base font-light text-stone-600 leading-relaxed max-w-3xl">
                   <p>
-                    O sistema é fundamentado no conceito de <strong className="font-medium text-stone-900">Glassmorphism e Luxo Interativo</strong>. 
+                    O sistema é fundamentado no conceito de <strong className="font-medium text-stone-900">Glassmorphism e Luxo Interativo</strong>.
                     A interface não possui apenas um fim funcional, mas sim o de proporcionar uma experiência visual agradável e sofisticada para organizadores e convidados.
                   </p>
                   <p>
-                    Com operações de banco de dados inteiramente <strong className="font-medium text-stone-900">Real-time (Zero Cache)</strong> via 
+                    Com operações de banco de dados inteiramente <strong className="font-medium text-stone-900">Real-time (Zero Cache)</strong> via
                     Server Actions do Next.js 16, a plataforma garante que todo RSVP ou alteração de configurações do evento reflitam de modo imediato em todos os dispositivos,
                     combinando <strong className="font-medium text-stone-900">PostgreSQL Serverless (Neon)</strong> e polling inteligente.
                   </p>
                   <p>
-                    A autenticação utiliza <strong className="font-medium text-stone-900">Google OAuth 2.0</strong> com validação de 
+                    Suporta <strong className="font-medium text-stone-900">múltiplos eventos simultâneos</strong> com colaboração entre administradores via compartilhamento de evento por e-mail.
+                    Cada evento possui convite, tema, lista de presentes e histórico de respostas completamente independentes.
+                  </p>
+                  <p>
+                    A autenticação utiliza <strong className="font-medium text-stone-900">Google OAuth 2.0</strong> com validação de
                     geolocalização por GPS/IP, garantindo que apenas usuários autorizados dentro de um raio geográfico definido possam acessar o painel administrativo.
                     Cada sessão registra dados detalhados do dispositivo (GPU, RAM, bateria, resolução) para auditoria completa.
                   </p>
@@ -155,8 +165,8 @@ export default function AboutPage() {
               <h2 className="text-sm font-serif tracking-[0.3em] text-primary uppercase pl-2">Stack Tecnológico</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
                 {techStack.map((tech) => (
-                  <motion.div 
-                    key={tech.name} 
+                  <motion.div
+                    key={tech.name}
                     variants={itemVariants}
                     whileHover={{ y: -5, scale: 1.01 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -192,12 +202,12 @@ export default function AboutPage() {
               <div className="relative z-10 space-y-8">
                 <div>
                   <h2 className="text-sm font-serif tracking-[0.3em] text-white uppercase mb-2">Funcionalidades</h2>
-                  <p className="text-[10px] text-stone-500 tracking-[0.2em] uppercase font-light">12 Módulos Implementados</p>
+                  <p className="text-[10px] text-stone-500 tracking-[0.2em] uppercase font-light">15 Módulos Implementados</p>
                 </div>
                 <ul className="space-y-5">
                   {features.map((feature, i) => (
-                    <motion.li 
-                      key={i} 
+                    <motion.li
+                      key={i}
                       className="flex gap-4 items-start"
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
@@ -229,13 +239,16 @@ export default function AboutPage() {
                      <strong className="font-semibold text-stone-800">Camada 1 — Autenticação:</strong> Login exclusivo via Google OAuth 2.0 com aprovação do administrador principal.
                    </p>
                    <p>
-                     <strong className="font-semibold text-stone-800">Camada 2 — Geofencing:</strong> Validação por GPS nativo e fallback via IP. Acesso bloqueado fora do raio de 50km do evento.
+                     <strong className="font-semibold text-stone-800">Camada 2 — Geofencing:</strong> Validação por GPS nativo e fallback via IP. Acesso bloqueado fora do raio de 50 km do evento.
                    </p>
                    <p>
-                     <strong className="font-semibold text-stone-800">Camada 3 — Sessões:</strong> Monitoramento a cada 5s com revogação remota instantânea e log completo de auditoria.
+                     <strong className="font-semibold text-stone-800">Camada 3 — Sessões:</strong> Monitoramento a cada 5 s com revogação remota instantânea e log completo de auditoria.
                    </p>
                    <p>
                      <strong className="font-semibold text-stone-800">Camada 4 — Permissões:</strong> Controle granular de telas permitidas por operador com route guard client-side.
+                   </p>
+                   <p>
+                     <strong className="font-semibold text-stone-800">Camada 5 — Isolamento:</strong> Todas as operações de dados são escopadas ao eventId ativo — impossível acessar dados de outro evento.
                    </p>
                  </div>
                </div>
@@ -245,9 +258,9 @@ export default function AboutPage() {
             <motion.section variants={itemVariants} className="p-8 rounded-[2rem] bg-white/70 backdrop-blur-md border border-white/80 shadow-sm space-y-4">
               <h2 className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Links do Projeto</h2>
               <div className="space-y-3">
-                <a 
-                  href="https://github.com/dnlortega/Cha-bebe" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/dnlortega/Cha-bebe"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-stone-900 text-white rounded-xl hover:bg-stone-800 transition-all group shadow-md"
                 >
@@ -255,9 +268,9 @@ export default function AboutPage() {
                   <span className="text-[10px] font-bold tracking-[0.2em] uppercase flex-1">Código Fonte</span>
                   <ExternalLink className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity" />
                 </a>
-                <a 
-                  href="https://cha-bebe.vercel.app" 
-                  target="_blank" 
+                <a
+                  href="https://cha-bebe.vercel.app"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all group shadow-md"
                 >
