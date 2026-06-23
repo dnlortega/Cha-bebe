@@ -87,6 +87,10 @@ model Settings {
   whatsappTemplate String? // Template personalizado para mensagem do WhatsApp
   backgroundStyle  String? @default("NONE") // BT21 background pattern for guest page
   inviteDesign     String? @default("editorial") // Guest invitation page design style
+  showEventDate    Boolean @default(true)
+  showEventAddress Boolean @default(true)
+  showGiftSection  Boolean @default(true)
+  showMessageSection Boolean @default(true)
 }
 
 model Gift {

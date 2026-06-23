@@ -701,7 +701,7 @@ export default function AdminLayout({
       <DarkModeProvider>
         <div className="flex min-h-screen">
           <AdminSidebar />
-          <main className="flex-1 w-full lg:pl-20 panel-premium:lg:pl-[280px] min-h-screen transition-all duration-300" id="admin-main-content">
+          <main className="flex-1 w-full lg:pl-[220px] panel-premium:lg:pl-[280px] min-h-screen transition-all duration-300" id="admin-main-content">
             <div className="p-4 sm:p-8 lg:p-12 xl:px-16 w-full mx-auto pt-20 lg:pt-12">
               {children}
             </div>

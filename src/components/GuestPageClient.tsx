@@ -113,29 +113,29 @@ function DesignEditorial(p: GuestPageClientProps) {
         <Divider genderBorder={p.genderBorder} star={star} char="◆" />
 
         {/* Details */}
-        {(p.settings.eventDate || p.settings.eventAddress) && (
+        {((p.settings.showEventDate !== false && p.settings.eventDate) || (p.settings.showEventAddress !== false && p.settings.eventAddress)) && (
           <section className="mb-14">
             <SectionTitle genderColor={p.genderColor} f={p.inviteFontFamily} title="O Evento" sub="Aguardamos sua presença" />
             <div className="space-y-3">
-              {p.settings.eventDate && (
+              {p.settings.showEventDate !== false && p.settings.eventDate && (
                 <div className={`${p.genderBgLight} border ${p.genderBorder} p-5 flex items-center gap-4`}>
                   <div className={`w-11 h-11 shrink-0 ${iconBg} flex items-center justify-center border ${p.genderBorder}`}>
                     <Calendar className={`h-4 w-4 ${p.genderColor} opacity-70`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[8px] font-bold tracking-[0.45em] uppercase opacity-35 mb-1">Quando</p>
+                    <p className="text-xs font-bold tracking-wider uppercase opacity-40 mb-1">Quando</p>
                     <p className="text-sm leading-relaxed opacity-75 font-medium break-words">{p.eventDateStr}</p>
                   </div>
                 </div>
               )}
-              {p.settings.eventAddress && (
+              {p.settings.showEventAddress !== false && p.settings.eventAddress && (
                 <div className={`${p.genderBgLight} border ${p.genderBorder} p-5`}>
                   <div className="flex items-start gap-4 mb-4">
                     <div className={`w-11 h-11 shrink-0 ${iconBg} flex items-center justify-center border ${p.genderBorder} mt-0.5`}>
                       <MapPin className={`h-4 w-4 ${p.genderColor} opacity-70`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[8px] font-bold tracking-[0.45em] uppercase opacity-35 mb-1">Onde</p>
+                      <p className="text-xs font-bold tracking-wider uppercase opacity-40 mb-1">Onde</p>
                       <p className="text-sm leading-relaxed opacity-75 font-medium break-words">{p.settings.eventAddress}</p>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ function DesignEditorial(p: GuestPageClientProps) {
         <section className="mb-4">
           <SectionTitle genderColor={p.genderColor} f={p.inviteFontFamily} title="Confirmação" sub="Sua presença é o maior presente" />
           <div className={`${p.genderBgLight} border ${p.genderBorder} p-5 sm:p-8`}>
-            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} />
+            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} showGiftSection={p.settings.showGiftSection !== false} showMessageSection={p.settings.showMessageSection !== false} />
           </div>
         </section>
 
@@ -221,39 +221,39 @@ function DesignFloral(p: GuestPageClientProps) {
         <FloralDivider char="🌸" extraClass="mb-12" />
 
         {/* Details */}
-        {(p.settings.eventDate || p.settings.eventAddress) && (
+        {((p.settings.showEventDate !== false && p.settings.eventDate) || (p.settings.showEventAddress !== false && p.settings.eventAddress)) && (
           <section className="mb-14">
             <div className="text-center mb-8">
               <p className="text-2xl mb-1">🌿</p>
               <h2 className={`text-2xl font-serif tracking-[0.2em] uppercase ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>O Evento</h2>
-              <p className="text-[8px] tracking-[0.45em] uppercase opacity-25 mt-1">Aguardamos sua presença</p>
+              <p className="text-xs tracking-wider uppercase opacity-30 mt-1">Aguardamos sua presença</p>
             </div>
             <div className="space-y-3">
-              {p.settings.eventDate && (
+              {p.settings.showEventDate !== false && p.settings.eventDate && (
                 <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-5 flex items-center gap-4">
                   <div className="w-11 h-11 shrink-0 bg-white rounded-full flex items-center justify-center border border-emerald-200 shadow-sm">
                     <Calendar className={`h-4 w-4 ${p.genderColor} opacity-70`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[8px] font-bold tracking-[0.45em] uppercase opacity-35 mb-1">Quando</p>
+                    <p className="text-xs font-bold tracking-wider uppercase opacity-40 mb-1">Quando</p>
                     <p className="text-sm leading-relaxed opacity-75 font-medium break-words">{p.eventDateStr}</p>
                   </div>
                 </div>
               )}
-              {p.settings.eventAddress && (
+              {p.settings.showEventAddress !== false && p.settings.eventAddress && (
                 <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-5">
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-11 h-11 shrink-0 bg-white rounded-full flex items-center justify-center border border-rose-200 shadow-sm mt-0.5">
                       <MapPin className={`h-4 w-4 ${p.genderColor} opacity-70`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[8px] font-bold tracking-[0.45em] uppercase opacity-35 mb-1">Onde</p>
+                      <p className="text-xs font-bold tracking-wider uppercase opacity-40 mb-1">Onde</p>
                       <p className="text-sm leading-relaxed opacity-75 font-medium break-words">{p.settings.eventAddress}</p>
                     </div>
                   </div>
                   {p.settings.eventMapsUrl && (
                     <a href={p.settings.eventMapsUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full border border-emerald-200 rounded-xl py-3 text-[9px] tracking-[0.4em] uppercase opacity-50 hover:opacity-80 active:opacity-90 transition-opacity bg-white/60">
+                      className="flex items-center justify-center gap-2 w-full border border-emerald-200 rounded-xl py-3 text-xs tracking-wider uppercase opacity-50 hover:opacity-80 active:opacity-90 transition-opacity bg-white/60">
                       <MapPin className="h-3 w-3 shrink-0" /> Ver no Mapa
                     </a>
                   )}
@@ -270,10 +270,10 @@ function DesignFloral(p: GuestPageClientProps) {
           <div className="text-center mb-8">
             <p className="text-2xl mb-1">🌸</p>
             <h2 className={`text-2xl font-serif tracking-[0.2em] uppercase ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>Confirmação</h2>
-            <p className="text-[8px] tracking-[0.45em] uppercase opacity-25 mt-1">Sua presença é o maior presente</p>
+            <p className="text-xs tracking-wider uppercase opacity-30 mt-1">Sua presença é o maior presente</p>
           </div>
           <div className="bg-emerald-50/60 border border-emerald-100 rounded-3xl p-5 sm:p-8">
-            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} />
+            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} showGiftSection={p.settings.showGiftSection !== false} showMessageSection={p.settings.showMessageSection !== false} />
           </div>
         </section>
 
@@ -346,25 +346,25 @@ function DesignLuxury(p: GuestPageClientProps) {
         <GoldDivider gold={gold} char="✦" extraClass="mb-12" />
 
         {/* Details */}
-        {(p.settings.eventDate || p.settings.eventAddress) && (
+        {((p.settings.showEventDate !== false && p.settings.eventDate) || (p.settings.showEventAddress !== false && p.settings.eventAddress)) && (
           <section className="mb-14">
             <div className="text-center mb-8 space-y-1.5">
               <h2 className={`text-2xl sm:text-3xl font-serif tracking-[0.25em] uppercase ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>O Evento</h2>
               <p className="text-[8px] tracking-[0.5em] uppercase opacity-25">Aguardamos sua presença</p>
             </div>
             <div className="space-y-3">
-              {p.settings.eventDate && (
+              {p.settings.showEventDate !== false && p.settings.eventDate && (
                 <div className="p-5 sm:p-6 flex items-center gap-4" style={{ background: "#f0ebe0", border: gb }}>
                   <div className="w-11 h-11 shrink-0 flex items-center justify-center" style={{ border: gbS }}>
                     <Calendar className={`h-4 w-4 ${p.genderColor} opacity-60`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[8px] font-bold tracking-[0.5em] uppercase opacity-35 mb-1">Quando</p>
+                    <p className="text-xs font-bold tracking-wider uppercase opacity-40 mb-1">Quando</p>
                     <p className="text-sm leading-relaxed opacity-75 font-medium break-words">{p.eventDateStr}</p>
                   </div>
                 </div>
               )}
-              {p.settings.eventAddress && (
+              {p.settings.showEventAddress !== false && p.settings.eventAddress && (
                 <div className="p-5 sm:p-6" style={{ background: "#f0ebe0", border: gb }}>
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-11 h-11 shrink-0 flex items-center justify-center mt-0.5" style={{ border: gbS }}>
@@ -397,7 +397,7 @@ function DesignLuxury(p: GuestPageClientProps) {
             <p className="text-[8px] tracking-[0.5em] uppercase opacity-25">Sua presença é o maior presente</p>
           </div>
           <div className="p-5 sm:p-8" style={{ background: "#f0ebe0", border: gb }}>
-            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} />
+            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} showGiftSection={p.settings.showGiftSection !== false} showMessageSection={p.settings.showMessageSection !== false} />
           </div>
         </section>
 
@@ -459,24 +459,24 @@ function DesignModern(p: GuestPageClientProps) {
         <div className="w-full h-0.5 bg-stone-900 mb-12 opacity-[0.08]" />
 
         {/* Details */}
-        {(p.settings.eventDate || p.settings.eventAddress) && (
+        {((p.settings.showEventDate !== false && p.settings.eventDate) || (p.settings.showEventAddress !== false && p.settings.eventAddress)) && (
           <section className="mb-14">
             <p className="text-[10px] tracking-[0.5em] uppercase font-black opacity-30 mb-7">Informações do Evento</p>
             <div className="space-y-6">
-              {p.settings.eventDate && (
+              {p.settings.showEventDate !== false && p.settings.eventDate && (
                 <div className="flex gap-4">
                   <div className={`w-1 shrink-0 ${accentBar} rounded-full`} />
                   <div className="min-w-0">
-                    <p className="text-[8px] font-black tracking-[0.4em] uppercase opacity-30 mb-1">Quando</p>
+                    <p className="text-xs font-black tracking-wider uppercase opacity-40 mb-1">Quando</p>
                     <p className="text-base font-semibold leading-relaxed text-stone-800 break-words">{p.eventDateStr}</p>
                   </div>
                 </div>
               )}
-              {p.settings.eventAddress && (
+              {p.settings.showEventAddress !== false && p.settings.eventAddress && (
                 <div className="flex gap-4">
                   <div className={`w-1 shrink-0 ${accentBar} rounded-full`} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[8px] font-black tracking-[0.4em] uppercase opacity-30 mb-1">Onde</p>
+                    <p className="text-xs font-black tracking-wider uppercase opacity-40 mb-1">Onde</p>
                     <p className="text-base font-semibold leading-relaxed text-stone-800 mb-3 break-words">{p.settings.eventAddress}</p>
                     {p.settings.eventMapsUrl && (
                       <a href={p.settings.eventMapsUrl} target="_blank" rel="noopener noreferrer"
@@ -497,7 +497,7 @@ function DesignModern(p: GuestPageClientProps) {
         <section className="mb-4">
           <p className="text-[10px] tracking-[0.5em] uppercase font-black opacity-30 mb-7">Confirmação de Presença</p>
           <div className="border-l-4 border-stone-900/10 pl-5 py-1">
-            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} />
+            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} showGiftSection={p.settings.showGiftSection !== false} showMessageSection={p.settings.showMessageSection !== false} />
           </div>
         </section>
 
@@ -579,32 +579,32 @@ function DesignRomantic(p: GuestPageClientProps) {
         <HeartDivider genderBorder={p.genderBorder} heartClr={heartClr} />
 
         {/* Details */}
-        {(p.settings.eventDate || p.settings.eventAddress) && (
+        {((p.settings.showEventDate !== false && p.settings.eventDate) || (p.settings.showEventAddress !== false && p.settings.eventAddress)) && (
           <section className="mb-14">
             <div className="text-center mb-8">
               <h2 className={`text-2xl font-serif tracking-[0.2em] uppercase italic ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>O Nosso Evento</h2>
               <p className="text-[8px] tracking-[0.4em] uppercase opacity-25 italic mt-1">te esperamos ♡</p>
             </div>
             <div className="space-y-3">
-              {p.settings.eventDate && (
+              {p.settings.showEventDate !== false && p.settings.eventDate && (
                 <div className={`${cardBg} border rounded-2xl p-5 flex items-center gap-4`}>
                   <div className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center ${iconBg}`}>
                     <Calendar className={`h-4 w-4 ${p.genderColor} opacity-60`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[8px] italic tracking-wider uppercase opacity-30 mb-1">Quando</p>
+                    <p className="text-xs italic tracking-wider uppercase opacity-40 mb-1">Quando</p>
                     <p className="text-sm leading-relaxed opacity-70 font-medium break-words">{p.eventDateStr}</p>
                   </div>
                 </div>
               )}
-              {p.settings.eventAddress && (
+              {p.settings.showEventAddress !== false && p.settings.eventAddress && (
                 <div className={`${cardBg} border rounded-2xl p-5`}>
                   <div className="flex items-start gap-4 mb-4">
                     <div className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center ${iconBg} mt-0.5`}>
                       <MapPin className={`h-4 w-4 ${p.genderColor} opacity-60`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[8px] italic tracking-wider uppercase opacity-30 mb-1">Onde</p>
+                      <p className="text-xs italic tracking-wider uppercase opacity-40 mb-1">Onde</p>
                       <p className="text-sm leading-relaxed opacity-70 font-medium break-words">{p.settings.eventAddress}</p>
                     </div>
                   </div>
@@ -629,7 +629,7 @@ function DesignRomantic(p: GuestPageClientProps) {
             <p className="text-[8px] tracking-[0.4em] uppercase opacity-25 italic mt-1">você vai poder vir? ♡</p>
           </div>
           <div className={`${cardBg} border rounded-3xl p-5 sm:p-8`}>
-            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} />
+            <RSVPForm guest={p.guestData} gifts={p.giftList} fontFamily={p.inviteFontFamily} fontSize={p.inviteFontSize} eventId={p.eventId} showGiftSection={p.settings.showGiftSection !== false} showMessageSection={p.settings.showMessageSection !== false} />
           </div>
         </section>
 

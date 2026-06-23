@@ -216,141 +216,162 @@ export function AdminSidebar() {
 }
 
 // ============================================================
-// CLASSIC SIDEBAR (original design, preserved exactly)
+// CLASSIC SIDEBAR — expanded: labels + colored icons
 // ============================================================
 
 function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isMaster, isDarkMode, toggleDarkMode, getInitials, handleLogout, allowedScreens }: any) {
-  const SidebarContent = ({ showLabels = false }: { showLabels?: boolean }) => (
-    <div className="flex flex-col h-full">
-      <div className={cn("border-b border-primary/5", showLabels ? "p-4" : "hidden lg:block py-5 px-3")}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className={cn(
-                "w-full flex items-center gap-2.5 px-2 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md transition-colors",
-                !showLabels && "justify-center"
-              )}
-              title="Opções da conta"
-            >
-              {avatarUrl && avatarUrl !== "null" ? (
-                <div className="relative flex-shrink-0">
-                  <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-primary/30 shadow-lg">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => {}} />
+  return (
+    <>
+      {/* Desktop sidebar — 220px, always expanded */}
+      <aside className="hidden lg:flex w-[220px] h-screen bg-white dark:bg-stone-950 border-r border-stone-100 dark:border-stone-800 flex-col fixed left-0 top-0 z-50 shadow-sm admin-sidebar">
+        {/* Account button */}
+        <div className="border-b border-stone-100 dark:border-stone-800 p-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-stone-50 dark:hover:bg-stone-900 rounded-lg transition-colors" title="Opções da conta">
+                {avatarUrl && avatarUrl !== "null" ? (
+                  <div className="relative flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-primary/20 shadow">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" onError={() => {}} />
+                    </div>
+                    {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-sm" title="Master" />}
                   </div>
-                  {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />}
-                </div>
-              ) : (
-                <div className="relative flex-shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow-lg flex items-center justify-center ring-2 ring-primary/20">
-                    <span className="text-white text-[10px] font-black tracking-wider">{getInitials(adminEmail)}</span>
+                ) : (
+                  <div className="relative flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-primary shadow flex items-center justify-center ring-2 ring-primary/20">
+                      <span className="text-white text-xs font-black">{getInitials(adminEmail)}</span>
+                    </div>
+                    {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-sm" />}
                   </div>
-                  {isMaster && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-white shadow-sm" title="Administrador Principal" />}
-                </div>
-              )}
-              {showLabels && adminEmail && (
+                )}
                 <div className="min-w-0 flex-1 text-left">
-                  <p className="text-[10px] font-bold tracking-wider text-stone-700 truncate uppercase">{isMaster ? "Master" : "Operador"}</p>
-                  <p className="text-[8px] text-stone-400 truncate">{adminEmail}</p>
+                  <p className="text-xs font-bold text-stone-700 dark:text-stone-200 truncate">{isMaster ? "Master Admin" : "Operador"}</p>
+                  <p className="text-[10px] text-stone-400 truncate">{adminEmail}</p>
                 </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="bottom" className="w-56 z-[70] shadow-xl border-stone-100">
+              <div className="px-3 py-2">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-stone-400">Minha Conta</span>
+                {adminEmail && <p className="text-xs text-stone-600 truncate font-medium mt-0.5">{adminEmail}</p>}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href="/admin/events" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3" />}>
+                <CalendarPlus className="h-4 w-4" style={{ color: "#a78bfa" }} />
+                <span className="text-xs font-semibold text-stone-700">Trocar Evento</span>
+              </DropdownMenuItem>
+              {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Visual")) && (
+                <DropdownMenuItem render={<Link href="/admin/visual" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3" />}>
+                  <Settings className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold text-stone-700">Visual & Config</span>
+                </DropdownMenuItem>
               )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align={showLabels ? "center" : "start"} side={showLabels ? "bottom" : "right"} className="w-56 z-[70] mb-2 ml-2 shadow-xl border-primary/10">
-            <div className="px-3 py-2 flex flex-col gap-0.5">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-stone-400">Minha Conta</span>
-              {adminEmail && <span className="text-[11px] text-stone-600 truncate font-medium">{adminEmail}</span>}
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href="/admin/events" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
-              <LayoutDashboard className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Trocar Evento</span>
-            </DropdownMenuItem>
-            {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Visual")) && (
-              <DropdownMenuItem render={<Link href="/admin/visual" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
-                <Settings className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Visual</span>
+              {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Sobre")) && (
+                <DropdownMenuItem render={<Link href="/admin/about" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3" />}>
+                  <Info className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold text-stone-700">Sobre</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-3 py-2.5 px-3" onClick={toggleDarkMode}>
+                {isDarkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-indigo-400" />}
+                <span className="text-xs font-semibold text-stone-700">{isDarkMode ? "Modo Claro" : "Modo Escuro"}</span>
               </DropdownMenuItem>
-            )}
-            {(isMaster || allowedScreens === "ALL" || allowedScreens.includes("Sobre")) && (
-              <DropdownMenuItem render={<Link href="/admin/about" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
-                <Info className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Sobre</span>
+              <DropdownMenuSeparator />
+              {isMaster && (
+                <DropdownMenuItem render={<Link href="/admin/access" className="cursor-pointer w-full flex items-center gap-3 py-2.5 px-3" />}>
+                  <ShieldAlert className="h-4 w-4 text-red-400" />
+                  <span className="text-xs font-semibold text-stone-700">Acessos e Permissões</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer flex items-center gap-3 py-2.5 px-3" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
+                <span className="text-xs font-semibold">Sair</span>
               </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer w-full flex items-center gap-3 py-3" onClick={toggleDarkMode}>
-              {isDarkMode ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">
-                {isDarkMode ? "Modo Claro" : "Modo Escuro"}
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {isMaster && (
-              <DropdownMenuItem render={<Link href="/admin/access" className="cursor-pointer w-full flex items-center gap-3 py-3" />}>
-                <ShieldAlert className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-700">Acessos e Permissões</span>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer w-full flex items-center gap-3 py-3" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Sair</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-      <nav className={cn("flex-1 p-2 space-y-1 py-6", !showLabels && "lg:pt-6")}>
-        {visibleMenuItems.map((item: any) => {
+        {/* Navigation */}
+        <nav className="flex-1 p-3 pt-4 space-y-0.5 overflow-y-auto">
+          <p className="text-[9px] font-bold tracking-[0.3em] uppercase text-stone-400 dark:text-stone-600 px-3 pb-3">Navegação</p>
+          {visibleMenuItems.map((item: any) => {
+            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                  isActive
+                    ? "bg-primary text-white shadow-sm shadow-primary/20"
+                    : "hover:bg-stone-50 dark:hover:bg-stone-900"
+                )}
+                title={item.title}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                  isActive ? "bg-white/20" : "bg-stone-50 dark:bg-stone-900 group-hover:scale-105"
+                )}>
+                  <item.icon
+                    className="h-4 w-4"
+                    style={{ color: isActive ? "white" : item.color }}
+                  />
+                </div>
+                <span className={cn(
+                  "text-sm font-semibold tracking-wide",
+                  isActive ? "text-white" : "text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-stone-100"
+                )}>
+                  {item.title}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer logout */}
+        <div className="border-t border-stone-100 dark:border-stone-800 p-3">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 group transition-colors"
+            title="Sair"
+          >
+            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950 flex items-center justify-center flex-shrink-0">
+              <LogOut className="h-4 w-4 text-red-400 group-hover:text-red-600 transition-colors" />
+            </div>
+            <span className="text-sm font-semibold text-red-400 group-hover:text-red-600 transition-colors">Sair</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile bottom nav — icons + tiny labels */}
+      <nav className="lg:hidden fixed inset-x-0 bottom-0 bg-white dark:bg-stone-950 border-t border-stone-100 dark:border-stone-800 z-50 flex justify-around py-2 px-1">
+        {visibleMenuItems.slice(0, 6).map((item: any) => {
           const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex items-center py-3 transition-all duration-200 group rounded-none",
-                showLabels ? "px-3 gap-3" : "justify-center px-3",
-                isActive
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-primary dark:text-stone-400 dark:hover:text-primary"
-              )}
+              className="flex flex-col items-center justify-center py-1 gap-0.5 min-w-0"
               title={item.title}
             >
-              <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-all", isActive ? "text-white" : "opacity-50 group-hover:opacity-100")} />
-              {showLabels && (
-                <span className={cn("text-[10px] font-bold tracking-[0.2em] uppercase", isActive ? "text-white" : "group-hover:text-primary")}>
-                  {item.title}
-                </span>
-              )}
+              <item.icon className="h-6 w-6 flex-shrink-0" style={{ color: isActive ? "var(--primary)" : item.color, opacity: isActive ? 1 : 0.6 }} />
+              <span className="text-[9px] font-semibold" style={{ color: isActive ? "var(--primary)" : "#78716c" }}>
+                {item.title.slice(0, 7)}
+              </span>
             </Link>
           );
         })}
-      </nav>
-    </div>
-  );
-
-  return (
-    <>
-      <aside className="hidden lg:flex w-20 h-screen bg-white border-r border-primary/8 flex-col fixed left-0 top-0 z-50 shadow-sm admin-sidebar">
-        <SidebarContent showLabels={false} />
-      </aside>
-      <nav className="lg:hidden fixed inset-x-0 bottom-0 bg-white border-t border-primary/5 z-50 flex justify-around py-2">
-        {visibleMenuItems.map((item: any) => {
-          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-          return (
-            <Link key={item.href} href={item.href} className={cn("flex flex-col items-center justify-center py-1", isActive ? "text-primary" : "text-stone-500 hover:text-primary")} title={item.title}>
-              <item.icon className="h-6 w-6" />
-            </Link>
-          );
-        })}
-        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 hover:text-primary transition-colors" title="Conta">
+        <button onClick={handleLogout} className="flex flex-col items-center justify-center py-1 gap-0.5" title="Sair">
           {avatarUrl && avatarUrl !== "null" ? (
-            <img src={avatarUrl} alt="Avatar" className="h-6 w-6 rounded-full object-cover" referrerPolicy="no-referrer" />
+            <img src={avatarUrl} alt="Avatar" className="h-6 w-6 rounded-full object-cover opacity-70" referrerPolicy="no-referrer" />
           ) : (
             <div className="h-6 w-6 flex items-center justify-center bg-primary/80 rounded-full text-white text-xs font-bold">
               {getInitials(adminEmail)}
             </div>
           )}
+          <span className="text-[9px] font-semibold text-stone-400">Conta</span>
         </button>
       </nav>
     </>

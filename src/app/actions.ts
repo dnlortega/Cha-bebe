@@ -51,7 +51,11 @@ export async function getSettings(forceEventId?: string) {
       eventMapsUrl: null,
       enableAnimations: true,
       whatsappTemplate: null,
-      inviteDesign: "editorial"
+      inviteDesign: "editorial",
+      showEventDate: true,
+      showEventAddress: true,
+      showGiftSection: true,
+      showMessageSection: true,
     };
   }
 
@@ -312,6 +316,29 @@ export async function getGuests(forceEventId?: string) {
       createdAt: g.gift.createdAt.toISOString()
     } : null
   }));
+}
+
+export async function addGuestsDirect(guests: { nome: string; tipo: string; membros: string | null; fralda_tamanho: string | null; kit_churrasco: boolean }[]) {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
+  try {
+    const usedSlugs = new Set<string>();
+    const existing = await prisma.guest.findMany({ where: { eventId }, select: { slug: true } });
+    existing.forEach(g => usedSlugs.add(g.slug));
+
+    const results = await Promise.all(guests.map(async (g) => {
+      const baseSlug = await generateSlug(g.nome);
+      let slug = baseSlug;
+      let counter = 1;
+      while (usedSlugs.has(slug)) { slug = `${baseSlug}-${counter}`; counter++; }
+      usedSlugs.add(slug);
+      return prisma.guest.create({ data: { eventId, nome: g.nome, slug, tipo: g.tipo, membros: g.membros, fralda_tamanho: g.fralda_tamanho, kit_churrasco: g.kit_churrasco } });
+    }));
+    revalidatePath("/admin");
+    return { success: true, count: results.length };
+  } catch {
+    return { success: false, error: "FALHA AO CADASTRAR CONVIDADOS." };
+  }
 }
 
 export async function addMultipleGuests(namesText: string) {

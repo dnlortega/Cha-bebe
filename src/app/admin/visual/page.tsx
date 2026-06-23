@@ -42,6 +42,10 @@ export default function VisualPage() {
   const [eventMapsUrl, setEventMapsUrl] = useState("");
   const [enableAnimations, setEnableAnimations] = useState(true);
   const [whatsappTemplate, setWhatsappTemplate] = useState("");
+  const [showEventDate, setShowEventDate] = useState(true);
+  const [showEventAddress, setShowEventAddress] = useState(true);
+  const [showGiftSection, setShowGiftSection] = useState(true);
+  const [showMessageSection, setShowMessageSection] = useState(true);
   const [loading, setLoading] = useState(false);
   
 
@@ -102,6 +106,10 @@ export default function VisualPage() {
       setEnableAnimations(data.enableAnimations ?? true);
       setWhatsappTemplate(data.whatsappTemplate || "");
       setInviteDesign((data.inviteDesign as InviteDesignId) || "editorial");
+      setShowEventDate((data as any).showEventDate ?? true);
+      setShowEventAddress((data as any).showEventAddress ?? true);
+      setShowGiftSection((data as any).showGiftSection ?? true);
+      setShowMessageSection((data as any).showMessageSection ?? true);
     }
   };
 
@@ -154,7 +162,7 @@ export default function VisualPage() {
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign });
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -422,6 +430,17 @@ export default function VisualPage() {
             </div>
             <div id="tour-show-image" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Exibir Imagem do Convite</label><Select value={showInvitationImage ? "SIM" : "NAO"} onValueChange={(v) => setShowInvitationImage(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">SIM</SelectItem><SelectItem value="NAO">NÃO</SelectItem></SelectContent></Select></div>
             <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Animações do Sistema</label><Select value={enableAnimations ? "SIM" : "NAO"} onValueChange={(v) => setEnableAnimations(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">LIGADAS</SelectItem><SelectItem value="NAO">DESLIGADAS</SelectItem></SelectContent></Select></div>
+
+            {/* Visibilidade dos campos do convite */}
+            <div className="col-span-2 space-y-3 border-t border-primary/5 pt-5">
+              <p className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Campos Visíveis no Convite</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Quando (Data)</label><Select value={showEventDate ? "SIM" : "NAO"} onValueChange={(v) => setShowEventDate(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
+                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Onde (Local)</label><Select value={showEventAddress ? "SIM" : "NAO"} onValueChange={(v) => setShowEventAddress(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
+                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Presente</label><Select value={showGiftSection ? "SIM" : "NAO"} onValueChange={(v) => setShowGiftSection(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
+                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Recado</label><Select value={showMessageSection ? "SIM" : "NAO"} onValueChange={(v) => setShowMessageSection(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
+              </div>
+            </div>
             <div id="tour-whatsapp" className="space-y-1">
               <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Template WhatsApp</label>
               <textarea

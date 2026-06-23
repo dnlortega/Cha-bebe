@@ -76,7 +76,7 @@ export default async function GuestPage({ params }: PageProps) {
   const isBoy = settings.babyGender === "BOY";
   const isGirl = settings.babyGender === "GIRL";
   const prefix = isGirl ? "DA" : isBoy ? "DO" : "DE";
-  const babyName = settings.babyName ? `CHÁ ${prefix} ${settings.babyName}` : "CHÁ DE BEBÊ";
+  const babyName = "CHÁ DE BEBÊ";
   const rawBabyName = settings.babyName || "CHÁ DE BEBÊ";
 
   const genderColor = isBoy ? "text-sky-700" : isGirl ? "text-rose-700" : "text-primary";
