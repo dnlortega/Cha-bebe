@@ -8,16 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { THEMES, PANEL_DESIGNS, INVITE_DESIGNS, type PanelDesignId, type InviteDesignId } from "@/lib/themes";
-import { Save, Loader2, Settings as SettingsIcon, Calendar, Layers, CheckCircle2, Mail, Upload, ImageIcon } from "lucide-react";
-import Image from "next/image";
+import { Save, Loader2, Settings as SettingsIcon, Calendar, Layers, CheckCircle2, Mail, Upload } from "lucide-react";
 import AdminTour, { type TourStep } from "@/components/AdminTour";
 
 const VISUAL_TOUR: TourStep[] = [
   { selector: null,                   icon: "🎨", title: "Visual & Info",             body: "Nesta página você configura toda a aparência e as informações do evento — desde o design do convite até data, local e acesso administrativo." },
   { selector: "#tour-panel-design",   icon: "🖥️", title: "Design do Painel",          body: "Escolha o visual da interface administrativa. As opções escuras (Premium, Neon, Ocean, Rose) mudam cores de todo o painel. A mudança é imediata e salva só neste dispositivo." },
   { selector: "#tour-invite-design",  icon: "✉️", title: "Design do Convite",         body: "Define o estilo visual da página que os convidados veem ao abrir o link. Cada design tem uma estética diferente: editorial, floral, luxo, moderno ou romântico." },
-  { selector: "#tour-invite-url",     icon: "🖼️", title: "URL do Convite",            body: "Cole aqui o link direto da imagem do seu convite. Use o Imgur, Google Drive (link público) ou qualquer hospedagem de imagens. A imagem aparece moldada no convite do convidado." },
-  { selector: "#tour-theme",          icon: "🎨", title: "Tema Visual",               body: "Escolha a paleta de cores do sistema. O tema afeta a cor primária de botões, ícones e destaques em todo o painel administrativo." },
+{ selector: "#tour-theme",          icon: "🎨", title: "Tema Visual",               body: "Escolha a paleta de cores do sistema. O tema afeta a cor primária de botões, ícones e destaques em todo o painel administrativo." },
   { selector: "#tour-fonts",          icon: "🔤", title: "Fonte do Convite",          body: "Selecione a tipografia que aparece nos títulos da página de convite (nome do bebê, seções, etc.). O tamanho ao lado controla o quanto ela é exibida." },
   { selector: "#tour-baby",           icon: "👶", title: "Nome & Sexo do Bebê",       body: "O nome aparece em destaque no convite e na splash screen. O sexo (menino/menina) define as cores do convite — azul celeste ou rosa suave." },
   { selector: "#tour-show-image",     icon: "👁️", title: "Exibir Imagem",             body: "Controla se a imagem do convite será exibida ou não na página do convidado. Desative se preferir um convite somente com texto." },
@@ -27,7 +25,6 @@ const VISUAL_TOUR: TourStep[] = [
 ];
 
 export default function VisualPage() {
-  const [invitationUrl, setInvitationUrl] = useState("");
   const [theme, setTheme] = useState("GOLD");
   const [showInvitationImage, setShowInvitationImage] = useState(true);
   const [inviteFont, setInviteFont] = useState("Playfair Display");
@@ -47,8 +44,6 @@ export default function VisualPage() {
   const [showMessageSection, setShowMessageSection] = useState(true);
   const [showInviteHeader, setShowInviteHeader] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [sizeImages, setSizeImages] = useState<Record<string, string>>({});
   const FRALDA_SIZES = ["RN", "P", "M", "G", "GG"];
   const [uploadingSize, setUploadingSize] = useState<string | null>(null);
@@ -83,7 +78,6 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
   const fetchSettings = async () => {
     const data = await getSettings();
     if (data) {
-      setInvitationUrl(data.invitationUrl || "");
       setTheme(data.theme || "GOLD");
       setInviteFont(data.inviteFont || "Playfair Display");
       setInviteFontSize(data.inviteFontSize || 18);
@@ -107,28 +101,6 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
         setSizeImages(JSON.parse((data as any).inviteImagesBySizes || "{}"));
       } catch { setSizeImages({}); }
     }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const json = await res.json();
-      if (json.url) {
-        setInvitationUrl(json.url);
-        toast.success("Imagem carregada! Salve as configurações para aplicar.");
-      } else {
-        toast.error(json.error || "Falha no upload.");
-      }
-    } catch {
-      toast.error("Erro ao enviar imagem.");
-    }
-    setUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSizeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,7 +127,7 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection, inviteImagesBySizes: JSON.stringify(sizeImages), showInviteHeader });
+    const result = await updateSettings({ theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection, inviteImagesBySizes: JSON.stringify(sizeImages), showInviteHeader });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -407,40 +379,8 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
         <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
           <div className="flex items-center gap-3 text-primary"><SettingsIcon className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Convite & Tema</h3></div>
           <div className="space-y-4">
-            <div id="tour-invite-url" className="space-y-2">
-              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Imagem Padrão (sem tamanho de fralda)</label>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              {invitationUrl ? (
-                <div className="relative w-full aspect-[9/16] max-h-64 bg-stone-100 border border-stone-200 overflow-hidden">
-                  <Image src={invitationUrl} alt="Convite" fill className="object-contain" unoptimized />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="absolute bottom-2 right-2 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 flex items-center gap-1.5 hover:bg-stone-700 transition-colors disabled:opacity-50"
-                  >
-                    {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                    Trocar
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="w-full h-28 border-2 border-dashed border-stone-200 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  {uploading ? <Loader2 className="h-5 w-5 animate-spin text-stone-400" /> : <ImageIcon className="h-5 w-5 text-stone-300" />}
-                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
-                    {uploading ? "Enviando..." : "Clique para fazer upload"}
-                  </span>
-                </button>
-              )}
-              <Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-10 bg-stone-50 text-[11px]" placeholder="Ou cole uma URL externa..." />
-            </div>
-
             {/* Convites por tamanho de fralda */}
-            <div className="space-y-3 border-t border-primary/5 pt-5">
+            <div className="space-y-3">
                 <div>
                   <p className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Convite por Tamanho de Fralda</p>
                   <p className="text-[9px] text-stone-400 mt-1">Cada convidado verá o convite do seu tamanho automaticamente.</p>
