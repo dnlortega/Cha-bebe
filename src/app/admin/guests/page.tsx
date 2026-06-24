@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Loader2, CheckCircle, XCircle, Clock, Trash2, Edit2,
   Copy, ExternalLink, Search, RefreshCw, Save, PackageCheck,
-  Download, SortAsc, SortDesc, MessageCircle, QrCode
+  Download, SortAsc, SortDesc, MessageCircle, QrCode, Link2
 } from "lucide-react";
 import AdminTour, { type TourStep } from "@/components/AdminTour";
 
@@ -127,6 +127,12 @@ export default function GuestsPage() {
     setCopyPreview(null);
   };
 
+  const copyLink = async (guest: any) => {
+    const link = `${window.location.origin}/${eventSlug}/${guest.slug}`;
+    await navigator.clipboard.writeText(link);
+    toast.success("LINK COPIADO!");
+  };
+
   const sendWhatsApp = (guest: any) => {
     const text = formatTemplate(guest);
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
@@ -229,6 +235,7 @@ export default function GuestsPage() {
                 <TableCell className="text-right pr-8">
                   <div className={`flex justify-end gap-1 transition-all ${guest.slug ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}><MessageCircle className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">WhatsApp</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-sky-500" onClick={() => copyLink(guest)}><Link2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Copiar Link</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => copyToClipboard(guest)}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Copiar Texto</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setQrGuest(guest)}><QrCode className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">QR Code</TooltipContent></Tooltip>
                     <Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setEditingGuest(guest); setEditName(guest.nome); setEditType(guest.tipo); setEditMembers(guest.membros || ""); setEditAdults(guest.qtd_adultos || 1); setEditChildren(guest.qtd_criancas || 0); setEditDiaper(guest.fralda_tamanho || null); setEditKitChurrasco(guest.kit_churrasco || false); }}><Edit2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent className="text-[9px]">Editar</TooltipContent></Tooltip>
@@ -275,6 +282,9 @@ export default function GuestsPage() {
               <div className="flex gap-0.5">
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-emerald-500" onClick={() => sendWhatsApp(guest)}>
                   <MessageCircle className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-sky-500" onClick={() => copyLink(guest)}>
+                  <Link2 className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600" onClick={() => copyToClipboard(guest)}>
                   <Copy className="h-4 w-4" />
