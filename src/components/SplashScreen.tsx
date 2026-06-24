@@ -101,7 +101,7 @@ export default function SplashScreen({ babyName, genderColor, fontFamily, guestN
                 className={`font-serif tracking-[0.15em] uppercase leading-tight ${genderColor} break-words`}
                 style={{ fontFamily, fontSize: "clamp(1.9rem, 9vw, 3.5rem)" }}
               >
-                Chá de Bebê
+                Chá da {babyName}
               </h1>
               <div className="flex items-center justify-center gap-3">
                 <span className={`block h-px w-10 border-t ${borderColor} opacity-30`} />
