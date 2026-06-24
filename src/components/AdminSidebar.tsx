@@ -294,7 +294,7 @@ function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 pt-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 p-3 pt-4 space-y-0.5 overflow-y-hidden">
           <p className="text-[9px] font-bold tracking-[0.3em] uppercase text-stone-400 dark:text-stone-600 px-3 pb-3">Navegação</p>
           {visibleMenuItems.map((item: any) => {
             const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -552,7 +552,7 @@ function DarkSidebar({ scheme, pathname, visibleMenuItems, avatarUrl, adminEmail
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-hidden">
           {!isCollapsed && (
             <p className="text-[8px] font-black tracking-[0.4em] uppercase px-3 pb-2 animate-in fade-in duration-300"
               style={{ color: scheme.navLabel }}>
