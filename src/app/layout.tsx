@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Cinzel, Playfair_Display, Cormorant_Garamond, Dancing_Script, Great_Vibes, Lora, Outfit, DM_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Roboto, Cinzel, Playfair_Display, Cormorant_Garamond, Dancing_Script, Great_Vibes, Lora, Outfit, DM_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // System fonts
+const roboto = Roboto({ variable: "--font-roboto", subsets: ["latin"], weight: ["400","500","700"] });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"] });
@@ -56,11 +57,11 @@ export default async function RootLayout({
   const themeConfig = getThemeById(initialTheme);
 
   const baseFont = FONT_VAR_MAP[settings.systemFont || "Inter"] || "var(--font-inter)";
-  const systemFontFamily = `${baseFont}, "Open Sans", Roboto, -apple-system, BlinkMacSystemFont, sans-serif`;
+  const systemFontFamily = `var(--font-roboto), ${baseFont}, "Open Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
   const systemFontSize = settings.systemFontSize || 12;
 
   const allFontVars = [
-    inter.variable, outfit.variable, dmSans.variable, plusJakarta.variable,
+    roboto.variable, inter.variable, outfit.variable, dmSans.variable, plusJakarta.variable,
     cinzel.variable, playfair.variable, cormorant.variable, dancing.variable,
     greatVibes.variable, lora.variable,
   ].join(" ");
