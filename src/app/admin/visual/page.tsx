@@ -30,7 +30,7 @@ export default function VisualPage() {
   const [inviteFont, setInviteFont] = useState("Playfair Display");
   const [inviteFontSize, setInviteFontSize] = useState(18);
   const [systemFont, setSystemFont] = useState("Inter");
-  const [systemFontSize, setSystemFontSize] = useState(14);
+  const [systemFontSize, setSystemFontSize] = useState(12);
   const [babyName, setBabyName] = useState("");
   const [babyGender, setBabyGender] = useState("NONE");
   const [eventDate, setEventDate] = useState("");

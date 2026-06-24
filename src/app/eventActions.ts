@@ -286,7 +286,7 @@ const defaultSettingsData = {
   gQty: 0,
   ggQty: 0,
   systemFont: "Inter",
-  systemFontSize: 14,
+  systemFontSize: 12,
   inviteFont: "Playfair Display",
   inviteFontSize: 18,
   showInvitationImage: true,

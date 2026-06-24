@@ -40,7 +40,7 @@ export async function getSettings(forceEventId?: string) {
       sessionTimeout: 30,
       rnQty: 0, pQty: 0, mQty: 0, gQty: 0, ggQty: 0,
       systemFont: "Inter",
-      systemFontSize: 14,
+      systemFontSize: 12,
       inviteFont: "Playfair Display",
       inviteFontSize: 18,
       showInvitationImage: true,

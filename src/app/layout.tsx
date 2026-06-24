@@ -55,8 +55,9 @@ export default async function RootLayout({
   const initialTheme = settings.theme || "GOLD";
   const themeConfig = getThemeById(initialTheme);
 
-  const systemFontFamily = FONT_VAR_MAP[settings.systemFont || "Inter"] || "var(--font-inter)";
-  const systemFontSize = settings.systemFontSize || 14;
+  const baseFont = FONT_VAR_MAP[settings.systemFont || "Inter"] || "var(--font-inter)";
+  const systemFontFamily = `${baseFont}, "Open Sans", Roboto, -apple-system, BlinkMacSystemFont, sans-serif`;
+  const systemFontSize = settings.systemFontSize || 12;
 
   const allFontVars = [
     inter.variable, outfit.variable, dmSans.variable, plusJakarta.variable,
