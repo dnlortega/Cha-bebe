@@ -93,12 +93,15 @@ function DesignEditorial(p: GuestPageClientProps) {
             <div className="relative w-full max-w-[min(280px,82vw)]">
               <div className={`absolute -inset-5 border ${p.genderBorder} opacity-10 pointer-events-none`} />
               <div className={`absolute -inset-2.5 border ${p.genderBorder} opacity-20 pointer-events-none`} />
-              <div className="relative aspect-[3/4] shadow-[0_24px_60px_-8px_rgba(0,0,0,0.16)] border-[14px] sm:border-[18px] border-white bg-white overflow-hidden group">
+              <div className="shadow-[0_24px_60px_-8px_rgba(0,0,0,0.16)] border-[14px] sm:border-[18px] border-white bg-white overflow-hidden group">
                 <Image
                   src={p.settings.invitationUrl || "/convite.png"}
                   alt="Convite"
-                  fill
-                  className="object-contain transition-transform duration-1000 group-hover:scale-105"
+                  width={0}
+                  height={0}
+                  sizes="(max-width: 640px) 82vw, 280px"
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                  className="transition-transform duration-1000 group-hover:scale-105"
                   priority
                 />
               </div>
@@ -207,8 +210,8 @@ function DesignFloral(p: GuestPageClientProps) {
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center">
             <div className="relative w-full max-w-[min(280px,82vw)]">
               <div className="absolute -inset-3 rounded-[2rem] bg-emerald-50 opacity-60" />
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_16px_50px_-8px_rgba(0,0,0,0.12)] border-[12px] sm:border-[14px] border-white">
-                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" fill className="object-contain" priority />
+              <div className="rounded-2xl overflow-hidden shadow-[0_16px_50px_-8px_rgba(0,0,0,0.12)] border-[12px] sm:border-[14px] border-white">
+                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" width={0} height={0} sizes="(max-width: 640px) 82vw, 280px" style={{ width: "100%", height: "auto", display: "block" }} priority />
               </div>
               <span className="absolute -top-2.5 -left-2.5 text-lg opacity-60 pointer-events-none">🌸</span>
               <span className="absolute -top-2.5 -right-2.5 text-lg opacity-60 pointer-events-none">🌿</span>
@@ -332,8 +335,8 @@ function DesignLuxury(p: GuestPageClientProps) {
               {/* outer decorative borders — hidden on very small screens to avoid overflow */}
               <div className="absolute -inset-4 hidden xs:block" style={{ border: gbS }} />
               <div className="absolute -inset-2" style={{ border: gb }} />
-              <div className="relative aspect-[3/4] overflow-hidden shadow-[0_32px_80px_-12px_rgba(0,0,0,0.20)] border-[16px] sm:border-[20px]" style={{ borderColor: "#faf8f3", background: "#faf8f3" }}>
-                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" fill className="object-contain" priority />
+              <div className="overflow-hidden shadow-[0_32px_80px_-12px_rgba(0,0,0,0.20)] border-[16px] sm:border-[20px]" style={{ borderColor: "#faf8f3", background: "#faf8f3" }}>
+                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" width={0} height={0} sizes="(max-width: 640px) 80vw, 280px" style={{ width: "100%", height: "auto", display: "block" }} priority />
               </div>
               <span className="absolute -top-0.5 -left-0.5 w-5 h-5" style={{ borderLeft: `2px solid ${gold}`, borderTop: `2px solid ${gold}` }} />
               <span className="absolute -top-0.5 -right-0.5 w-5 h-5" style={{ borderRight: `2px solid ${gold}`, borderTop: `2px solid ${gold}` }} />
@@ -449,8 +452,8 @@ function DesignModern(p: GuestPageClientProps) {
           <section className="animate-in fade-in duration-1000 delay-200 mb-14">
             <div className="relative w-full max-w-[min(300px,85vw)]">
               <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentBar} rounded-r-sm`} />
-              <div className="ml-5 relative aspect-[3/4] overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,0.07)] border border-stone-200">
-                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" fill className="object-contain" priority />
+              <div className="ml-5 overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,0.07)] border border-stone-200">
+                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" width={0} height={0} sizes="(max-width: 640px) 85vw, 300px" style={{ width: "100%", height: "auto", display: "block" }} priority />
               </div>
             </div>
           </section>
@@ -563,10 +566,10 @@ function DesignRomantic(p: GuestPageClientProps) {
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center overflow-hidden">
             <div style={{ transform: "rotate(-1.5deg)", transformOrigin: "center top" }}>
               <div
-                className="relative aspect-[3/4] overflow-hidden shadow-[0_20px_50px_-5px_rgba(0,0,0,0.18)] bg-white"
+                className="overflow-hidden shadow-[0_20px_50px_-5px_rgba(0,0,0,0.18)] bg-white"
                 style={{ width: "min(240px,72vw)", borderWidth: "12px 12px 36px 12px", borderStyle: "solid", borderColor: "white" }}
               >
-                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" fill className="object-contain" priority />
+                <Image src={p.settings.invitationUrl || "/convite.png"} alt="Convite" width={0} height={0} sizes="(max-width: 640px) 72vw, 240px" style={{ width: "100%", height: "auto", display: "block" }} priority />
               </div>
               <p className={`text-center text-[9px] tracking-wider italic opacity-40 mt-1 ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>
                 com amor ♡
