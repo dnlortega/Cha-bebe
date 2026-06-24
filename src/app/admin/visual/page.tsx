@@ -58,8 +58,6 @@ export default function VisualPage() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [currentSessionToken, setCurrentSessionToken] = useState("");
   const [loadingSessions, setLoadingSessions] = useState(false);
-  const [selectedDiag, setSelectedDiag] = useState<any | null>(null);
-
   // Histórico de auditoria de sessões
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -469,135 +467,73 @@ export default function VisualPage() {
       <div className="grid grid-cols-1 gap-8">
         {/* Sessões e Auditoria de Acessos */}
         <Card id="tour-sessions" className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
+          <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+            <div className="flex items-center gap-6">
+              <button
                 onClick={() => setSessionTab("ACTIVE")}
-                className={`text-xs font-bold tracking-widest uppercase rounded-none h-9 px-0 border-b-2 transition-all ${
-                  sessionTab === "ACTIVE" 
-                    ? "border-primary text-primary font-black" 
+                className={`text-xs font-bold tracking-wider uppercase pb-1 border-b-2 transition-all ${
+                  sessionTab === "ACTIVE"
+                    ? "border-primary text-primary"
                     : "border-transparent text-stone-400 hover:text-stone-600"
                 }`}
               >
-                Dispositivos Logados ({sessions.length})
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setSessionTab("HISTORY");
-                  fetchHistory();
-                }}
-                className={`text-xs font-bold tracking-widest uppercase rounded-none h-9 px-0 border-b-2 transition-all ${
-                  sessionTab === "HISTORY" 
-                    ? "border-primary text-primary font-black" 
+                Dispositivos Ativos ({sessions.length})
+              </button>
+              <button
+                onClick={() => { setSessionTab("HISTORY"); fetchHistory(); }}
+                className={`text-xs font-bold tracking-wider uppercase pb-1 border-b-2 transition-all ${
+                  sessionTab === "HISTORY"
+                    ? "border-primary text-primary"
                     : "border-transparent text-stone-400 hover:text-stone-600"
                 }`}
               >
-                Histórico de Acessos ({historyLogs.length})
-              </Button>
+                Histórico ({historyLogs.length})
+              </button>
             </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={sessionTab === "ACTIVE" ? fetchSessions : fetchHistory} 
+            <button
+              onClick={sessionTab === "ACTIVE" ? fetchSessions : fetchHistory}
               disabled={loadingSessions || loadingHistory}
-              className="text-[9px] font-bold tracking-wider rounded-none uppercase h-8 bg-stone-50 border-stone-200 ml-auto"
+              className="text-xs font-semibold text-stone-400 hover:text-stone-700 transition-colors flex items-center gap-1.5 disabled:opacity-40"
             >
-              {(loadingSessions || loadingHistory) ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : null}
-              Atualizar Lista
-            </Button>
+              {(loadingSessions || loadingHistory) && <Loader2 className="h-3 w-3 animate-spin" />}
+              Atualizar
+            </button>
           </div>
 
           {sessionTab === "ACTIVE" ? (
-            <div className="space-y-4">
+            <div>
               {sessions.length === 0 ? (
-                <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
-                  Nenhum dispositivo registrado.
-                </p>
+                <p className="text-sm text-stone-400 text-center py-8">Nenhum dispositivo registrado.</p>
               ) : (
                 <div className="divide-y divide-stone-100">
                   {sessions.map((sess) => {
                     const isCurrent = sess.token === currentSessionToken;
                     const formattedDate = new Date(sess.lastActive).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit"
+                      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
                     });
-
                     return (
-                      <div key={sess.id} className="flex items-center justify-between py-4 group">
-                        <div className="space-y-1.5">
+                      <div key={sess.id} className="flex items-center justify-between py-4 gap-4">
+                        <div className="min-w-0 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
-                              {sess.deviceName}
-                            </span>
-                            <Badge className="bg-stone-100 text-stone-500 hover:bg-stone-100 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
-                              {sess.deviceInfo}
-                            </Badge>
+                            <span className="text-sm font-semibold text-stone-800">{sess.deviceName}</span>
                             {isCurrent && (
-                              <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
-                                Este Dispositivo
-                              </Badge>
+                              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-sm">
+                                Este dispositivo
+                              </span>
                             )}
                           </div>
-                          <div className="space-y-0.5">
-                            {sess.gpsCoords ? (
-                              <a 
-                                href={`https://www.google.com/maps?q=${sess.gpsCoords}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-[9px] text-stone-600 hover:text-primary uppercase tracking-widest font-semibold flex items-center gap-1 hover:underline transition-all"
-                              >
-                                📍 {sess.location} <span className="text-[7px] text-primary font-bold bg-primary/5 px-1.5 py-0.2 ml-1 rounded-none border border-primary/10 tracking-widest uppercase">MAPA</span>
-                              </a>
-                            ) : (
-                              <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
-                                📍 {sess.location}
-                              </p>
-                            )}
-                            <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
-                              Última atividade: {formattedDate}
-                            </p>
-                          </div>
+                          <p className="text-xs text-stone-400">
+                            {sess.location} · {formattedDate}
+                          </p>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              try {
-                                if (sess.diagnostics && sess.diagnostics !== "{}") {
-                                  setSelectedDiag(JSON.parse(sess.diagnostics));
-                                } else {
-                                  setSelectedDiag({
-                                    "Aviso": "Sessão antiga detectada",
-                                    "Instrução": "Por favor, saia e faça login novamente para gerar o relatório completo",
-                                    "Aparelho": sess.deviceName,
-                                    "Navegador": sess.deviceInfo,
-                                    "Cidade/Estado": sess.location
-                                  });
-                                }
-                              } catch (e) {
-                                setSelectedDiag({ "Status": "Não foi possível analisar os metadados" });
-                              }
-                            }}
-                            className="text-[9px] font-bold text-stone-500 hover:text-stone-850 hover:bg-stone-50 rounded-none uppercase h-8 px-3 tracking-widest border border-stone-205 transition-all"
-                          >
-                            Diagnóstico
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRevokeSession(sess.id, sess.token)}
-                            className="text-[9px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none uppercase h-8 px-3 tracking-widest border border-transparent hover:border-red-100"
-                          >
-                            {isCurrent ? "Sair" : "Desconectar"}
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeSession(sess.id, sess.token)}
+                          className="text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none shrink-0 h-8 px-3"
+                        >
+                          {isCurrent ? "Sair" : "Desconectar"}
+                        </Button>
                       </div>
                     );
                   })}
@@ -605,50 +541,30 @@ export default function VisualPage() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div>
               {historyLogs.length === 0 ? (
-                <p className="text-[10px] text-stone-400 text-center py-6 uppercase tracking-wider font-semibold">
-                  Nenhum registro de histórico encontrado.
-                </p>
+                <p className="text-sm text-stone-400 text-center py-8">Nenhum registro encontrado.</p>
               ) : (
                 <div className="divide-y divide-stone-100">
                   {historyLogs.map((log) => {
                     const formattedDate = new Date(log.timestamp).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit"
+                      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
                     });
                     const isStart = log.action === "INICIADA";
-
                     return (
-                      <div key={log.id} className="flex items-center justify-between py-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
-                              {log.deviceName}
-                            </span>
-                            <Badge className="bg-stone-100 text-stone-500 rounded-none text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 border-none">
-                              {log.deviceInfo}
-                            </Badge>
-                            <Badge className={`rounded-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${
-                              isStart 
-                                ? "bg-emerald-50 text-emerald-600" 
-                                : "bg-red-50 text-red-600"
-                            }`}>
-                              {isStart ? "🟢 INICIADA" : "🔴 FINALIZADA"}
-                            </Badge>
+                      <div key={log.id} className="flex items-center justify-between py-3 gap-4">
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isStart ? "bg-emerald-400" : "bg-red-400"}`} />
+                            <span className="text-sm font-semibold text-stone-800 truncate">{log.deviceName}</span>
                           </div>
-                          <div className="space-y-0.5">
-                            <p className="text-[9px] text-stone-500 uppercase tracking-widest font-semibold">
-                              📍 {log.location}
-                            </p>
-                            <p className="text-[8px] text-stone-400 uppercase tracking-widest font-bold">
-                              Data/Hora: {formattedDate}
-                            </p>
-                          </div>
+                          <p className="text-xs text-stone-400 pl-4">
+                            {log.location} · {formattedDate}
+                          </p>
                         </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm flex-shrink-0 ${isStart ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+                          {isStart ? "Entrou" : "Saiu"}
+                        </span>
                       </div>
                     );
                   })}
@@ -658,42 +574,6 @@ export default function VisualPage() {
           )}
         </Card>
       </div>
-
-      {/* Modal de Diagnóstico Avançado */}
-      {selectedDiag && (
-        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="border border-stone-200 shadow-2xl bg-white rounded-none p-8 max-w-md w-full space-y-6 relative">
-            <div className="border-b border-stone-100 pb-4">
-              <h3 className="text-xs font-bold tracking-widest uppercase text-stone-800 flex items-center gap-2">
-                ⚙️ DIAGNÓSTICO DE HARDWARE
-              </h3>
-              <p className="text-[9px] text-stone-400 uppercase tracking-widest font-semibold mt-1">
-                Relatório técnico detalhado do dispositivo
-              </p>
-            </div>
-            
-            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
-              {Object.entries(selectedDiag).map(([key, val]) => (
-                <div key={key} className="flex justify-between items-center py-2 border-b border-stone-50 text-[10px]">
-                  <span className="font-bold text-stone-500 uppercase tracking-wider">{key}</span>
-                  <span className="font-semibold text-stone-800 text-right uppercase tracking-wider">{String(val)}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedDiag(null)}
-                className="text-[9px] font-bold tracking-wider rounded-none uppercase h-9 bg-stone-900 text-white hover:bg-stone-800 border-none px-6"
-              >
-                Fechar Relatório
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
