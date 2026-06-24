@@ -65,6 +65,7 @@ function DesignEditorial(p: GuestPageClientProps) {
 
       <div className={WRAP}>
         {/* Hero */}
+        {p.settings.showInviteHeader !== false && (
         <header className="text-center pt-14 sm:pt-20 pb-12 space-y-6 animate-in fade-in slide-in-from-top duration-1000">
           <div className="flex items-center justify-center gap-3">
             <span className={`block h-px flex-1 max-w-[4rem] border-t ${p.genderBorder} opacity-40`} />
@@ -97,6 +98,7 @@ function DesignEditorial(p: GuestPageClientProps) {
             Com amor e alegria, convidamos você para celebrar este momento mágico.
           </p>
         </header>
+        )}
 
         {/* Image */}
         {p.settings.showInvitationImage && (
@@ -195,6 +197,7 @@ function DesignFloral(p: GuestPageClientProps) {
 
       <div className={WRAP}>
         {/* Hero */}
+        {p.settings.showInviteHeader !== false && (
         <header className="text-center pt-14 sm:pt-20 pb-12 space-y-6 animate-in fade-in slide-in-from-top duration-1000">
           <p className="text-3xl leading-none">🌸</p>
           <div>
@@ -212,6 +215,7 @@ function DesignFloral(p: GuestPageClientProps) {
             Com alegria florescente, convidamos você para este momento especial 🌿
           </p>
         </header>
+        )}
 
         {/* Image */}
         {p.settings.showInvitationImage && (
@@ -315,6 +319,7 @@ function DesignLuxury(p: GuestPageClientProps) {
 
       <div className={WRAP}>
         {/* Hero */}
+        {p.settings.showInviteHeader !== false && (
         <header className="text-center pt-14 sm:pt-20 pb-12 space-y-7 animate-in fade-in slide-in-from-top duration-1000">
           <div className="flex items-center justify-center gap-3">
             <span className="block flex-1 h-px max-w-[5rem]" style={{ background: `linear-gradient(to right,transparent,${gold}55)` }} />
@@ -336,6 +341,7 @@ function DesignLuxury(p: GuestPageClientProps) {
             Com honra e alegria, convidamos você para este momento singular.
           </p>
         </header>
+        )}
 
         {/* Image — double mat */}
         {p.settings.showInvitationImage && (
@@ -436,6 +442,7 @@ function DesignModern(p: GuestPageClientProps) {
     <main className="min-h-screen bg-white flex flex-col items-center relative overflow-x-hidden" style={{ fontFamily: "var(--font-outfit)" }}>
       <div className={WRAP}>
         {/* Hero */}
+        {p.settings.showInviteHeader !== false && (
         <header className="pt-14 sm:pt-20 pb-12 space-y-5 animate-in fade-in slide-in-from-top duration-1000">
           <div className="flex items-center gap-3">
             <div className={`w-1 h-10 shrink-0 ${accentBar}`} />
@@ -456,6 +463,7 @@ function DesignModern(p: GuestPageClientProps) {
             Com alegria, convidamos você para celebrar este momento especial.
           </p>
         </header>
+        )}
 
         {/* Image */}
         {p.settings.showInvitationImage && (
@@ -545,6 +553,7 @@ function DesignRomantic(p: GuestPageClientProps) {
 
       <div className={WRAP}>
         {/* Hero */}
+        {p.settings.showInviteHeader !== false && (
         <header className="text-center pt-14 sm:pt-20 pb-12 space-y-6 animate-in fade-in slide-in-from-top duration-1000">
           <div className="flex items-center justify-center gap-2">
             <span className={`block h-px w-8 ${p.genderBorder} border-t opacity-30`} />
@@ -571,6 +580,7 @@ function DesignRomantic(p: GuestPageClientProps) {
             Com todo nosso amor, aguardamos a sua presença neste momento tão especial.
           </p>
         </header>
+        )}
 
         {/* Image — polaroid */}
         {p.settings.showInvitationImage && (

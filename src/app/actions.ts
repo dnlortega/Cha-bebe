@@ -57,6 +57,7 @@ export async function getSettings(forceEventId?: string) {
       showGiftSection: true,
       showMessageSection: true,
       inviteImagesBySizes: "{}",
+      showInviteHeader: true,
     };
   }
 

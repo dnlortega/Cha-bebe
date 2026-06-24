@@ -46,6 +46,7 @@ export default function VisualPage() {
   const [showEventAddress, setShowEventAddress] = useState(true);
   const [showGiftSection, setShowGiftSection] = useState(true);
   const [showMessageSection, setShowMessageSection] = useState(true);
+  const [showInviteHeader, setShowInviteHeader] = useState(true);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,6 +103,7 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
       setShowEventAddress((data as any).showEventAddress ?? true);
       setShowGiftSection((data as any).showGiftSection ?? true);
       setShowMessageSection((data as any).showMessageSection ?? true);
+      setShowInviteHeader((data as any).showInviteHeader ?? true);
       try {
         setSizeImages(JSON.parse((data as any).inviteImagesBySizes || "{}"));
       } catch { setSizeImages({}); }
@@ -156,7 +158,7 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
 
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection, inviteImagesBySizes: JSON.stringify(sizeImages) });
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection, inviteImagesBySizes: JSON.stringify(sizeImages), showInviteHeader });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -507,6 +509,7 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
             <div className="col-span-2 space-y-3 border-t border-primary/5 pt-5">
               <p className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Campos Visíveis no Convite</p>
               <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Cabeçalho (Nome/Título)</label><Select value={showInviteHeader ? "SIM" : "NAO"} onValueChange={(v) => setShowInviteHeader(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
                 <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Quando (Data)</label><Select value={showEventDate ? "SIM" : "NAO"} onValueChange={(v) => setShowEventDate(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
                 <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Onde (Local)</label><Select value={showEventAddress ? "SIM" : "NAO"} onValueChange={(v) => setShowEventAddress(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
                 <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Presente</label><Select value={showGiftSection ? "SIM" : "NAO"} onValueChange={(v) => setShowGiftSection(v === "SIM")}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="SIM">EXIBIR</SelectItem><SelectItem value="NAO">OCULTAR</SelectItem></SelectContent></Select></div>
