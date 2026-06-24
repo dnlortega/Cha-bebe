@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getSettings, updateSettings, getAdminSessions, revokeAdminSession, getSessionHistoryLogs } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { THEMES, PANEL_DESIGNS, INVITE_DESIGNS, type PanelDesignId, type InviteDesignId } from "@/lib/themes";
-import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2, Mail } from "lucide-react";
+import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2, Mail, Upload, ImageIcon } from "lucide-react";
+import Image from "next/image";
 import AdminTour, { type TourStep } from "@/components/AdminTour";
 
 const VISUAL_TOUR: TourStep[] = [
@@ -47,7 +48,8 @@ export default function VisualPage() {
   const [showGiftSection, setShowGiftSection] = useState(true);
   const [showMessageSection, setShowMessageSection] = useState(true);
   const [loading, setLoading] = useState(false);
-  
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Panel design
   const [panelDesign, setPanelDesign] = useState<PanelDesignId>("classic");
@@ -156,6 +158,28 @@ export default function VisualPage() {
     } else {
       toast.error("Erro ao desconectar dispositivo");
     }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const json = await res.json();
+      if (json.url) {
+        setInvitationUrl(json.url);
+        toast.success("Imagem carregada! Salve as configurações para aplicar.");
+      } else {
+        toast.error(json.error || "Falha no upload.");
+      }
+    } catch {
+      toast.error("Erro ao enviar imagem.");
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSaveSettings = async () => {
@@ -412,7 +436,37 @@ export default function VisualPage() {
         <Card className="border-none shadow-2xl bg-white rounded-none p-8 space-y-6">
           <div className="flex items-center gap-3 text-primary"><SettingsIcon className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Convite & Tema</h3></div>
           <div className="space-y-4">
-            <div id="tour-invite-url" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">URL do Convite</label><Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-12 bg-stone-50" /></div>
+            <div id="tour-invite-url" className="space-y-2">
+              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Imagem do Convite</label>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              {invitationUrl ? (
+                <div className="relative w-full aspect-[9/16] max-h-64 bg-stone-100 border border-stone-200 overflow-hidden">
+                  <Image src={invitationUrl} alt="Convite" fill className="object-contain" unoptimized />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="absolute bottom-2 right-2 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 flex items-center gap-1.5 hover:bg-stone-700 transition-colors disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                    Trocar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full h-28 border-2 border-dashed border-stone-200 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 className="h-5 w-5 animate-spin text-stone-400" /> : <ImageIcon className="h-5 w-5 text-stone-300" />}
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                    {uploading ? "Enviando..." : "Clique para fazer upload"}
+                  </span>
+                </button>
+              )}
+              <Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-10 bg-stone-50 text-[11px]" placeholder="Ou cole uma URL externa..." />
+            </div>
             <div id="tour-theme" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
             <div id="tour-fonts" className="grid grid-cols-2 gap-4">
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Convite</label><Select value={inviteFont} onValueChange={(v) => v && setInviteFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Playfair Display">Playfair Display</SelectItem><SelectItem value="Cormorant Garamond">Cormorant Garamond</SelectItem><SelectItem value="Dancing Script">Dancing Script</SelectItem><SelectItem value="Great Vibes">Great Vibes</SelectItem><SelectItem value="Lora">Lora</SelectItem><SelectItem value="Cinzel">Cinzel</SelectItem></SelectContent></Select></div>
