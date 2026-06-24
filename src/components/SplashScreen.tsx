@@ -65,7 +65,7 @@ export default function SplashScreen({ babyName, genderColor, fontFamily, guestN
               className="flex items-center justify-center gap-3"
             >
               <span className={`block h-px w-10 border-t ${borderColor} opacity-60`} />
-              <span className="text-[8px] tracking-[0.55em] uppercase opacity-30 font-light">Convite Pessoal</span>
+              <span className="tracking-[0.55em] uppercase opacity-30 font-light" style={{ fontSize: "22px" }}>Convite Pessoal</span>
               <span className={`block h-px w-10 border-t ${borderColor} opacity-60`} />
             </motion.div>
 
@@ -76,7 +76,7 @@ export default function SplashScreen({ babyName, genderColor, fontFamily, guestN
               transition={{ delay: 0.4, duration: 0.65 }}
               className="space-y-1.5"
             >
-              <p className="text-[9px] tracking-[0.45em] uppercase opacity-25 font-light">Para</p>
+              <p className="tracking-[0.45em] uppercase opacity-25 font-light" style={{ fontSize: "22px" }}>Para</p>
               <p
                 className={`text-2xl sm:text-3xl font-serif tracking-[0.08em] ${genderColor} opacity-85 break-words`}
                 style={{ fontFamily }}
