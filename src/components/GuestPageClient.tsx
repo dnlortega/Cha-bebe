@@ -40,9 +40,7 @@ function getInviteImage(settings: any, fralda_tamanho?: string | null): string {
   } catch {}
 
   if (fralda_tamanho && map[fralda_tamanho]) return map[fralda_tamanho];
-  const firstAvailable = Object.values(map)[0] as string | undefined;
-  if (firstAvailable) return firstAvailable;
-  return "/convite.png";
+  return "";
 }
 
 // ─────────────────────────────────────────────
@@ -102,7 +100,7 @@ function DesignEditorial(p: GuestPageClientProps) {
         )}
 
         {/* Image */}
-        {p.settings.showInvitationImage && (
+        {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center">
             <div className="relative w-full">
               <div className={`absolute -inset-5 border ${p.genderBorder} opacity-10 pointer-events-none`} />
@@ -219,7 +217,7 @@ function DesignFloral(p: GuestPageClientProps) {
         )}
 
         {/* Image */}
-        {p.settings.showInvitationImage && (
+        {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center">
             <div className="relative w-full">
               <div className="absolute -inset-3 rounded-[2rem] bg-emerald-50 opacity-60" />
@@ -345,7 +343,7 @@ function DesignLuxury(p: GuestPageClientProps) {
         )}
 
         {/* Image — double mat */}
-        {p.settings.showInvitationImage && (
+        {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center">
             <div className="relative w-full">
               {/* outer decorative borders — hidden on very small screens to avoid overflow */}
@@ -467,7 +465,7 @@ function DesignModern(p: GuestPageClientProps) {
         )}
 
         {/* Image */}
-        {p.settings.showInvitationImage && (
+        {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
           <section className="animate-in fade-in duration-1000 delay-200 mb-14">
             <div className="relative w-full">
               <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentBar} rounded-r-sm`} />
@@ -584,7 +582,7 @@ function DesignRomantic(p: GuestPageClientProps) {
         )}
 
         {/* Image — polaroid */}
-        {p.settings.showInvitationImage && (
+        {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
           <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center overflow-hidden">
             <div style={{ transform: "rotate(-1.5deg)", transformOrigin: "center top" }}>
               <div
