@@ -408,7 +408,7 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
           <div className="flex items-center gap-3 text-primary"><SettingsIcon className="h-4 w-4" /><h3 className="text-xs font-bold tracking-widest uppercase">Convite & Tema</h3></div>
           <div className="space-y-4">
             <div id="tour-invite-url" className="space-y-2">
-              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Imagem do Convite</label>
+              <label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Imagem Padrão (sem tamanho de fralda)</label>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               {invitationUrl ? (
                 <div className="relative w-full aspect-[9/16] max-h-64 bg-stone-100 border border-stone-200 overflow-hidden">

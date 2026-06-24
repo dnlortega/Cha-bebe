@@ -39,11 +39,19 @@ function getInviteImage(settings: any, fralda_tamanho?: string | null): string {
     if (settings.inviteImagesBySizes) map = JSON.parse(settings.inviteImagesBySizes);
   } catch {}
 
+  // 1. Imagem específica do tamanho
   if (fralda_tamanho && map[fralda_tamanho]) return map[fralda_tamanho];
-  if (settings.invitationUrl) return settings.invitationUrl;
-  const firstAvailable = Object.values(map)[0];
+
+  // 2. Imagem padrão (se foi definida manualmente, não é o placeholder)
+  const defaultUrl = settings.invitationUrl;
+  if (defaultUrl && defaultUrl !== "/convite.png") return defaultUrl;
+
+  // 3. Qualquer imagem dos tamanhos como fallback
+  const firstAvailable = Object.values(map)[0] as string | undefined;
   if (firstAvailable) return firstAvailable;
-  return "/convite.png";
+
+  // 4. Último recurso
+  return defaultUrl || "/convite.png";
 }
 
 // ─────────────────────────────────────────────
