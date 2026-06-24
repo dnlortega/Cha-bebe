@@ -573,7 +573,7 @@ export async function verifyAdminSession(token: string): Promise<boolean> {
     });
     if (!session) return false;
 
-    const SESSION_MAX_MS = 24 * 60 * 60 * 1000; // 24 horas
+    const SESSION_MAX_MS = 60 * 60 * 1000; // 1 hora
     const age = Date.now() - session.createdAt.getTime();
     if (age > SESSION_MAX_MS) {
       await prisma.sessionHistoryLog.create({
