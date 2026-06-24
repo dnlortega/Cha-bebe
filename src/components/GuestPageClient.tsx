@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import RSVPForm from "@/components/RSVPForm";
 import SplashScreen from "@/components/SplashScreen";
 import { MapPin, Calendar } from "lucide-react";

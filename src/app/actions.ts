@@ -110,19 +110,6 @@ export async function updateSettings(data: any) {
   }
 }
 
-export async function getUniqueFraldaSizes(): Promise<string[]> {
-  const eventId = await getActiveEventId();
-  if (!eventId) return [];
-  const rows = await prisma.guest.findMany({
-    where: { eventId, fralda_tamanho: { not: null } },
-    select: { fralda_tamanho: true },
-    distinct: ["fralda_tamanho"],
-  });
-  const order = ["RN", "P", "M", "G", "GG", "XG"];
-  const sizes = rows.map(r => r.fralda_tamanho!).filter(Boolean);
-  return sizes.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-}
-
 // Guestbook / Mural Actions
 export async function getRecentMessages(forAdmin = false, forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();

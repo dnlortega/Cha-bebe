@@ -6,10 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { THEMES, PANEL_DESIGNS, INVITE_DESIGNS, type PanelDesignId, type InviteDesignId } from "@/lib/themes";
-import { Save, Loader2, Settings as SettingsIcon, Calendar, Lock, Layers, CheckCircle2, Mail, Upload, ImageIcon } from "lucide-react";
+import { Save, Loader2, Settings as SettingsIcon, Calendar, Layers, CheckCircle2, Mail, Upload, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import AdminTour, { type TourStep } from "@/components/AdminTour";
 
