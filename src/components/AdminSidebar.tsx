@@ -320,7 +320,7 @@ function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
                   />
                 </div>
                 <span className={cn(
-                  "text-sm font-semibold tracking-wide",
+                  "text-sm font-normal tracking-wide",
                   isActive ? "text-white" : "text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-stone-100"
                 )}>
                   {item.title}
@@ -340,7 +340,7 @@ function ClassicSidebar({ pathname, visibleMenuItems, avatarUrl, adminEmail, isM
             <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950 flex items-center justify-center flex-shrink-0">
               <LogOut className="h-4 w-4 text-red-400 group-hover:text-red-600 transition-colors" />
             </div>
-            <span className="text-sm font-semibold text-red-400 group-hover:text-red-600 transition-colors">Sair</span>
+            <span className="text-sm font-normal text-red-400 group-hover:text-red-600 transition-colors">Sair</span>
           </button>
         </div>
       </aside>
@@ -601,7 +601,7 @@ function DarkSidebar({ scheme, pathname, visibleMenuItems, avatarUrl, adminEmail
 
                 {!isCollapsed && (
                   <span
-                    className="text-[10px] font-bold tracking-wider uppercase transition-all duration-200 animate-in fade-in slide-in-from-left-1 duration-300"
+                    className="text-[10px] font-normal tracking-wider uppercase transition-all duration-200 animate-in fade-in slide-in-from-left-1 duration-300"
                     style={{ color: isActive ? "#fff" : scheme.itemText }}
                   >
                     {item.title}
@@ -632,7 +632,7 @@ function DarkSidebar({ scheme, pathname, visibleMenuItems, avatarUrl, adminEmail
           >
             <LogOut className="h-4 w-4 text-red-400/60 group-hover:text-red-400 transition-colors flex-shrink-0" />
             {!isCollapsed && (
-              <span className="text-[9px] font-bold uppercase tracking-widest text-red-400/50 group-hover:text-red-400 transition-colors animate-in fade-in duration-300">
+              <span className="text-[9px] font-normal uppercase tracking-widest text-red-400/50 group-hover:text-red-400 transition-colors animate-in fade-in duration-300">
                 Sair
               </span>
             )}
