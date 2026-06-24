@@ -298,6 +298,39 @@ export async function updateGuest(id: string, nome: string, tipo: string, membro
   }
 }
 
+export async function distributeDiaperSizes(quantities: Record<string, number>) {
+  const eventId = await getActiveEventId();
+  if (!eventId) return { success: false, error: "Nenhum evento ativo." };
+  try {
+    const guests = await prisma.guest.findMany({
+      where: { eventId, fralda_tamanho: null },
+      select: { id: true },
+    });
+
+    // Shuffle
+    const shuffled = [...guests].sort(() => Math.random() - 0.5);
+
+    const assignments: { id: string; size: string }[] = [];
+    let idx = 0;
+    for (const [size, qty] of Object.entries(quantities)) {
+      for (let i = 0; i < qty && idx < shuffled.length; i++, idx++) {
+        assignments.push({ id: shuffled[idx].id, size });
+      }
+    }
+
+    await Promise.all(
+      assignments.map(a =>
+        prisma.guest.update({ where: { id: a.id }, data: { fralda_tamanho: a.size } })
+      )
+    );
+
+    revalidatePath("/admin");
+    return { success: true, assigned: assignments.length, total: guests.length };
+  } catch (error: any) {
+    return { success: false, error: `ERRO: ${error.message}` };
+  }
+}
+
 export async function getGuests(forceEventId?: string) {
   const eventId = forceEventId || await getActiveEventId();
   if (!eventId) return [];

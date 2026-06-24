@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getGuests, deleteGuest, updateGuest, deleteAllGuests, getSettings } from "@/app/actions";
+import { getGuests, deleteGuest, updateGuest, deleteAllGuests, getSettings, distributeDiaperSizes } from "@/app/actions";
 import { getActiveEventSlug } from "@/app/eventActions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Loader2, CheckCircle, XCircle, Clock, Trash2, Edit2,
   Copy, ExternalLink, Search, RefreshCw, Save, PackageCheck,
-  Download, SortAsc, SortDesc, MessageCircle, QrCode, Link2
+  Download, SortAsc, SortDesc, MessageCircle, QrCode, Link2, Shuffle
 } from "lucide-react";
 import AdminTour, { type TourStep } from "@/components/AdminTour";
 
@@ -53,6 +53,10 @@ export default function GuestsPage() {
   const [editDiaper, setEditDiaper] = useState<string | null>(null);
   const [editKitChurrasco, setEditKitChurrasco] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [showDistribute, setShowDistribute] = useState(false);
+  const [distributeQty, setDistributeQty] = useState<Record<string, number>>({ RN: 0, P: 0, M: 0, G: 0, GG: 0 });
+  const [isDistributing, setIsDistributing] = useState(false);
 
   useEffect(() => {
     fetchGuests();
@@ -138,6 +142,22 @@ export default function GuestsPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
+  const handleDistribute = async () => {
+    const total = Object.values(distributeQty).reduce((a, b) => a + b, 0);
+    if (total === 0) { toast.error("Digite ao menos 1 fralda para distribuir."); return; }
+    setIsDistributing(true);
+    const result = await distributeDiaperSizes(distributeQty);
+    if (result.success) {
+      toast.success(`${result.assigned} convidados receberam tamanhos de fralda!`);
+      setShowDistribute(false);
+      setDistributeQty({ RN: 0, P: 0, M: 0, G: 0, GG: 0 });
+      fetchGuests();
+    } else {
+      toast.error((result as any).error || "Erro ao distribuir.");
+    }
+    setIsDistributing(false);
+  };
+
   const exportCSV = () => {
     const headers = ["Nome", "Status", "Adultos", "Crianças", "Fralda", "Kit", "Mensagem", "Link"];
     const rows = filteredGuests.map(g => [g.nome, g.status_confirmacao || "PENDENTE", g.qtd_adultos, g.qtd_criancas, g.fralda_tamanho || "", g.kit_churrasco ? "SIM" : "NÃO", (g.mensagem || "").replace(/;/g, ","), `${window.location.origin}/${eventSlug}/${g.slug}`]);
@@ -187,10 +207,18 @@ export default function GuestsPage() {
           <Button variant="outline" size="icon" onClick={fetchGuests} disabled={loading} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900"><RefreshCw className={loading ? "animate-spin h-4 w-4" : "h-4 w-4"} /></Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleDeleteAll} 
+              <Button variant="outline" size="icon" onClick={() => setShowDistribute(true)} className="h-10 w-10 rounded-none border-primary/10 dark:border-primary/30 bg-white dark:bg-stone-900 text-primary">
+                <Shuffle className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="text-[9px]">DISTRIBUIR FRALDAS</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleDeleteAll}
                 disabled={loading || guests.length === 0} 
                 className="h-10 w-10 rounded-none border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950 hover:border-red-300 dark:hover:border-red-800 bg-white dark:bg-stone-900 text-red-500 dark:text-red-400"
               >
@@ -375,6 +403,52 @@ export default function GuestsPage() {
               <Select value={editDiaper || "NONE"} onValueChange={(v) => setEditDiaper(v === "NONE" ? null : v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">FRALDA: NENHUMA</SelectItem>{["RN","P","M","G","GG"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
             </div>
             {editType === "FAMILIA" && <Textarea value={editMembers} onChange={e => setEditMembers(e.target.value)} placeholder="MEMBROS (VÍRGULA)" className="h-24 rounded-none bg-stone-50 dark:bg-stone-900 dark:text-stone-200" />}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Distribute Diaper Sizes Dialog */}
+      <Dialog open={showDistribute} onOpenChange={o => { if (!o) { setShowDistribute(false); setDistributeQty({ RN: 0, P: 0, M: 0, G: 0, GG: 0 }); } }}>
+        <DialogContent className="rounded-none border-none sm:max-w-[480px] p-0 overflow-hidden shadow-2xl">
+          <div className="bg-primary p-8 text-primary-foreground">
+            <DialogTitle className="text-xl font-serif tracking-[0.2em] uppercase flex items-center gap-3">
+              <Shuffle className="h-5 w-5" /> Distribuir Fraldas
+            </DialogTitle>
+            <p className="text-[10px] tracking-widest opacity-60 mt-1 uppercase">
+              {guests.filter(g => !g.fralda_tamanho).length} convidados sem tamanho atribuído
+            </p>
+          </div>
+          <div className="p-8 bg-white dark:bg-stone-950 space-y-6">
+            <p className="text-[10px] text-stone-400 tracking-wider leading-relaxed">
+              Digite quantas fraldas de cada tamanho deseja distribuir. Os convidados sem tamanho receberão os tamanhos aleatoriamente.
+            </p>
+            <div className="grid grid-cols-5 gap-3">
+              {["RN", "P", "M", "G", "GG"].map(size => (
+                <div key={size} className="space-y-2 text-center">
+                  <label className="text-[10px] font-bold tracking-widest uppercase text-stone-500 block">{size}</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={distributeQty[size] || 0}
+                    onChange={e => setDistributeQty(prev => ({ ...prev, [size]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="rounded-none h-14 text-center text-lg font-bold bg-stone-50 dark:bg-stone-900 border-primary/10"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-primary/5">
+              <div className="text-[10px] text-stone-400 tracking-widest uppercase">
+                Total: <span className="font-bold text-primary">{Object.values(distributeQty).reduce((a, b) => a + b, 0)}</span> fraldas
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setShowDistribute(false); setDistributeQty({ RN: 0, P: 0, M: 0, G: 0, GG: 0 }); }} className="rounded-none h-10 text-[10px] tracking-widest uppercase">
+                  Cancelar
+                </Button>
+                <Button onClick={handleDistribute} disabled={isDistributing || Object.values(distributeQty).reduce((a, b) => a + b, 0) === 0} className="rounded-none h-10 text-[10px] tracking-widest uppercase bg-stone-900 text-white hover:bg-stone-700">
+                  {isDistributing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Shuffle className="h-4 w-4 mr-2" />Distribuir</>}
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
