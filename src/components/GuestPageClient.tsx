@@ -445,10 +445,10 @@ function DesignModern(p: GuestPageClientProps) {
         <header className="pt-14 sm:pt-20 pb-12 space-y-5 animate-in fade-in slide-in-from-top duration-1000">
           <div className="flex items-center gap-3">
             <div className={`w-1 h-10 shrink-0 ${accentBar}`} />
-            <p className="text-[9px] tracking-[0.5em] uppercase opacity-40 font-bold">Convite Pessoal</p>
+            <p className="text-sm tracking-[0.5em] uppercase opacity-40 font-bold">Convite Pessoal</p>
           </div>
           <div>
-            <p className="text-[9px] tracking-[0.4em] uppercase opacity-30 mb-2">Para</p>
+            <p className="text-sm tracking-[0.4em] uppercase opacity-30 mb-2">Para</p>
             <p className={`text-2xl sm:text-3xl font-bold tracking-tight ${p.genderColor} break-words`}>{p.guestData.nome}</p>
           </div>
           <div className="w-full h-px bg-stone-900 opacity-[0.08]" />
