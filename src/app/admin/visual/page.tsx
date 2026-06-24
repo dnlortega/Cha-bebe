@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSettings, updateSettings, getAdminSessions, revokeAdminSession, getSessionHistoryLogs } from "@/app/actions";
+import { getSettings, updateSettings } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,6 @@ const VISUAL_TOUR: TourStep[] = [
   { selector: "#tour-event-date",     icon: "📅", title: "Data & Local",              body: "Defina a data, o endereço e o link do Google Maps do evento. Essas informações aparecem no card 'O Evento' dentro do convite de cada convidado." },
   { selector: "#tour-whatsapp",       icon: "💬", title: "Template WhatsApp",         body: "Personalize a mensagem enviada via WhatsApp para cada convidado. Use as variáveis {nome}, {data}, {endereco}, {link} e {bebe} para personalizar automaticamente." },
   { selector: "#tour-admin-access",   icon: "🔐", title: "Acesso Administrativo",     body: "Altere seu usuário e senha de acesso ao painel. Você também pode configurar o e-mail do Google para fazer login via Google. Deixe a senha em branco para não alterá-la." },
-  { selector: "#tour-sessions",       icon: "📱", title: "Sessões & Histórico",       body: "Veja todos os dispositivos que estão logados no painel. Você pode desconectar qualquer dispositivo remotamente — útil se suspeitar de acesso indevido." },
 ];
 
 export default function VisualPage() {
@@ -56,23 +55,11 @@ export default function VisualPage() {
   // Invite design
   const [inviteDesign, setInviteDesign] = useState<InviteDesignId>("editorial");
 
-  // Estados de controle de sessões ativas e histórico
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [currentSessionToken, setCurrentSessionToken] = useState("");
-  const [loadingSessions, setLoadingSessions] = useState(false);
-  // Histórico de auditoria de sessões
-  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-  const [sessionTab, setSessionTab] = useState<"ACTIVE" | "HISTORY">("ACTIVE");
-
   useEffect(() => {
     fetchSettings();
-    fetchSessions();
-    fetchHistory();
 
     if (typeof window !== "undefined") {
-      setCurrentSessionToken(localStorage.getItem("admin_session_token") || "");
-      const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId || "classic";
+const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId || "classic";
       setPanelDesign(savedDesign);
     }
   }, []);
@@ -110,53 +97,6 @@ export default function VisualPage() {
       setShowEventAddress((data as any).showEventAddress ?? true);
       setShowGiftSection((data as any).showGiftSection ?? true);
       setShowMessageSection((data as any).showMessageSection ?? true);
-    }
-  };
-
-  const fetchSessions = async () => {
-    setLoadingSessions(true);
-    try {
-      const data = await getAdminSessions();
-      setSessions(data);
-    } catch (e) {
-      console.error("Erro ao carregar sessões:", e);
-    } finally {
-      setLoadingSessions(false);
-    }
-  };
-
-  const fetchHistory = async () => {
-    setLoadingHistory(true);
-    try {
-      const data = await getSessionHistoryLogs();
-      setHistoryLogs(data);
-    } catch (e) {
-      console.error("Erro ao carregar histórico de sessões:", e);
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
-
-  const handleRevokeSession = async (id: string, token: string) => {
-    const res = await revokeAdminSession(id);
-    if (res.success) {
-      toast.success("DISPOSITIVO DESCONECTADO");
-      fetchHistory();
-      // Se desconectou a si mesmo, força deslogar
-      if (token === currentSessionToken) {
-        if (typeof window !== "undefined") {
-          const { clearActiveEventCookie } = await import("@/app/eventCookieActions");
-          await clearActiveEventCookie();
-          localStorage.removeItem("admin_session_token");
-          localStorage.removeItem("admin_authorized");
-          localStorage.removeItem("admin_username");
-          window.location.reload();
-        }
-      } else {
-        fetchSessions();
-      }
-    } else {
-      toast.error("Erro ao desconectar dispositivo");
     }
   };
 
@@ -518,116 +458,6 @@ export default function VisualPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        {/* Sessões e Auditoria de Acessos */}
-        <Card id="tour-sessions" className="border border-stone-200 shadow-xl bg-white rounded-none p-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-4">
-            <div className="flex items-center gap-6">
-              <button
-                onClick={() => setSessionTab("ACTIVE")}
-                className={`text-xs font-bold tracking-wider uppercase pb-1 border-b-2 transition-all ${
-                  sessionTab === "ACTIVE"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-stone-400 hover:text-stone-600"
-                }`}
-              >
-                Dispositivos Ativos ({sessions.length})
-              </button>
-              <button
-                onClick={() => { setSessionTab("HISTORY"); fetchHistory(); }}
-                className={`text-xs font-bold tracking-wider uppercase pb-1 border-b-2 transition-all ${
-                  sessionTab === "HISTORY"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-stone-400 hover:text-stone-600"
-                }`}
-              >
-                Histórico ({historyLogs.length})
-              </button>
-            </div>
-            <button
-              onClick={sessionTab === "ACTIVE" ? fetchSessions : fetchHistory}
-              disabled={loadingSessions || loadingHistory}
-              className="text-xs font-semibold text-stone-400 hover:text-stone-700 transition-colors flex items-center gap-1.5 disabled:opacity-40"
-            >
-              {(loadingSessions || loadingHistory) && <Loader2 className="h-3 w-3 animate-spin" />}
-              Atualizar
-            </button>
-          </div>
-
-          {sessionTab === "ACTIVE" ? (
-            <div>
-              {sessions.length === 0 ? (
-                <p className="text-sm text-stone-400 text-center py-8">Nenhum dispositivo registrado.</p>
-              ) : (
-                <div className="divide-y divide-stone-100">
-                  {sessions.map((sess) => {
-                    const isCurrent = sess.token === currentSessionToken;
-                    const formattedDate = new Date(sess.lastActive).toLocaleString("pt-BR", {
-                      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
-                    });
-                    return (
-                      <div key={sess.id} className="flex items-center justify-between py-4 gap-4">
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-stone-800">{sess.deviceName}</span>
-                            {isCurrent && (
-                              <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-sm">
-                                Este dispositivo
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-stone-400">
-                            {sess.location} · {formattedDate}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRevokeSession(sess.id, sess.token)}
-                          className="text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 rounded-none shrink-0 h-8 px-3"
-                        >
-                          {isCurrent ? "Sair" : "Desconectar"}
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              {historyLogs.length === 0 ? (
-                <p className="text-sm text-stone-400 text-center py-8">Nenhum registro encontrado.</p>
-              ) : (
-                <div className="divide-y divide-stone-100">
-                  {historyLogs.map((log) => {
-                    const formattedDate = new Date(log.timestamp).toLocaleString("pt-BR", {
-                      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
-                    });
-                    const isStart = log.action === "INICIADA";
-                    return (
-                      <div key={log.id} className="flex items-center justify-between py-3 gap-4">
-                        <div className="min-w-0 space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isStart ? "bg-emerald-400" : "bg-red-400"}`} />
-                            <span className="text-sm font-semibold text-stone-800 truncate">{log.deviceName}</span>
-                          </div>
-                          <p className="text-xs text-stone-400 pl-4">
-                            {log.location} · {formattedDate}
-                          </p>
-                        </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm flex-shrink-0 ${isStart ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
-                          {isStart ? "Entrou" : "Saiu"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </Card>
-      </div>
     </div>
   );
 }
