@@ -101,7 +101,7 @@ function DesignEditorial(p: GuestPageClientProps) {
 
         {/* Image */}
         {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
-          <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center">
+          <section className={`animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center${p.settings.showInviteHeader === false ? " pt-14 sm:pt-20" : ""}`}>
             <div className="relative w-full">
               <div className={`absolute -inset-5 border ${p.genderBorder} opacity-10 pointer-events-none`} />
               <div className={`absolute -inset-2.5 border ${p.genderBorder} opacity-20 pointer-events-none`} />
@@ -466,7 +466,7 @@ function DesignModern(p: GuestPageClientProps) {
 
         {/* Image */}
         {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
-          <section className="animate-in fade-in duration-1000 delay-200 mb-14">
+          <section className={`animate-in fade-in duration-1000 delay-200 mb-14${p.settings.showInviteHeader === false ? " pt-14 sm:pt-20" : ""}`}>
             <div className="relative w-full">
               <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentBar} rounded-r-sm`} />
               <div className="ml-5 overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,0.07)] border border-stone-200">
@@ -583,7 +583,7 @@ function DesignRomantic(p: GuestPageClientProps) {
 
         {/* Image — polaroid */}
         {p.settings.showInvitationImage && getInviteImage(p.settings, p.guestData.fralda_tamanho) && (
-          <section className="animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center overflow-hidden">
+          <section className={`animate-in fade-in duration-1000 delay-200 mb-14 flex justify-center overflow-hidden${p.settings.showInviteHeader === false ? " pt-14 sm:pt-20" : ""}`}>
             <div style={{ transform: "rotate(-1.5deg)", transformOrigin: "center top" }}>
               <div
                 className="overflow-hidden shadow-[0_20px_50px_-5px_rgba(0,0,0,0.18)] bg-white w-full"
