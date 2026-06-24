@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSettings, updateSettings, getUniqueFraldaSizes } from "@/app/actions";
+import { getSettings, updateSettings } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ export default function VisualPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [sizeImages, setSizeImages] = useState<Record<string, string>>({});
-  const [uniqueSizes, setUniqueSizes] = useState<string[]>([]);
+  const FRALDA_SIZES = ["RN", "P", "M", "G", "GG"];
   const [uploadingSize, setUploadingSize] = useState<string | null>(null);
   const [currentUploadSize, setCurrentUploadSize] = useState("");
   const sizeFileRef = useRef<HTMLInputElement>(null);
@@ -108,8 +108,6 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
         setSizeImages(JSON.parse((data as any).inviteImagesBySizes || "{}"));
       } catch { setSizeImages({}); }
     }
-    const sizes = await getUniqueFraldaSizes();
-    setUniqueSizes(sizes);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -443,15 +441,14 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
             </div>
 
             {/* Convites por tamanho de fralda */}
-            {uniqueSizes.length > 0 && (
-              <div className="space-y-3 border-t border-primary/5 pt-5">
+            <div className="space-y-3 border-t border-primary/5 pt-5">
                 <div>
                   <p className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Convite por Tamanho de Fralda</p>
                   <p className="text-[9px] text-stone-400 mt-1">Cada convidado verá o convite do seu tamanho automaticamente.</p>
                 </div>
                 <input ref={sizeFileRef} type="file" accept="image/*" className="hidden" onChange={handleSizeImageUpload} />
                 <div className="grid grid-cols-1 gap-4">
-                  {uniqueSizes.map(size => (
+                  {FRALDA_SIZES.map(size => (
                     <div key={size} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-stone-600 uppercase tracking-wider">Tamanho {size}</label>
@@ -487,7 +484,6 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
                   ))}
                 </div>
               </div>
-            )}
 
             <div id="tour-theme" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
             <div id="tour-fonts" className="grid grid-cols-2 gap-4">

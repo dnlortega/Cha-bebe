@@ -5,7 +5,7 @@ import { updateRSVP } from "@/app/actions";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
-import { Check, Heart, MessageSquare, Baby, Gift, X, ChevronDown } from "lucide-react";
+import { Check, Heart, MessageSquare, Gift, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RSVPFormProps {
@@ -209,25 +209,6 @@ export default function RSVPForm({
             </div>
           )}
 
-          {/* Diaper / Kit suggestion */}
-          {(guest.fralda_tamanho || guest.kit_churrasco) && (
-            <div className="bg-primary text-primary-foreground p-6 text-center space-y-4">
-              <p className="text-xs font-bold tracking-wider uppercase opacity-60 flex items-center justify-center gap-2">
-                <Baby className="h-3.5 w-3.5" /> Sugestão de Presente
-              </p>
-              {guest.fralda_tamanho && (
-                <div className="space-y-1">
-                  <p className="text-xs tracking-wider uppercase opacity-50">Fralda Tamanho</p>
-                  <p className="text-6xl font-serif leading-none">{guest.fralda_tamanho}</p>
-                </div>
-              )}
-              {guest.kit_churrasco && (
-                <div className="pt-3 border-t border-white/15">
-                  <p className="text-sm tracking-wider uppercase opacity-70">Kit Churrasco</p>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Gift — collapsible, condicionado pelo settings */}
           {showGiftSection && (
