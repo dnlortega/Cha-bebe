@@ -91,6 +91,7 @@ model Settings {
   showEventAddress Boolean @default(true)
   showGiftSection  Boolean @default(true)
   showMessageSection Boolean @default(true)
+  inviteImagesBySizes String @default("{}")
 }
 
 model Gift {

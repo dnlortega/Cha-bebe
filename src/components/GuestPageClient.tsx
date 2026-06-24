@@ -33,6 +33,17 @@ const SAFE_PB: React.CSSProperties = {
   paddingBottom: "calc(3.5rem + env(safe-area-inset-bottom, 0px))",
 };
 
+// ─── Seleciona imagem do convite pelo tamanho de fralda ─────────────
+function getInviteImage(settings: any, fralda_tamanho?: string | null): string {
+  if (fralda_tamanho && settings.inviteImagesBySizes) {
+    try {
+      const map = JSON.parse(settings.inviteImagesBySizes);
+      if (map[fralda_tamanho]) return map[fralda_tamanho];
+    } catch {}
+  }
+  return settings.invitationUrl || "/convite.png";
+}
+
 // ─────────────────────────────────────────────
 // DESIGN 1 — EDITORIAL
 // ─────────────────────────────────────────────
@@ -96,7 +107,7 @@ function DesignEditorial(p: GuestPageClientProps) {
               <div className="shadow-[0_24px_60px_-8px_rgba(0,0,0,0.16)] border-[10px] sm:border-[14px] border-white bg-white overflow-hidden group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={p.settings.invitationUrl || "/convite.png"}
+                  src={getInviteImage(p.settings, p.guestData.fralda_tamanho)}
                   alt="Convite"
                   style={{ width: "100%", height: "auto", display: "block" }}
                   className="transition-transform duration-1000 group-hover:scale-105"
@@ -209,7 +220,7 @@ function DesignFloral(p: GuestPageClientProps) {
               <div className="absolute -inset-3 rounded-[2rem] bg-emerald-50 opacity-60" />
               <div className="rounded-2xl overflow-hidden shadow-[0_16px_50px_-8px_rgba(0,0,0,0.12)] border-[10px] sm:border-[12px] border-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.settings.invitationUrl || "/convite.png"} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
+                <img src={getInviteImage(p.settings, p.guestData.fralda_tamanho)} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
               </div>
               <span className="absolute -top-2.5 -left-2.5 text-lg opacity-60 pointer-events-none">🌸</span>
               <span className="absolute -top-2.5 -right-2.5 text-lg opacity-60 pointer-events-none">🌿</span>
@@ -335,7 +346,7 @@ function DesignLuxury(p: GuestPageClientProps) {
               <div className="absolute -inset-2" style={{ border: gb }} />
               <div className="overflow-hidden shadow-[0_32px_80px_-12px_rgba(0,0,0,0.20)] border-[12px] sm:border-[16px]" style={{ borderColor: "#faf8f3", background: "#faf8f3" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.settings.invitationUrl || "/convite.png"} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
+                <img src={getInviteImage(p.settings, p.guestData.fralda_tamanho)} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
               </div>
               <span className="absolute -top-0.5 -left-0.5 w-5 h-5" style={{ borderLeft: `2px solid ${gold}`, borderTop: `2px solid ${gold}` }} />
               <span className="absolute -top-0.5 -right-0.5 w-5 h-5" style={{ borderRight: `2px solid ${gold}`, borderTop: `2px solid ${gold}` }} />
@@ -453,7 +464,7 @@ function DesignModern(p: GuestPageClientProps) {
               <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${accentBar} rounded-r-sm`} />
               <div className="ml-5 overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,0.07)] border border-stone-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.settings.invitationUrl || "/convite.png"} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
+                <img src={getInviteImage(p.settings, p.guestData.fralda_tamanho)} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
               </div>
             </div>
           </section>
@@ -570,7 +581,7 @@ function DesignRomantic(p: GuestPageClientProps) {
                 style={{ borderWidth: "10px 10px 32px 10px", borderStyle: "solid", borderColor: "white" }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.settings.invitationUrl || "/convite.png"} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
+                <img src={getInviteImage(p.settings, p.guestData.fralda_tamanho)} alt="Convite" style={{ width: "100%", height: "auto", display: "block" }} />
               </div>
               <p className={`text-center text-[9px] tracking-wider italic opacity-40 mt-1 ${p.genderColor}`} style={{ fontFamily: p.inviteFontFamily }}>
                 com amor ♡

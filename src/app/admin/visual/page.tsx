@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSettings, updateSettings } from "@/app/actions";
+import { getSettings, updateSettings, getUniqueFraldaSizes } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,11 @@ export default function VisualPage() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [sizeImages, setSizeImages] = useState<Record<string, string>>({});
+  const [uniqueSizes, setUniqueSizes] = useState<string[]>([]);
+  const [uploadingSize, setUploadingSize] = useState<string | null>(null);
+  const [currentUploadSize, setCurrentUploadSize] = useState("");
+  const sizeFileRef = useRef<HTMLInputElement>(null);
 
   // Panel design
   const [panelDesign, setPanelDesign] = useState<PanelDesignId>("classic");
@@ -97,7 +102,12 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
       setShowEventAddress((data as any).showEventAddress ?? true);
       setShowGiftSection((data as any).showGiftSection ?? true);
       setShowMessageSection((data as any).showMessageSection ?? true);
+      try {
+        setSizeImages(JSON.parse((data as any).inviteImagesBySizes || "{}"));
+      } catch { setSizeImages({}); }
     }
+    const sizes = await getUniqueFraldaSizes();
+    setUniqueSizes(sizes);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,9 +132,31 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleSizeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUploadSize) return;
+    setUploadingSize(currentUploadSize);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const json = await res.json();
+      if (json.url) {
+        setSizeImages(prev => ({ ...prev, [currentUploadSize]: json.url }));
+        toast.success(`Imagem para tamanho ${currentUploadSize} carregada! Salve para aplicar.`);
+      } else {
+        toast.error(json.error || "Falha no upload.");
+      }
+    } catch {
+      toast.error("Erro ao enviar imagem.");
+    }
+    setUploadingSize(null);
+    if (sizeFileRef.current) sizeFileRef.current.value = "";
+  };
+
   const handleSaveSettings = async () => {
     setLoading(true);
-    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection });
+    const result = await updateSettings({ invitationUrl, theme, inviteFont, inviteFontSize, systemFont, systemFontSize, showInvitationImage, babyName, babyGender, eventDate, eventAddress, eventMapsUrl, enableAnimations, whatsappTemplate, inviteDesign, showEventDate, showEventAddress, showGiftSection, showMessageSection, inviteImagesBySizes: JSON.stringify(sizeImages) });
     if (result.success) {
       toast.success("CONFIGURAÇÕES SALVAS");
     } else {
@@ -407,6 +439,54 @@ const savedDesign = localStorage.getItem("admin_panel_design") as PanelDesignId 
               )}
               <Input value={invitationUrl} onChange={e => setInvitationUrl(e.target.value)} className="rounded-none h-10 bg-stone-50 text-[11px]" placeholder="Ou cole uma URL externa..." />
             </div>
+
+            {/* Convites por tamanho de fralda */}
+            {uniqueSizes.length > 0 && (
+              <div className="space-y-3 border-t border-primary/5 pt-5">
+                <div>
+                  <p className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Convite por Tamanho de Fralda</p>
+                  <p className="text-[9px] text-stone-400 mt-1">Cada convidado verá o convite do seu tamanho automaticamente.</p>
+                </div>
+                <input ref={sizeFileRef} type="file" accept="image/*" className="hidden" onChange={handleSizeImageUpload} />
+                <div className="grid grid-cols-1 gap-4">
+                  {uniqueSizes.map(size => (
+                    <div key={size} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-stone-600 uppercase tracking-wider">Tamanho {size}</label>
+                        {sizeImages[size] && (
+                          <button type="button" onClick={() => setSizeImages(p => { const n = {...p}; delete n[size]; return n; })}
+                            className="text-[10px] text-red-400 hover:text-red-600 font-semibold">Remover</button>
+                        )}
+                      </div>
+                      {sizeImages[size] ? (
+                        <div className="relative bg-stone-100 border border-stone-200 overflow-hidden">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={sizeImages[size]} alt={`Convite ${size}`} style={{ width: "100%", height: "auto", maxHeight: "160px", objectFit: "contain" }} />
+                          <button type="button" onClick={() => { setCurrentUploadSize(size); sizeFileRef.current?.click(); }}
+                            disabled={uploadingSize === size}
+                            className="absolute bottom-2 right-2 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 flex items-center gap-1.5 hover:bg-stone-700 transition-colors disabled:opacity-50">
+                            {uploadingSize === size ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                            Trocar
+                          </button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => { setCurrentUploadSize(size); sizeFileRef.current?.click(); }}
+                          disabled={uploadingSize === size}
+                          className="w-full h-20 border-2 border-dashed border-stone-200 bg-stone-50 hover:bg-stone-100 flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+                          {uploadingSize === size ? <Loader2 className="h-4 w-4 animate-spin text-stone-400" /> : <Upload className="h-4 w-4 text-stone-300" />}
+                          <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                            {uploadingSize === size ? "Enviando..." : `Upload convite tamanho ${size}`}
+                          </span>
+                        </button>
+                      )}
+                      <Input value={sizeImages[size] || ""} onChange={e => setSizeImages(p => ({ ...p, [size]: e.target.value }))}
+                        className="rounded-none h-9 bg-stone-50 text-[11px]" placeholder="Ou cole uma URL externa..." />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div id="tour-theme" className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Tema Visual</label><Select value={theme} onValueChange={(v) => v && setTheme(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent>{THEMES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
             <div id="tour-fonts" className="grid grid-cols-2 gap-4">
                <div className="space-y-1"><label className="text-[9px] font-bold opacity-30 uppercase tracking-widest">Fonte do Convite</label><Select value={inviteFont} onValueChange={(v) => v && setInviteFont(v)}><SelectTrigger className="h-12 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Playfair Display">Playfair Display</SelectItem><SelectItem value="Cormorant Garamond">Cormorant Garamond</SelectItem><SelectItem value="Dancing Script">Dancing Script</SelectItem><SelectItem value="Great Vibes">Great Vibes</SelectItem><SelectItem value="Lora">Lora</SelectItem><SelectItem value="Cinzel">Cinzel</SelectItem></SelectContent></Select></div>
