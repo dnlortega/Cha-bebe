@@ -34,13 +34,16 @@ const SAFE_PB: React.CSSProperties = {
 
 // ─── Seleciona imagem do convite pelo tamanho de fralda ─────────────
 function getInviteImage(settings: any, fralda_tamanho?: string | null): string {
-  if (fralda_tamanho && settings.inviteImagesBySizes) {
-    try {
-      const map = JSON.parse(settings.inviteImagesBySizes);
-      if (map[fralda_tamanho]) return map[fralda_tamanho];
-    } catch {}
-  }
-  return settings.invitationUrl || "/convite.png";
+  let map: Record<string, string> = {};
+  try {
+    if (settings.inviteImagesBySizes) map = JSON.parse(settings.inviteImagesBySizes);
+  } catch {}
+
+  if (fralda_tamanho && map[fralda_tamanho]) return map[fralda_tamanho];
+  if (settings.invitationUrl) return settings.invitationUrl;
+  const firstAvailable = Object.values(map)[0];
+  if (firstAvailable) return firstAvailable;
+  return "/convite.png";
 }
 
 // ─────────────────────────────────────────────
